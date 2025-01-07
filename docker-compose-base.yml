@@ -1,0 +1,129 @@
+
+networks:
+  firecrest-internal-v2:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.240.0/24
+
+secrets:
+  service_account_client_secret:
+    file: ./build/secrets/client_secret
+  s3_secret_access_key:
+    file: ./build/secrets/s3_secret_access_key
+  ssh_private_key:
+    file: ./build/environment/keys/ca-key
+  
+services:
+  firecrest:
+    image: firecrestv2
+    secrets:
+      - service_account_client_secret
+      - s3_secret_access_key
+      - ssh_private_key
+    environment:
+      ENVIRONMENT: development
+      APP_VERSION: local
+      SSH_KEYGEN_URL: http://192.168.240.20:5000
+      YAML_CONFIG_FILE: "/app/config/app-config.yaml"
+    depends_on:
+        keycloak:
+          condition: service_healthy
+        slurm:
+          condition: service_healthy
+    build:
+      context: ./
+      args:
+            ENVIRONMENT: development
+      dockerfile: ./build/docker/firecrest-api/Dockerfile
+    command:
+      [
+        "sh",
+        "-c",
+        "python3 -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 -m uvicorn firecrest.main:app --host 0.0.0.0 --port 5000 --reload --reload-dir /app/firecrest --reload-dir /app/lib",
+      ]
+    volumes:
+      - ./src/firecrest:/app/firecrest
+      - ./src/lib:/app/lib
+      - ./f7t-api-config.local-env.yaml:/app/config/app-config.yaml
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.10
+    ports:
+      - 8000:5000
+      - 5678:5678
+
+  slurm:
+    image: slurm
+    privileged: true
+    environment:
+      OIDC_CERT_URLS: '["http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/certs"]'
+    build:
+      platforms:
+        - linux/amd64
+        - linux/arm64
+      context: ./
+      dockerfile: ./build/docker/slurm-cluster/Dockerfile
+    hostname: slurm
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.2
+    ports:
+      - 6820:6820
+      - 2222:22
+    healthcheck:
+        test: ["CMD", "scontrol", "ping"]
+        interval: 1s
+        timeout: 2s
+        retries: 30
+
+  # complementary 3rd party services
+  keycloak:
+    image: "quay.io/keycloak/keycloak:26.0.7"
+    env_file: ./build/docker/keycloak/keycloak.env
+    command: start-dev --http-relative-path /auth --import-realm --health-enabled=true --metrics-enabled=true
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.3
+    ports:
+      - "8080:8080"
+      - "9090:9000"
+    volumes:
+      - ./build/docker/keycloak/config.json:/opt/keycloak/data/import/config.json:ro
+      - ./build/logs/keycloak:/opt/jboss/keycloak/standalone/log/:delegated
+    healthcheck:
+        # curl no longer available in recent versions (see https://gist.github.com/sarath-soman/5d9aec06953bbd0990c648605d4dba07 for alternatives)
+        test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /auth/health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3;cat <&3 | grep -q '\"status\": \"UP\"' && exit 0 || exit 1"]
+        interval: 1s
+        timeout: 2s
+        retries: 30
+ 
+  keycloak-create-user:
+     image: "quay.io/keycloak/keycloak:26.0.7"
+     depends_on:
+         keycloak:
+           condition: service_healthy
+     restart: "no"
+     networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.55
+     volumes:
+       - ./build/docker/keycloak/config.json:/opt/keycloak/data/import/config.json:ro
+     entrypoint: ["/bin/sh", "-c" , "/opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080/auth/ --realm master --user admin --password admin2 && /opt/keycloak/bin/kcadm.sh create users -r kcrealm -s username=fireuser -s enabled=true && /opt/keycloak/bin/kcadm.sh set-password -r kcrealm --username fireuser -p password"]   
+
+  # S3 backend
+  minio:
+    image: minio/minio:RELEASE.2022-10-24T18-35-07Z
+    command: minio server /data --console-address ":9001"
+    environment:
+     MINIO_ROOT_USER: storage_access_key
+     MINIO_ROOT_PASSWORD: storage_secret_key
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.19
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - ./build/minio:/data:delegated

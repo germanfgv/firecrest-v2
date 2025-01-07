@@ -1,0 +1,8 @@
+{
+    "stdout": "Submitted batch job 1",
+    "stderr": "",
+    "exit_code": 0,
+    "swalllow_stdin": true,
+    "command":"sbatch"
+}
+

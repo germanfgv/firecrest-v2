@@ -1,0 +1,7 @@
+{
+    "stdout": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"scontrol write batch_script 1 -"
+}
+

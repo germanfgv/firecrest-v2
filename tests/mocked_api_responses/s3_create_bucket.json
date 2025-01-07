@@ -1,0 +1,8 @@
+{
+    "Location": "/test-user" ,
+    "ResponseMetadata": {
+        "HTTPStatusCode": 200,
+        "HostId": "host",
+        "RequestId": "42"
+    }
+}

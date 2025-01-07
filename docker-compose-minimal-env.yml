@@ -1,0 +1,8 @@
+
+include:
+  - path :
+    - docker-compose-base.yml
+    - docker-compose-minimal-override.yml
+
+  
+  

@@ -1,0 +1,7 @@
+
+services:
+  slurm:
+      volumes:
+        # ssh config
+        - ./build/docker/slurm-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
+  

@@ -1,0 +1,117 @@
+{
+    "meta": {
+        "plugin": {
+            "type": "openapi/v0.0.38",
+            "name": "Slurm OpenAPI v0.0.38"
+        },
+        "Slurm": {
+            "version": {
+                "major": 22,
+                "micro": 5,
+                "minor": 5
+            },
+            "release": "22.05.5"
+        }
+    },
+    "errors": [],
+    "partitions": [
+        {
+            "flags": [
+                "default"
+            ],
+            "preemption_mode": [
+                "disabled"
+            ],
+            "allowed_allocation_nodes": "",
+            "allowed_accounts": "",
+            "allowed_groups": "",
+            "allowed_qos": "",
+            "alternative": "",
+            "billing_weights": "",
+            "default_memory_per_cpu": 0,
+            "default_time_limit": 7200,
+            "denied_accounts": "",
+            "denied_qos": "",
+            "preemption_grace_time": 0,
+            "maximum_cpus_per_node": -1,
+            "maximum_memory_per_node": 0,
+            "maximum_nodes_per_job": 1,
+            "max_time_limit": 7200,
+            "min nodes per job": 0,
+            "name": "part01",
+            "nodes": "localhost",
+            "over_time_limit": null,
+            "priority_job_factor": 1,
+            "priority_tier": 1,
+            "qos": "",
+            "state": "UP",
+            "total_cpus": 2,
+            "total_nodes": 1,
+            "tres": "cpu=2,mem=1000M,node=1,billing=2"
+        },
+        {
+            "flags": [],
+            "preemption_mode": [
+                "disabled"
+            ],
+            "allowed_allocation_nodes": "",
+            "allowed_accounts": "",
+            "allowed_groups": "",
+            "allowed_qos": "",
+            "alternative": "",
+            "billing_weights": "",
+            "default_memory_per_cpu": 0,
+            "default_time_limit": 2880,
+            "denied_accounts": "",
+            "denied_qos": "",
+            "preemption_grace_time": 0,
+            "maximum_cpus_per_node": -1,
+            "maximum_memory_per_node": 0,
+            "maximum_nodes_per_job": 1,
+            "max_time_limit": 2880,
+            "min nodes per job": 0,
+            "name": "part02",
+            "nodes": "localhost",
+            "over_time_limit": null,
+            "priority_job_factor": 1,
+            "priority_tier": 1,
+            "qos": "",
+            "state": "UP",
+            "total_cpus": 2,
+            "total_nodes": 1,
+            "tres": "cpu=2,mem=1000M,node=1,billing=2"
+        },
+        {
+            "flags": [],
+            "preemption_mode": [
+                "disabled"
+            ],
+            "allowed_allocation_nodes": "",
+            "allowed_accounts": "",
+            "allowed_groups": "",
+            "allowed_qos": "",
+            "alternative": "",
+            "billing_weights": "",
+            "default_memory_per_cpu": 0,
+            "default_time_limit": 2880,
+            "denied_accounts": "",
+            "denied_qos": "",
+            "preemption_grace_time": 0,
+            "maximum_cpus_per_node": -1,
+            "maximum_memory_per_node": 0,
+            "maximum_nodes_per_job": 1,
+            "max_time_limit": 2880,
+            "min nodes per job": 0,
+            "name": "xfer",
+            "nodes": "localhost",
+            "over_time_limit": null,
+            "priority_job_factor": 1,
+            "priority_tier": 1,
+            "qos": "",
+            "state": "UP",
+            "total_cpus": 2,
+            "total_nodes": 1,
+            "tres": "cpu=2,mem=1000M,node=1,billing=2"
+        }
+    ]
+}

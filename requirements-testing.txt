@@ -1,0 +1,7 @@
+debugpy
+pytest
+pytest-env
+pytest-asyncio
+aioresponses
+httpx
+pytest_httpx

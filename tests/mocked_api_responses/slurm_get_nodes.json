@@ -1,0 +1,70 @@
+{
+    "meta": {
+        "plugin": {
+            "type": "openapi/v0.0.38",
+            "name": "Slurm OpenAPI v0.0.38"
+        },
+        "Slurm": {
+            "version": {
+                "major": 22,
+                "micro": 5,
+                "minor": 5
+            },
+            "release": "22.05.5"
+        }
+    },
+    "errors": [],
+    "nodes": [
+        {
+            "architecture": "x86_64",
+            "burstbuffer_network_address": "",
+            "boards": 1,
+            "boot_time": 1710896175,
+            "comment": "",
+            "cores": 1,
+            "cpu_binding": 0,
+            "cpu_load": 305,
+            "extra": "",
+            "free_memory": 2528,
+            "cpus": 2,
+            "last_busy": 1711018347,
+            "features": "f7t",
+            "active_features": "f7t",
+            "gres": "",
+            "gres_drained": "N/A",
+            "gres_used": "",
+            "mcs_label": "",
+            "name": "localhost",
+            "next_state_after_reboot": "invalid",
+            "address": "localhost",
+            "hostname": "localhost",
+            "state": "idle",
+            "state_flags": [],
+            "next_state_after_reboot_flags": [],
+            "operating_system": "Linux 6.6.16-linuxkit #1 SMP Fri Feb 16 11:54:02 UTC 2024",
+            "owner": null,
+            "partitions": [
+                "part01",
+                "part02",
+                "xfer"
+            ],
+            "port": 6818,
+            "real_memory": 1000,
+            "reason": "",
+            "reason_changed_at": 0,
+            "reason_set_by_user": null,
+            "slurmd_start_time": 1711018337,
+            "sockets": 2,
+            "threads": 1,
+            "temporary_disk": 0,
+            "weight": 1,
+            "tres": "cpu=2,mem=1000M,billing=2",
+            "slurmd_version": "22.05.5",
+            "alloc_memory": 0,
+            "alloc_cpus": 0,
+            "idle_cpus": 2,
+            "tres_used": null,
+            "tres_weighted": 0.000000
+        }
+    ]
+}

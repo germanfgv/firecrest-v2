@@ -1,0 +1,52 @@
+FROM ubuntu:plucky
+
+RUN apt update -y \
+    && apt install -y sudo \
+    munge  \
+    vim \
+    build-essential \
+    git \
+    mariadb-server \
+    openssh-server \
+    wget \
+    curl \
+    python3 \
+    supervisor
+
+# Install Slurm
+RUN apt install -y slurmd slurmdbd slurmctld slurmrestd mpich
+
+# Add Slurm Api user
+RUN groupadd -r --gid=991 slurmapi && useradd -r -g slurmapi --uid=991 slurmapi
+
+# Add config and helper scripts
+COPY ./build/docker/slurm-cluster/slurm/*.conf /etc/slurm/
+COPY ./build/docker/slurm-cluster/slurm/*.sh /
+COPY ./build/docker/slurm-cluster/slurm/*.py /
+
+RUN chmod 644 /etc/slurm/*.conf && chmod 600 /etc/slurm/slurmdbd.conf  && chown -R slurm:slurm /etc/slurm/*.conf && chmod 755 /*.sh
+
+# Setup services
+ADD ./build/docker/slurm-cluster/supervisord.conf /etc/supervisord.conf
+RUN chmod 755 /*.sh
+
+# Setup users
+RUN useradd -m -s /bin/bash fireuser    && echo 'fireuser:fireuser'       | chpasswd
+RUN useradd -m -s /bin/bash firesrv    && echo 'firesrv:sfiresrv'      | chpasswd
+
+ADD --chown=fireuser:users ./build/environment/keys/ca-key.pub /home/fireuser/.ssh/authorized_keys
+ADD --chown=firesrv:users ./build/environment/keys/ca-key.pub /home/firesrv/.ssh/authorized_keys
+
+# Setup SSH keys
+RUN chmod 0755 /var/run/sshd
+ADD ./build/environment/keys/ca-key.pub  /etc/ssh/
+RUN chmod -R 400 /etc/ssh/  && chown -R root:root /etc/ssh/
+RUN /usr/bin/ssh-keygen -A
+
+# Setup MariaDB
+RUN mkdir -p /run/mariadb && chown mysql:mysql /run/mariadb
+
+# Setup Munge
+RUN mkdir -p /run/munge && chown -R munge:munge /var/log/munge  && chown -R munge:munge /var/lib/munge  && chown -R munge:munge /run/munge && chown 755 /var/log/munge && chmod 755 /run/munge && chmod 755 /var/lib/munge
+
+ENTRYPOINT ["supervisord"]

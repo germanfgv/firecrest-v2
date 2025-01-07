@@ -1,0 +1,6 @@
+{
+    "stdout": "scancel: Terminating job 10",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"scancel"
+}

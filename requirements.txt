@@ -1,0 +1,16 @@
+fastapi[all]
+uvicorn[standard]
+pyhumps
+python-jose
+Authlib
+pydantic
+pydantic-settings >= 2.2.0
+setuptools
+aiohttp
+asyncio
+rootpath
+asyncssh
+aiobotocore
+apscheduler>=4.0.0a4
+requests-file
+aiofiles

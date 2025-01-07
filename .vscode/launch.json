@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FirecrestAPI [Docker Compose]",
+            "type": "debugpy",
+            "request": "attach",
+            "logToFile": true,
+            "justMyCode": false,
+            "preLaunchTask": "Firecrest_v2 booter",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/src/firecrest",
+                    "remoteRoot": "/app/firecrest"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/src/lib",
+                    "remoteRoot": "/app/lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/tests",
+                    "remoteRoot": "/tests"
+                }
+            ]
+        }
+    ]
+}

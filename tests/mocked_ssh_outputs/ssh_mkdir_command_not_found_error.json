@@ -1,0 +1,7 @@
+{
+    "stdout": "",
+    "stderr": "mkdir: cannot create directory '/home/tmp/dir2/subdir': No such file or directory\n",
+    "exit_code": 1,
+    "command":"mkdir  -- '/home/tmp/dir2/subdir'"
+}
+

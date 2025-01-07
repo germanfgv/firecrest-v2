@@ -1,0 +1,7 @@
+{
+    "stdout": "JobId=1 JobName=(null) UserId=test1(1000) GroupId=users(100) MCS_label=N/A Priority=1 Nice=0 Account=test QOS=normal JobState=COMPLETED Reason=None Dependency=(null) Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:01:42 TimeLimit=5-00:00:00 TimeMin=N/A SubmitTime=2024-09-19T18:48:52 EligibleTime=2024-09-19T18:48:52 AccrueTime=2024-09-19T18:48:52 StartTime=2024-09-19T18:48:53 EndTime=2024-09-19T18:50:35 Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2024-09-19T18:48:53 Scheduler=Main Partition=part01 AllocNode:Sid=localhost:1 ReqNodeList=(null) ExcNodeList=(null) NodeList=localhost BatchHost=localhost NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=1,mem=1000M,node=1,billing=1 AllocTRES=cpu=1,mem=1000M,node=1,billing=1 Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=1 MinMemoryNode=0 MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null) Command=(null) WorkDir=/home/test1 StdErr=/home/test1/jobs.error StdIn=/dev/null StdOut=/home/test1/jobs.out",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"scontrol show -o  job 1"
+}
+

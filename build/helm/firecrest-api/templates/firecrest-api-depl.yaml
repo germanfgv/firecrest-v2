@@ -1,0 +1,76 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firecrest-api-depl
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: firecrest-api
+  template:
+    metadata:
+      labels:
+        app: firecrest-api
+      annotations:
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs/json.keys_under_root: "true"
+        co.elastic.logs/json.add_error_key: "true"
+    spec:
+      containers:
+        - name: firecrest-api
+          image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment }}
+            - name: YAML_CONFIG_FILE
+              value: "/app/config/firecrest-config.yaml"
+            - name: APP_VERSION
+              value: {{ .Chart.AppVersion }}
+            - name: LOGGING_LEVEL
+              value: {{ .Values.loggingLevel }}
+          volumeMounts:
+          - name: firecrest-config-volume
+            mountPath: /app/config/
+            readOnly: true
+          - name: health-check-service-account-secret
+            mountPath: /run/secrets/health_check_service_account_secret
+            readOnly: true
+          - name: s3-secret-access-key
+            mountPath: /run/secrets/s3_secret_access_key
+            readOnly: true
+      volumes:
+        - name: firecrest-config-volume
+          configMap:
+            name: firecrest-configmap
+            items:
+                - key: firecrest-config
+                  path: firecrest-config.yaml
+        - name: health-check-service-account-secret
+          secret:
+            secretName: firecrest-v2
+            items:
+              - key: health-check-service-account-secret
+                path: secret
+        - name: s3-secret-access-key
+          secret:
+            secretName: firecrest-v2
+            items:
+              - key: s3-secret-access-key
+                path: secret
+            
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: firecrest-api-srv
+spec:
+  selector:
+    app: firecrest-api
+  ports:
+    - name: firecrest-api
+      protocol: TCP
+      port: 5001
+      targetPort: 5000

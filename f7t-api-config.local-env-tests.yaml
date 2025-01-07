@@ -1,0 +1,66 @@
+auth:
+  authentication:
+    scopes:  {}
+    tokenUrl:  "http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+    publicCerts: []
+ssh_credentials:
+  url: "http://192.168.240.20:5000"
+  max_connections: 500
+clusters:
+- name: "cluster-slurm-api"
+  ssh:
+    host: "192.168.240.2"
+    port: 22
+    max_clients: 500
+  scheduler:
+    type: "slurm"
+    version: "24.11.0"
+    api_url: "http://192.168.240.2:6820"
+    api_version: "0.0.42"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-api"
+    secret: ""
+  probing:
+    interval: 60
+    timeout: 5
+  file_systems:
+    - path: '/home'
+      data_type: 'users'
+      default_work_dir: true
+- name: "cluster-slurm-ssh"
+  ssh:
+    host: "192.168.240.2"
+    port: 22
+    max_clients: 500
+  scheduler:
+    type: "slurm"
+    version: "24.11.0"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-api"
+    secret: ""
+  probing:
+    interval: 60
+    timeout: 10
+  datatransfer_jobs_directives:
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+  file_systems:
+    - path: '/home'
+      data_type: 'users'
+      default_work_dir: true
+storage:
+  name: "s3-storage"
+  private_url: "http://192.168.240.19:9000"
+  public_url: "http://localhost:9000"
+  access_key_id: "storage_access_key"
+  secret_access_key: ""
+  region: "us-east-1"
+  ttl: 604800
+  multipart:
+    use_split: false
+    max_part_size: 2147483648
+    parallel_runs: 3
+    tmp_folder: "tmp"
+  max_ops_file_size: 1048576 # 1M

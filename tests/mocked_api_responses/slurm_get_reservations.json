@@ -1,0 +1,44 @@
+{
+    "meta": {
+        "plugin": {
+            "type": "openapi/v0.0.38",
+            "name": "Slurm OpenAPI v0.0.38"
+        },
+        "Slurm": {
+            "version": {
+                "major": 22,
+                "micro": 5,
+                "minor": 5
+            },
+            "release": "22.05.5"
+        }
+    },
+    "errors": [],
+    "reservations": [
+        {
+            "flags": [
+                "MAINT",
+                "IGNORE_JOBS",
+                "SPEC_NODES",
+                "ALL_NODES"
+            ],
+            "accounts": "",
+            "burst_buffer": "",
+            "core_count": 2,
+            "core_spec_cnt": 0,
+            "end_time": 1865095200,
+            "features": "",
+            "groups": "",
+            "licenses": "",
+            "max_start_delay": 0,
+            "name": "root_1",
+            "node_count": 1,
+            "node_list": "localhost",
+            "partition": "",
+            "start_time": 1865088000,
+            "watts": 4294967294,
+            "tres": "cpu=2",
+            "users": "root"
+        }
+    ]
+}

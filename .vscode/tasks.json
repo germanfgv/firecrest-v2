@@ -1,0 +1,64 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Set certificate permission",
+			"type": "shell",
+			"command": "chmod 0400 ${workspaceFolder}/build/environment/keys/ca-key && chmod 0400 ${workspaceFolder}/build/environment/keys/user-key",
+			"windows": {
+				"command": "attrib +r ${workspaceFolder}/build/environment/keys/ca-key"
+			  },
+		},
+		{
+			"label": "Firecrest_v2 cluster up",
+			"type": "docker-compose",
+			"dockerCompose": {
+			  "up": {
+				"detached": true,
+				"build": true,
+			  },
+			  "files": [
+				"${workspaceFolder}/docker-compose-${input:dockerEnv}.yml"
+			  ]
+			},
+			"isBackground": true,
+            "runOptions":{
+                "instanceLimit": 1
+            },
+			"dependsOn": "Set certificate permission",
+		  },
+		  {
+			// Waits for Firecrest API to be up and running ensuring the debugger can successfully be attached
+			"label": "Firecrest_v2 booter",
+			"type": "shell",
+			"command": "i=0 ; while [ true ] ; do ((i++)) ; curl http://localhost:8000 &> /dev/null ; if [[ \"$?\" -eq 0 ]] || [ \"$i\" -gt \"60\" ]; then exit 0 ; else sleep 0.5 ; fi ; done",
+			"windows": {
+				//TODO: replace with a batch script like the linux/mac one
+				"command": "timeout 5"
+			  },
+			"dependsOn": "Firecrest_v2 cluster up",
+		  },
+		  {
+			// Waits for Firecrest API to be up and running ensuring the debugger can successfully be attached
+			"label": "SSH-Keygen booter",
+			"type": "shell",
+			"command": "i=0 ; while [ true ] ; do ((i++)) ; curl http://localhost:8081 &> /dev/null ; if [[ \"$?\" -eq 0 ]] || [ \"$i\" -gt \"60\" ]; then exit 0 ; else sleep 0.5 ; fi ; done",
+			"windows": {
+				//TODO: replace with a batch script like the linux/mac one
+				"command": "timeout 5"
+			  },
+			"dependsOn": "Firecrest_v2 cluster up",
+		  },
+	],
+	"inputs": [
+    {
+      "type": "pickString",
+      "id": "dockerEnv",
+      "description": "What Firecrest v2 environment would you like to start?",
+      "options": [
+		"minimal-env"
+      ],
+      "default": "minimal-env"
+    }
+  ]
+}

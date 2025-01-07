@@ -1,0 +1,18 @@
+// Workspace settings
+{
+    "files.exclude": {
+        "node_modules/": true,
+        "**/._*": true,
+        "**/__pycache__/": true
+    },
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+    },
+    "cSpell.words": [
+        "dotenv",
+        "pydantic"
+    ]
+}

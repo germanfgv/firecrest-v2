@@ -1,0 +1,24 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "17E0D72B37CA0763",
+        "HostId": "",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "accept-ranges": "bytes",
+            "content-length": "285",
+            "content-security-policy": "block-all-mixed-content",
+            "content-type": "application/xml",
+            "server": "MinIO",
+            "strict-transport-security": "max-age=31536000; includeSubDomains",
+            "vary": "Accept-Encoding",
+            "x-amz-request-id": "17E0D72B37CA0763",
+            "x-content-type-options": "nosniff",
+            "x-xss-protection": "1; mode=block",
+            "date": "Wed, 10 Jul 2024 11:40:38 GMT"
+        },
+        "RetryAttempts": 0
+    },
+    "Bucket": "test1",
+    "Key": "c48d4920-7ee1-4b52-937d-17a5e54dfeda/data.big",
+    "UploadId": "bc0ee8f9-21cb-4f46-b84e-75d687a20705"
+}

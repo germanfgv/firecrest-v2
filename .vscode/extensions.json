@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "ms-azuretools.vscode-docker",
+        "postman.postman-for-vscode",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode-remote.remote-containers",
+        "ms-python.black-formatter",
+        "ms-python.ruff",
+    ]
+}

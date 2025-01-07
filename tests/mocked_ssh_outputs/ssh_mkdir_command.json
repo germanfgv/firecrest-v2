@@ -1,0 +1,6 @@
+{
+    "stdout": "drwxr-xr-x 2 root root 4096 2024-05-16T13:48:53 \"/home/dir1\"",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"mkdir  -- '/home/dir1'"
+}
