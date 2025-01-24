@@ -18,7 +18,7 @@
 				"build": true,
 			  },
 			  "files": [
-				"${workspaceFolder}/docker-compose-${input:dockerEnv}.yml"
+				"${workspaceFolder}/docker-compose.yml"
 			  ]
 			},
 			"isBackground": true,
@@ -50,15 +50,4 @@
 			"dependsOn": "Firecrest_v2 cluster up",
 		  },
 	],
-	"inputs": [
-    {
-      "type": "pickString",
-      "id": "dockerEnv",
-      "description": "What Firecrest v2 environment would you like to start?",
-      "options": [
-		"minimal-env"
-      ],
-      "default": "minimal-env"
-    }
-  ]
 }

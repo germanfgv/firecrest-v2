@@ -72,6 +72,9 @@ services:
     ports:
       - 6820:6820
       - 2222:22
+    volumes:
+        # ssh config
+        - ./build/docker/slurm-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
     healthcheck:
         test: ["CMD", "scontrol", "ping"]
         interval: 1s
