@@ -8,16 +8,20 @@ on:
 
 jobs:
   static_analysis:
-    runs-on: python:3.10-slim
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
-    - name: qa-stage
-      run: | 
-        apt-get -y update
-        python3 -m venv venv
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    - name: Install Static Analysis Tools
+      run: |
+        python -m venv venv
         source venv/bin/activate
-        pip3 install -r ./requirements.txt
-        pip3 install -r ./requirements-static-code.txt
+        pip install -r ./requirements-static-code.txt
+    - name: Run Static Code Analysis
+      run: |
+        source venv/bin/activate
         ruff check ./src
-        bandit -ll -r --exclude venv -r ./src
-    # allow_failure: true
+        bandit -ll -r --exclude venv ./src
