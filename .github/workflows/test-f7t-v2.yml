@@ -1,0 +1,23 @@
+name: Test FirecREST v2
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  static_analysis:
+    runs-on: python:3.10-slim
+    steps:
+    - uses: actions/checkout@v4
+    - name: qa-stage
+      run: | 
+        apt-get -y update
+        python3 -m venv venv
+        source venv/bin/activate
+        pip3 install -r ./requirements.txt
+        pip3 install -r ./requirements-static-code.txt
+        ruff check ./src
+        bandit -ll -r --exclude venv -r ./src
+    # allow_failure: true
