@@ -25,3 +25,20 @@ jobs:
         source venv/bin/activate
         ruff check ./src
         bandit -ll -r --exclude venv ./src
+        
+  unit_test:  
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    - name: Install Testing Tools
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install -r ./requirements.txt
+        pip install -r ./requirements-testing.txt
+    - name: Run PyTest
+      run: pytest
