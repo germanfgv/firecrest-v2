@@ -1,0 +1,58 @@
+name: Publish Helm Chart
+
+on:
+  release:
+    types: [prereleased, released]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.14.3
+
+    - name: Build Helm dependencies
+      run: helm dependency build build/helm/firecrest-api
+
+    - name: Package Helm chart
+      run: |
+        helm package --version ${{ github.ref_name }} build/helm/firecrest-api
+        # rm -rf chart/Chart.lock chart/charts/
+
+        # move the packages to a directory to avoid issues
+        # when checking out to `gh-pages`
+        mkdir gh_
+        mv *.tgz gh_
+
+    - name: Push to gh-pages branch
+      run: |
+        git config --global user.name "$GITHUB_ACTOR"
+        git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+        git fetch origin gh-pages:gh-pages
+        git checkout gh-pages
+        mv gh_/*tgz .
+
+        helm repo index . --url https://eth-cscs.github.io/firecrest-v2 --merge index.yaml
+
+        NEW_BRANCH="update-helm-repo-$(date +%s)"
+        echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
+
+        git checkout -b $NEW_BRANCH                
+        git add *.tgz index.yaml
+        git commit -m "update helm repo"
+        git push -u origin $NEW_BRANCH
+
+    - name: Create pull request
+      run: |
+        gh pr create -H $NEW_BRANCH -B gh-pages --title '[release-chart] Update Helm repo' --body 'Created by Github action'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NEW_BRANCH: ${{ env.NEW_BRANCH }}
