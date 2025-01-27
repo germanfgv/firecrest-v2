@@ -1,0 +1,39 @@
+name: Test FirecREST v2
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  static_analysis:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    - name: Install Static Analysis Tools
+      run: |
+        pip install -r ./requirements-static-code.txt
+    - name: Run Static Code Analysis
+      run: |
+        ruff check ./src
+        bandit -ll -r ./src
+        
+  unit_test:  
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    - name: Install Testing Tools
+      run: |
+        pip install -r ./requirements.txt
+        pip install -r ./requirements-testing.txt
+    - name: Run PyTest
+      run: pytest
