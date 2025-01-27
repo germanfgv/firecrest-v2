@@ -17,14 +17,11 @@ jobs:
         python-version: 3.12
     - name: Install Static Analysis Tools
       run: |
-        python -m venv venv
-        source venv/bin/activate
         pip install -r ./requirements-static-code.txt
     - name: Run Static Code Analysis
       run: |
-        source venv/bin/activate
         ruff check ./src
-        bandit -ll -r --exclude venv ./src
+        bandit -ll -r ./src
         
   unit_test:  
     runs-on: ubuntu-22.04
@@ -36,8 +33,6 @@ jobs:
         python-version: 3.12
     - name: Install Testing Tools
       run: |
-        python3 -m venv venv
-        source venv/bin/activate
         pip install -r ./requirements.txt
         pip install -r ./requirements-testing.txt
     - name: Run PyTest
