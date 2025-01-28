@@ -34,7 +34,7 @@ jobs:
         helm package build/helm/firecrest-api --app-version=$VERSION --version=$VERSION --destination=.cr-release-packages
 
     - name: Setup Helm Chart Releaser
-      uses: helm/chart-releaser-action@v1.7.0
+      uses: helm/chart-releaser-action@3e001cb8c68933439c7e721650f20a07a1a5c61e # no relase for this fix yet
       with:
         charts_dir: build/helm
         skip_packaging: true
