@@ -18,52 +18,22 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+    # this additional step is done since the chart-releaser-action doesn't take 
+    # correctly the release name, and then it doesn't create a new helm release    
+    - name: Custom packaging
+      run: |
+        # obtain the version for the Chart from the release
+        VERSION=${{ github.ref_name }}
+        # 
+        rm -rf .cr-release-packages
+        mkdir -p .cr-release-packages
+        helm package build/helm/firecrest-api --app-version=$VERSION --version=$VERSION --destination=.cr-release-packages
+
     - name: Setup Helm Chart Releaser
       uses: helm/chart-releaser-action@v1.7.0
       with:
         charts_dir: build/helm
         pages_branch: gh-pages
+        skip_packaging: true
       env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-    # - name: Push Helm Charts to Github Pages
-    #  users: 
-
-    # - name: Build Helm dependencies
-    #   run: helm dependency build build/helm/firecrest-api
-
-    # - name: Package Helm chart
-    #  run: |
-    #    helm package --version ${{ github.ref_name }} build/helm/firecrest-api
-        # rm -rf chart/Chart.lock chart/charts/
-
-        # move the packages to a directory to avoid issues
-        # when checking out to `gh-pages`
-    #    mkdir gh_
-    #    mv *.tgz gh_
-
-    # - name: Push to gh-pages branch
-    # run: |
-    #     git config --global user.name "$GITHUB_ACTOR"
-    #     git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-    #     git fetch origin gh-pages:gh-pages
-    #     git checkout gh-pages
-    #     mv gh_/*tgz .
-
-    #     helm repo index . --url https://eth-cscs.github.io/firecrest-v2 --merge index.yaml
-
-    #     NEW_BRANCH="update-helm-repo-$(date +%s)"
-    #     echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
-
-    #     git checkout -b $NEW_BRANCH                
-    #     git add *.tgz index.yaml
-    #     git commit -m "update helm repo"
-    #     git push -u origin $NEW_BRANCH
-
-    # - name: Create pull request
-    #   run: |
-    #     gh pr create -H $NEW_BRANCH -B gh-pages --title '[release-chart] Update Helm repo' --body 'Created by Github action'
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     NEW_BRANCH: ${{ env.NEW_BRANCH }}
