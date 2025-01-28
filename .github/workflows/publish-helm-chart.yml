@@ -6,12 +6,16 @@ on:
 
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Configure Git User
       run: |
@@ -33,7 +37,6 @@ jobs:
       uses: helm/chart-releaser-action@v1.7.0
       with:
         charts_dir: build/helm
-        pages_branch: gh-pages
         skip_packaging: true
       env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
