@@ -37,27 +37,19 @@ jobs:
         rm -rf $CHART_DIR/.cr-build
         mkdir -p $CHART_DIR/.cr-build
         echo "Packaging helm chart of firecrest-api for version '$VERSION'"
-        helm package $CHART_DIR/firecrest-api --app-version=$VERSION --version=$VERSION --destination=$CHART_DIR/.cr-build
+        helm package $CHART_DIR --app-version=$VERSION --version=$VERSION --destination=$CHART_DIR/.cr-build
 
     - name: Upload chart artifact
       uses: actions/upload-artifact@v4
       with:
         name: firecrest-api-${{ github.ref_name }}.tgz
-        path: $CHART_DIR/.cr-build/*
+        path: $CHART_DIR/.cr-build/firecrest-api-${{ github.ref_name }}.tgz
         retention-days: 30
-
-    # - name: Setup Helm Chart Releaser
-    #   uses: helm/chart-releaser-action@3e001cb8c68933439c7e721650f20a07a1a5c61e # no relase for this fix yet
-    #   with:
-    #     charts_dir: $CHART_DIR
-    #     skip_packaging: true
-    #   env:
-    #       CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
     - name: Publish to GitHub pages
       run: |
         git checkout $GH_PAGES_BRANCH --force
-        helm repo index --merge index.yaml --url ${{ github.server_url }}/${{github.repository}}/releases/download/${{ github.ref_name }}
+        helm repo index $CHART_DIR/.ci-build/ --merge index.yaml --url ${{ github.server_url }}/${{github.repository}}/releases/download/${{ github.ref_name }}
         cp $CHART_DIR/.ci-build/index.yaml index.yaml
         echo "New index:" && cat index.yaml
         git commit -a -m "Update pages index for helm chart firecrest-api-${{ github.ref_name }}"
