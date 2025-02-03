@@ -8,8 +8,12 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+        CHART_DIR: build/helm
+        GH_PAGES_BRANCH: gh-pages
     permissions:
       contents: write
+      pages: write
 
     steps:
     - name: Checkout repository
@@ -19,6 +23,7 @@ jobs:
 
     - name: Configure Git User
       run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
@@ -28,15 +33,32 @@ jobs:
       run: |
         # obtain the version for the Chart from the release
         VERSION=${{ github.ref_name }}
-        # 
-        rm -rf .cr-release-packages
-        mkdir -p .cr-release-packages
-        helm package build/helm/firecrest-api --app-version=$VERSION --version=$VERSION --destination=.cr-release-packages
+        # removing the directory where temp tgz are stored
+        rm -rf $CHART_DIR/.cr-build
+        mkdir -p $CHART_DIR/.cr-build
+        echo "Packaging helm chart of firecrest-api for version '$VERSION'"
+        helm package $CHART_DIR/firecrest-api --app-version=$VERSION --version=$VERSION --destination=$CHART_DIR/.cr-build
 
-    - name: Setup Helm Chart Releaser
-      uses: helm/chart-releaser-action@3e001cb8c68933439c7e721650f20a07a1a5c61e # no relase for this fix yet
+    - name: Upload chart artifact
+      uses: actions/upload-artifact@v4
       with:
-        charts_dir: build/helm
-        skip_packaging: true
-      env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        name: firecrest-api-${{ github.ref_name }}.tgz
+        path: $CHART_DIR/.cr-build/*
+        retention-days: 30
+
+    # - name: Setup Helm Chart Releaser
+    #   uses: helm/chart-releaser-action@3e001cb8c68933439c7e721650f20a07a1a5c61e # no relase for this fix yet
+    #   with:
+    #     charts_dir: $CHART_DIR
+    #     skip_packaging: true
+    #   env:
+    #       CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+    - name: Publish to GitHub pages
+      run: |
+        git checkout $GH_PAGES_BRANCH --force
+        helm repo index --merge index.yaml --url ${{ github.server_url }}/${{github.repository}}/releases/download/${{ github.ref_name }}
+        cp $CHART_DIR/.ci-build/index.yaml index.yaml
+        echo "New index:" && cat index.yaml
+        git commit -a -m "Update pages index for helm chart firecrest-api-${{ github.ref_name }}"
+        git push origin $GH_PAGES_BRANCH
