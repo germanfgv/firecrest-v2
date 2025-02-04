@@ -32,7 +32,7 @@ jobs:
 
     - name: Package Helm chart
       run: |
-        helm package $CHART_DIR/firecrest-api
+        helm package $CHART_DIR/firecrest-api --version=${{ github.ref_name }} --app-version=${{ github.ref_name }} 
         rm -rf $CHART_DIR/firecrest-api/Chart.lock $CHART_DIR/firecrest-api/charts/
 
         # move the packages to a directory to avoid issues
