@@ -20,6 +20,9 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    
+    - name: Setup Helm
+      uses: azure/setup-helm@v4.2.0      
 
     - name: Configure Git User
       run: |
@@ -27,30 +30,25 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-    # this additional step is done since the chart-releaser-action doesn't take 
-    # correctly the release name, and then it doesn't create a new helm release    
-    - name: Custom packaging
+    - name: Package Helm chart
       run: |
-        # obtain the version for the Chart from the release
-        VERSION=${{ github.ref_name }}
-        # removing the directory where temp tgz are stored
-        rm -rf $CHART_DIR/.cr-build
-        mkdir -p $CHART_DIR/.cr-build
-        echo "Packaging helm chart of firecrest-api for version '$VERSION'"
-        helm package $CHART_DIR/firecrest-api --app-version=$VERSION --version=$VERSION --destination=$CHART_DIR/.cr-build
+        helm package $CHART_DIR/firecrest-api
+        rm -rf $CHART_DIR/firecrest-api/Chart.lock $CHART_DIR/firecrest-api/charts/
 
-    - name: Upload chart artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: firecrest-api-${{ github.ref_name }}.tgz
-        path: $CHART_DIR/.cr-build/firecrest-api-${{ github.ref_name }}.tgz
-        retention-days: 30
+        # move the packages to a directory to avoid issues
+        # when checking out to `gh-pages`
+        mkdir gh_
+        mv *.tgz gh_
 
-    - name: Publish to GitHub pages
+    - name: Push to gh-pages branch
       run: |
-        git checkout $GH_PAGES_BRANCH --force
-        helm repo index $CHART_DIR/.ci-build/ --merge index.yaml --url ${{ github.server_url }}/${{github.repository}}/releases/download/${{ github.ref_name }}
-        cp $CHART_DIR/.ci-build/index.yaml index.yaml
-        echo "New index:" && cat index.yaml
-        git commit -a -m "Update pages index for helm chart firecrest-api-${{ github.ref_name }}"
-        git push origin $GH_PAGES_BRANCH
+        
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv gh_/*tgz .
+
+        helm repo index . --url https://eth-cscs.github.io/firecrest-v2 --merge index.yaml
+
+        git add *.tgz index.yaml
+        git commit -m "New firecrest-api helm chart release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
