@@ -63,19 +63,29 @@ def mocked_ssh_stat_output():
     return load_ssh_output("ssh_stat_command.json")
 
 
+@pytest.fixture(scope="module")
+def mocked_ssh_id_output():
+    return load_ssh_output("ssh_id_command.json")
+
+
 @pytest.mark.asyncio
 async def test_upload(
     client,
     s3_client,
+    ssh_client,
     slurm_cluster_with_api_config,
     mocked_job_submit_response,
     mocked_create_bucket_response,
+    mocked_create_multipart_upload,
     mocked_put_bucket_lifecycle_configuration,
+    mocked_ssh_id_output,
 ):
 
     request_body = {
-        "fileName": "data.big",
         "path": "/home/test1/",
+        "account": "fireuser",
+        "fileName": "data.big",
+        "fileSize": "100000",
     }
     # mocking s3 server response
     with Stubber(s3_client) as stubber:
@@ -88,24 +98,35 @@ async def test_upload(
             method="put_bucket_lifecycle_configuration",
             service_response=mocked_put_bucket_lifecycle_configuration,
         )
+        stubber.add_response(
+            method="create_multipart_upload",
+            service_response=mocked_create_multipart_upload,
+        )
         stubber.activate()
+
         # mocking slurm server response
         with aioresponses() as mocked:
+
             mocked.post(
                 f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/submit",
                 status=200,
                 body=json.dumps(mocked_job_submit_response),
             )
-
-            # Testing storage end-point
-            response = client.post(
-                f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/upload",
-                json=request_body,
-            )
+            async with ssh_client.mocked_output(
+                [
+                    MockedCommand(**mocked_ssh_id_output),
+                ]
+            ):
+                # Testing storage end-point
+                response = client.post(
+                    f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/upload",
+                    json=request_body,
+                )
             assert response.status_code == 201
             assert response.json() is not None
             upload = UploadFileResponse(**response.json())
-            assert upload.upload_url is not None
+            assert upload.parts_upload_urls is not None
+            assert upload.complete_upload_url is not None
             assert upload.transfer_job.job_id == mocked_job_submit_response["job_id"]
             assert upload.transfer_job.system == slurm_cluster_with_api_config.name
         stubber.deactivate()
@@ -121,11 +142,13 @@ async def test_download(
     mocked_create_bucket_response,
     mocked_put_bucket_lifecycle_configuration,
     mocked_ssh_stat_output,
+    mocked_ssh_id_output,
     mocked_create_multipart_upload,
 ):
 
     request_body = {
         "sourcePath": "/home/test1/data.big",
+        "account": "fireuser",
     }
     # mocking s3 server response
     with Stubber(s3_client) as stubber:
@@ -152,7 +175,10 @@ async def test_download(
             )
 
             async with ssh_client.mocked_output(
-                [MockedCommand(**mocked_ssh_stat_output)]
+                [
+                    MockedCommand(**mocked_ssh_stat_output),
+                    MockedCommand(**mocked_ssh_id_output),
+                ]
             ):
 
                 # Testing storage end-point
@@ -183,6 +209,7 @@ async def test_mv(
     request_body = {
         "sourcePath": "/home/test1/file1.txt",
         "targetPath": "/home/test1/file2.txt",
+        "account": "fireuser",
     }
 
     with aioresponses() as mocked:
@@ -206,6 +233,33 @@ async def test_mv(
 
 
 @pytest.mark.asyncio
+async def test_mv_no_account_set(
+    client,
+    slurm_cluster_with_api_config,
+    mocked_job_submit_response,
+):
+
+    request_body = {
+        "sourcePath": "/home/test1/file1.txt",
+        "targetPath": "/home/test1/file2.txt",
+    }
+
+    with aioresponses() as mocked:
+        mocked.post(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/submit",
+            status=200,
+            body=json.dumps(mocked_job_submit_response),
+        )
+
+        # Testing storage end-point
+        response = client.post(
+            f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/mv",
+            json=request_body,
+        )
+        assert response.status_code == 400
+
+
+@pytest.mark.asyncio
 async def test_cp(
     client,
     slurm_cluster_with_api_config,
@@ -215,6 +269,7 @@ async def test_cp(
     request_body = {
         "sourcePath": "/home/test1/file1.txt",
         "targetPath": "/home/test1/file2.txt",
+        "account": "fireuser",
     }
 
     with aioresponses() as mocked:
@@ -253,7 +308,7 @@ async def test_rm(
 
         # Testing storage end-point
         response = client.delete(
-            f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/rm?path=/home/new"
+            f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/rm?path=/home/new&account=fireuser"
         )
         assert response.status_code == 200
         assert response.json() is not None
