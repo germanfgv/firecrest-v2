@@ -156,7 +156,7 @@ class SSHClientPool:
         client: SSHClient = None
 
         try:
-            keys = await self.key_provider.get_keys(jwt_token)
+            keys = await self.key_provider.get_keys(username, jwt_token)
         except TimeoutError as e:
             raise TimeoutLimitExceeded(
                 "SSH keys generation timeout limit exceeded."

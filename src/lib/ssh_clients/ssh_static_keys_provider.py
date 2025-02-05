@@ -1,14 +1,20 @@
+from typing import Dict
+from lib.exceptions import SSHCredentials
+from lib.models.config_model import SSHUserKeys
 from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
 
 
 class SSHStaticKeysProvider(SSHKeysProvider):
 
-    def __init__(self, private_key: str, public_key: str):
-        self.private_key = private_key
-        self.public_key = public_key
+    def __init__(self, users_keys: Dict[str, SSHUserKeys]):
+        self.users_keys = users_keys
 
-    async def get_keys(self, jwt_token: str):
-        return {
-            "private": self.private_key.get_secret_value(),
-            "public": self.public_key,
-        }
+    async def get_keys(self, username: str, jwt_token: str):
+
+        if username in self.users_keys:
+            return {
+                "private": self.users_keys[username].private_key.get_secret_value(),
+                "public": self.users_keys[username].public_key,
+            }
+        else:
+            raise SSHCredentials(f"No SSH credentials found for user:{username}")

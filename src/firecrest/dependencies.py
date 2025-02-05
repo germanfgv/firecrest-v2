@@ -10,7 +10,6 @@ from firecrest.config import (
     HPCCluster,
     HealthCheckType,
     SSHKeysService,
-    SSHStaticKeys,
     SchedulerType,
 )
 from firecrest.filesystem.models import FilesystemRequestBase
@@ -68,6 +67,7 @@ class APIAuthDependency(AuthDependency):
         # TODO: rename ApiAuthHelper to something like Session Auth Helper
         ApiAuthHelper.set_auth(auth=auth)
         ApiAuthHelper.set_access_token(access_token=token)
+        request.state.username = auth.username
 
 
 class ServiceAvailabilityDependency:
@@ -197,19 +197,15 @@ class SSHClientDependency:
         ignore_health: bool = False,
     ):
         self.ignore_health = ignore_health
-        match settings.ssh_credentials:
-            case SSHKeysService():
-                self.key_provider = SSHKeygenClient(
-                    settings.ssh_credentials.url,
-                    settings.ssh_credentials.max_connections,
-                )
-            case SSHStaticKeys():
-                self.key_provider = SSHStaticKeysProvider(
-                    settings.ssh_credentials.private_key,
-                    settings.ssh_credentials.public_key,
-                )
-            case _:
-                raise TypeError("Unsupported SSHKeysProvider")
+        if isinstance(settings.ssh_credentials, SSHKeysService):
+            self.key_provider = SSHKeygenClient(
+                settings.ssh_credentials.url,
+                settings.ssh_credentials.max_connections,
+            )
+        elif isinstance(settings.ssh_credentials, dict):
+            self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials)
+        else:
+            raise TypeError("Unsupported SSHKeysProvider")
 
     async def __call__(self, system_name: str):
         system = ServiceAvailabilityDependency(

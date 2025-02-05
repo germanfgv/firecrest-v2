@@ -16,3 +16,7 @@ class SlurmAuthTokenError(SlurmError):
 
 class SSHServiceError(Exception):
     pass
+
+
+class SSHCredentials(Exception):
+    pass

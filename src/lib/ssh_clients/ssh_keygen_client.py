@@ -42,7 +42,7 @@ class SSHKeygenClient(SSHKeysProvider):
         self.ssh_keygen_url = ssh_keygen_url
         SSHKeygenClient.max_connections = max_connections
 
-    async def get_keys(self, jwt_token: str):
+    async def get_keys(self, username: str, jwt_token: str):
         client = await self.get_aiohttp_client()
         headers = _ssh_service_headers(jwt_token)
 

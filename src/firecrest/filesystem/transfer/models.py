@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
@@ -7,10 +7,12 @@ from lib.models import CamelModel
 
 class PostFileUploadRequest(FilesystemRequestBase):
     file_name: str
+    account: Optional[str] = None
+    file_size: int
 
 
 class PostFileDownloadRequest(FilesystemRequestBase):
-    pass
+    account: Optional[str] = None
 
 
 class PostXferInternalOperationApiResponse(CamelModel):
@@ -30,7 +32,9 @@ class TransferJob(CamelModel):
 
 
 class UploadFileResponse(CamelModel):
-    upload_url: str
+    parts_upload_urls: list
+    complete_upload_url: str
+    max_part_size: int
     transfer_job: TransferJob
 
 
@@ -41,6 +45,7 @@ class DownloadFileResponse(CamelModel):
 
 class CopyRequest(FilesystemRequestBase):
     target_path: str
+    account: Optional[str] = None
 
 
 class CopyResponse(CamelModel):
@@ -53,6 +58,7 @@ class DeleteResponse(CamelModel):
 
 class MoveRequest(FilesystemRequestBase):
     target_path: str
+    account: Optional[str] = None
 
 
 class MoveResponse(CamelModel):

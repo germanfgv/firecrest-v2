@@ -1,3 +1,5 @@
+import logging
+import re
 import types
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -36,6 +38,9 @@ from apscheduler import AsyncScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(settings: config.Settings) -> FastAPI:
@@ -114,6 +119,43 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def init_response_headers(request: Request, call_next):
         return await meta_headers_handler(request=request, call_next=call_next)
+
+    @app.middleware("http")
+    async def log_middleware(request: Request, call_next):
+        try:
+            response = await call_next(request)
+            username = None
+            if hasattr(request.state, "username"):
+                username = request.state.username
+
+            system_name = None
+            # /filesystem/{system_name}/.*
+            # /compute/{system_name}/.*
+            # /status/{system_name}
+            if match := re.search(
+                r"^\/(?:compute|filesystem|status)\/([^\/\s]+)\/.*$",
+                request.url.path,
+                re.IGNORECASE,
+            ):
+                system_name = match.group(1)
+
+            logger.info(
+                {
+                    "username": username,
+                    "system": system_name,
+                    "endpoint": request.url.path,
+                    "satus_code": response.status_code,
+                }
+            )
+            return response
+        except Exception as e:
+            logger.error(
+                {
+                    "endpoint": request.url.path,
+                    "error": str(e),
+                }
+            )
+            raise e
 
 
 def register_routes(app: FastAPI, settings: config.Settings):

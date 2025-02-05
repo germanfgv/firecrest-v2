@@ -1,8 +1,8 @@
 from math import ceil
 import uuid
 import re
-from fastapi import Depends, Path, Query, status
-from typing import Annotated, Any
+from fastapi import Depends, Path, Query, status, HTTPException
+from typing import Annotated, Any, List, Optional
 from importlib import resources as imp_resources
 
 
@@ -64,14 +64,12 @@ class JobHelper:
         self,
         working_dir: str = None,
         script: str = None,
-        account: str = None,
         job_name: str = None,
     ):
         self.working_dir = working_dir
         unique_id = uuid.uuid4()
         self.job_param = {
             "name": job_name,
-            "account": account,
             "working_directory": working_dir,
             "standard_input": "/dev/null",
             "standard_output": f"{working_dir}/.f7t_file_handling_job_{unique_id}.log",
@@ -111,6 +109,19 @@ async def _generate_presigned_url(client, action, params, method=None):
     return url
 
 
+def _format_directives(directives: List[str], account: str):
+
+    directives_str = "\n".join(directives)
+    if "{account}" in directives_str:
+        if account is None:
+            raise HTTPException(
+                status_code=400, detail="Account parameter is required on this system."
+            )
+        directives_str = directives_str.format(account=account)
+
+    return directives_str
+
+
 @router.post(
     "/upload",
     status_code=status.HTTP_201_CREATED,
@@ -146,7 +157,7 @@ async def post_upload(
         )
     except StopIteration as e:
         raise ValueError(
-            f"The system {system_name} has no filesystem dafined as default_work_dir"
+            f"The system {system_name} has no filesystem defined as default_work_dir"
         ) from e
 
     async with s3_client_private:
@@ -159,24 +170,59 @@ async def post_upload(
             )
         except s3_client_private.exceptions.BucketAlreadyOwnedByYou:
             pass
+
+        upload_id = (
+            await s3_client_private.create_multipart_upload(
+                Bucket=username, Key=object_name
+            )
+        )["UploadId"]
+
+        post_external_upload_urls = []
+        for part_number in range(
+            1,
+            ceil(upload_request.file_size / settings.storage.multipart.max_part_size)
+            + 1,
+        ):
+            post_external_upload_urls.append(
+                await _generate_presigned_url(
+                    s3_client_public,
+                    "upload_part",
+                    {
+                        "Bucket": username,
+                        "Key": object_name,
+                        "UploadId": upload_id,
+                        "PartNumber": part_number,
+                    },
+                )
+            )
+
+        complete_external_multipart_upload_url = await _generate_presigned_url(
+            s3_client_public,
+            "complete_multipart_upload",
+            {"Bucket": username, "Key": object_name, "UploadId": upload_id},
+            "POST",
+        )
+
         get_download_url = await _generate_presigned_url(
             s3_client_private, "get_object", {"Bucket": username, "Key": object_name}
         )
+
         head_download_url = await _generate_presigned_url(
             s3_client_private, "head_object", {"Bucket": username, "Key": object_name}
         )
 
         parameters = {
-            "sbatch_directives": "\n".join(system.datatransfer_jobs_directives),
+            "sbatch_directives": _format_directives(
+                system.datatransfer_jobs_directives, upload_request.account
+            ),
             "download_head_url": head_download_url,
             "download_url": get_download_url,
             "target_path": f"{upload_request.path}/{upload_request.file_name}",
+            "max_part_size": str(settings.storage.multipart.max_part_size),
         }
 
         job_script = _build_script("slurm_job_downloader.sh", parameters)
-        job = JobHelper(
-            f"{work_dir}/{username}", job_script, None, "IngressFileTransfer"
-        )
+        job = JobHelper(f"{work_dir}/{username}", job_script, "IngressFileTransfer")
 
         job_id = await scheduler_client.submit_job(
             job_description=SlurmJobDescription(**job.job_param),
@@ -184,13 +230,10 @@ async def post_upload(
             jwt_token=access_token,
         )
 
-    async with s3_client_public:
-        put_upload_url = await _generate_presigned_url(
-            s3_client_public, "put_object", {"Bucket": username, "Key": object_name}
-        )
-
     return {
-        "uploadUrl": put_upload_url,
+        "partsUploadUrls": post_external_upload_urls,
+        "completeUploadUrl": complete_external_multipart_upload_url,
+        "maxPartSize": settings.storage.multipart.max_part_size,
         "transferJob": TransferJob(
             job_id=job_id,
             system=system_name,
@@ -292,7 +335,9 @@ async def post_download(
         )
 
         parameters = {
-            "sbatch_directives": "\n".join(system.datatransfer_jobs_directives),
+            "sbatch_directives": _format_directives(
+                system.datatransfer_jobs_directives, download_request.account
+            ),
             "F7T_MAX_PART_SIZE": str(settings.storage.multipart.max_part_size),
             "F7T_MP_USE_SPLIT": (
                 "true" if settings.storage.multipart.use_split else "false"
@@ -311,7 +356,6 @@ async def post_download(
                 "slurm_job_uploader_multipart.sh",
                 parameters,
             ),
-            None,
             "OutgressFileTransfer",
         )
         get_download_url = None
@@ -371,13 +415,15 @@ async def move_mv(
         ) from e
 
     parameters = {
-        "sbatch_directives": "\n".join(system.datatransfer_jobs_directives),
+        "sbatch_directives": _format_directives(
+            system.datatransfer_jobs_directives, request.account
+        ),
         "source_path": request.path,
         "target_path": request.target_path,
     }
 
     joj_script = _build_script("slurm_job_move.sh", parameters)
-    job = JobHelper(f"{work_dir}/{username}", joj_script, None, "MoveFiles")
+    job = JobHelper(f"{work_dir}/{username}", joj_script, "MoveFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
@@ -419,7 +465,9 @@ async def post_cp(
     job_id = None
 
     parameters = {
-        "sbatch_directives": "\n".join(system.datatransfer_jobs_directives),
+        "sbatch_directives": _format_directives(
+            system.datatransfer_jobs_directives, request.account
+        ),
         "source_path": request.path,
         "target_path": request.target_path,
     }
@@ -437,7 +485,7 @@ async def post_cp(
 
     joj_script = _build_script("slurm_job_copy.sh", parameters)
 
-    job = JobHelper(f"{work_dir}/{username}", joj_script, None, "CopyFiles")
+    job = JobHelper(f"{work_dir}/{username}", joj_script, "CopyFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
@@ -468,6 +516,7 @@ async def delete_rm(
     path: Annotated[str, Query(description="The path to delete")],
     system_name: Annotated[str, Path(description="System where the jobs are running")],
     scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
+    account: Optional[str] = None,
     system: HPCCluster = Depends(
         ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
         use_cache=False,
@@ -490,11 +539,13 @@ async def delete_rm(
         ) from e
 
     parameters = {
-        "sbatch_directives": "\n".join(system.datatransfer_jobs_directives),
+        "sbatch_directives": _format_directives(
+            system.datatransfer_jobs_directives, account
+        ),
         "path": path,
     }
     joj_script = _build_script("slurm_job_delete.sh", parameters)
-    job = JobHelper(f"{work_dir}/{username}", joj_script, None, "DeleteFiles")
+    job = JobHelper(f"{work_dir}/{username}", joj_script, "DeleteFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),

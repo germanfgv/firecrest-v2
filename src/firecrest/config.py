@@ -1,8 +1,13 @@
 from enum import Enum
 import os
+import yaml
 from pathlib import Path
-from typing import Dict, Tuple, Type
-from pydantic import BaseModel, Field, SecretStr
+from typing import Any, Dict, Tuple, Type
+from pydantic import (
+    BaseModel,
+    Field,
+    field_validator,
+)
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -15,18 +20,7 @@ from functools import lru_cache
 from typing import List, Optional
 
 from lib.models.base_model import CamelModel
-from lib.models.config_model import Oidc
-
-
-class LoadFileSecretStr(SecretStr):
-
-    def __init__(self, secret_value: str) -> None:
-        if secret_value.startswith("secret_file:"):
-            secrets_path = Path(secret_value[12:]).expanduser()
-            if not secrets_path.exists() or not secrets_path.is_file:
-                raise FileNotFoundError(f"Secret file: {secrets_path} not found!")
-            secret_value = secrets_path.read_text("utf-8").strip()
-        super().__init__(secret_value)
+from lib.models.config_model import LoadFileSecretStr, Oidc, SSHUserKeys
 
 
 class MultipartUpload(BaseModel):
@@ -175,11 +169,6 @@ class SSHKeysService(CamelModel):
     max_connections: Optional[int] = 100
 
 
-class SSHStaticKeys(CamelModel):
-    private_key: LoadFileSecretStr
-    public_key: str
-
-
 class Auth(CamelModel):
     authentication: Oidc = None
     authorization: Optional[OpenFGA] = None
@@ -205,14 +194,38 @@ class Settings(BaseSettings):
     auth: Auth = None
     # Slurm
     clusters: List[HPCCluster] = []
+
     # SSH Service
-    ssh_credentials: SSHKeysService | SSHStaticKeys
+    ssh_credentials: SSHKeysService | Dict[str, SSHUserKeys]
     # storage
     storage: Storage = None
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", secrets_dir="/run/secrets/"
     )
+
+    @field_validator("clusters", mode="before")
+    @classmethod
+    def ensure_list(cls, value: Any) -> Any:
+        if isinstance(value, str) and value.startswith("path:"):
+            path = Path(value[5:]).expanduser()
+            if not path.exists():
+                raise FileNotFoundError(f"Clusters config path: {path} not found!")
+            if not path.is_dir:
+                raise FileNotFoundError(
+                    f"Clusters config path: {path} is not a folder!"
+                )
+            clusters = []
+            for dirpath, _dirs, files in os.walk(path):
+                for file in files:
+                    if file.endswith(".yaml"):
+                        with open(os.path.join(dirpath, file)) as stream:
+                            clusters.append(
+                                HPCCluster.model_validate(yaml.safe_load(stream))
+                            )
+            return clusters
+        else:
+            return value
 
     @classmethod
     def settings_customise_sources(
