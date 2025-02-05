@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from firecrest.config import ClusterNodesHealth, HPCCluster, SchedulerServiceHealth
 from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase

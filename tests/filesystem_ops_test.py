@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from importlib import resources as impresources
 from firecrest.filesystem.ops.models import File
 from tests import mocked_ssh_outputs

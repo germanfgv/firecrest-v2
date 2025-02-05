@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from enum import Enum
 import os
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
