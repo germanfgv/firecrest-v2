@@ -25,9 +25,13 @@ sleep 1
 echo "Slurmdbd ready, create cluster"
 sacctmgr --immediate create cluster cluster
 echo "Slurmdbd, create account 'fireuser' and add firesrv"
-sacctmgr --immediate create account name=test
-sacctmgr --immediate create user name=fireuser account=test
-sacctmgr --immediate create user name=firesrv account=test
+sacctmgr --immediate create account name=staff
+sacctmgr --immediate create account name=users
+sacctmgr --immediate create account name=service-accounts
+sacctmgr --immediate create user name=fireuser account=staff
+sacctmgr --immediate create user name=fireuser account=users
+sacctmgr --immediate create user name=firesrv account=staff
+sacctmgr --immediate create user name=firesrv account=service-accounts
 
 echo "Starting slurmctld"
 slurmctld  -D

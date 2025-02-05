@@ -31,15 +31,17 @@ ADD ./build/docker/slurm-cluster/supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /*.sh
 
 # Setup users
-RUN useradd -m -s /bin/bash fireuser    && echo 'fireuser:fireuser'       | chpasswd
-RUN useradd -m -s /bin/bash firesrv    && echo 'firesrv:sfiresrv'      | chpasswd
+RUN useradd -m -s /bin/bash --no-user-group --gid users  fireuser  && echo 'fireuser:fireuser'       | chpasswd
+RUN groupadd service-accounts
+RUN useradd -m -s /bin/bash --no-user-group --gid service-accounts firesrv    && echo 'firesrv:sfiresrv'      | chpasswd
 
-ADD --chown=fireuser:users ./build/environment/keys/ca-key.pub /home/fireuser/.ssh/authorized_keys
-ADD --chown=firesrv:users ./build/environment/keys/ca-key.pub /home/firesrv/.ssh/authorized_keys
+ADD --chown=fireuser:users ./build/environment/keys/fireuser.pub /home/fireuser/.ssh/authorized_keys
+ADD --chown=firesrv:users ./build/environment/keys/firesrv.pub /home/firesrv/.ssh/authorized_keys
 
 # Setup SSH keys
 RUN chmod 0755 /var/run/sshd
-ADD ./build/environment/keys/ca-key.pub  /etc/ssh/
+# use the fireuser.pub key also as a trusted ca (used for cscs keygen solution)
+ADD ./build/environment/keys/fireuser.pub  /etc/ssh/ca-key.pub
 RUN chmod -R 400 /etc/ssh/  && chown -R root:root /etc/ssh/
 RUN /usr/bin/ssh-keygen -A
 
