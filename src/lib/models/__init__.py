@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # models
 from lib.models.base_model import CamelModel
 from lib.models.health_model import HealthStatus
