@@ -12,7 +12,7 @@ To start a local Firecrest environment in VS Code right click the selected envir
 
 Alternatively, use the command line:
 ```console
-docker compose -f docker-compose-minimal-env.yml up
+docker-compose -f docker-compose-minimal-env.yml up
 ```
 ## Local Environments
 
@@ -126,9 +126,9 @@ To ssh into the Slurm Dummy Cluster you can use the fireuser
 
 ```console
 
-ssh-keygen -p -s build/environment/keys/ca-key -n fireuser -I fireuser -f user-key-cert.pub build/environment/keys/user-key.pub
-chmod 0400 build/environment/keys/user-key-cert.pub       
-ssh -i build/environment/keys/user-key-cert.pub fireuser@localhost -p 2222
+ssh-keygen -p -s build/environment/keys/fireuser-key -n fireuser -I fireuser -f user-key-cert.pub build/environment/keys/fireuser.pub
+chmod 0400 build/environment/keys/fireuser.pub       
+ssh -i build/environment/keys/fireuser.pub fireuser@localhost -p 2222
 
 ```
 

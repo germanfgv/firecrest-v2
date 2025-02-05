@@ -14,3 +14,4 @@ aiobotocore
 apscheduler>=4.0.0a4
 requests-file
 aiofiles
+python-json-logger

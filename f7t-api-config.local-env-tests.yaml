@@ -24,6 +24,10 @@ clusters:
   probing:
     interval: 60
     timeout: 5
+  datatransfer_jobs_directives:
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+    - "#SBATCH --account={account}"
   file_systems:
     - path: '/home'
       data_type: 'users'

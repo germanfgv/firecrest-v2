@@ -1,4 +1,3 @@
-
 networks:
   firecrest-internal-v2:
     driver: bridge
@@ -12,8 +11,11 @@ secrets:
     file: ./build/secrets/client_secret
   s3_secret_access_key:
     file: ./build/secrets/s3_secret_access_key
-  ssh_private_key:
-    file: ./build/environment/keys/ca-key
+  ssh_private_key_fireuser:
+    file: ./build/environment/keys/fireuser-key
+  ssh_private_key_firesrv:
+    file: ./build/environment/keys/firesrv-key
+
   
 services:
   firecrest:
@@ -21,7 +23,8 @@ services:
     secrets:
       - service_account_client_secret
       - s3_secret_access_key
-      - ssh_private_key
+      - ssh_private_key_fireuser
+      - ssh_private_key_firesrv
     environment:
       ENVIRONMENT: development
       APP_VERSION: local

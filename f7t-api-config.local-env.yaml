@@ -9,8 +9,12 @@ auth:
     publicCerts:
         - "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs"
 ssh_credentials:
-  private_key: "secret_file:/run/secrets/ssh_private_key"
-  public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJOZWkEPhVLsQ7pHI09A7XU8YXYUG0x0OMDUjC6p7lSG ca@cluster"
+  fireuser:
+    private_key: "secret_file:/run/secrets/ssh_private_key_fireuser"
+    public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJOZWkEPhVLsQ7pHI09A7XU8YXYUG0x0OMDUjC6p7lSG fireuser@cluster"
+  firesrv:
+    private_key: "secret_file:/run/secrets/ssh_private_key_firesrv"
+    public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDEDvgDXtHRf88VaThzNz2MtPk7Ux81ZJ/isUgfW6D5C firesrv@cluster"
 clusters:
 - name: "cluster-slurm-api"
   ssh:
@@ -65,6 +69,10 @@ clusters:
   probing:
     interval: 120
     timeout: 5
+  datatransfer_jobs_directives:
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+    - "#SBATCH --account={account}"
   file_systems:
     - path: '/home'
       data_type: 'users'
