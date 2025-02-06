@@ -198,7 +198,7 @@ class Settings(BaseSettings):
     # SSH Service
     ssh_credentials: SSHKeysService | Dict[str, SSHUserKeys]
     # storage
-    storage: Storage = None
+    storage: Optional[Storage] = None
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", secrets_dir="/run/secrets/"
