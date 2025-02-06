@@ -368,7 +368,7 @@ async def test_extract(
 
     request_body = {
         "sourcePath": "/home/test1/file1.tar",
-        "targetPath": "/home/test1/file1.txt",
+        "targetPath": "/home/test1",
         "account": "fireuser",
     }
 
