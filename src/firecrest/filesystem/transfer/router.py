@@ -6,6 +6,7 @@
 from math import ceil
 import uuid
 import re
+import os
 from fastapi import Depends, Path, Query, status, HTTPException
 from typing import Annotated, Any, List, Optional
 from importlib import resources as imp_resources
@@ -50,6 +51,10 @@ from firecrest.filesystem.transfer.models import (
     DownloadFileResponse,
     TransferJob,
     TransferJobLogs,
+    CompressRequest,
+    CompressResponse,
+    ExtractRequest,
+    ExtractResponse
 )
 from lib.ssh_clients.ssh_client import SSHClientPool
 
@@ -551,6 +556,135 @@ async def delete_rm(
     }
     joj_script = _build_script("slurm_job_delete.sh", parameters)
     job = JobHelper(f"{work_dir}/{username}", joj_script, "DeleteFiles")
+
+    job_id = await scheduler_client.submit_job(
+        job_description=SlurmJobDescription(**job.job_param),
+        username=username,
+        jwt_token=access_token,
+    )
+
+    return {
+        "transferJob": TransferJob(
+            job_id=job_id,
+            system=system_name,
+            working_directory=job.working_dir,
+            logs=TransferJobLogs(
+                output_log=job.job_param["standard_output"],
+                error_log=job.job_param["standard_error"],
+            ),
+        ),
+    }
+
+
+@router.post(
+    "/compress",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CompressResponse,
+    response_description="Compress a file or directory",
+)
+async def compress(
+    request: CompressRequest,
+    system_name: Annotated[str, Path(description="System where the jobs are running")],
+    scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        use_cache=False,
+    ),
+) -> Any:
+    username = ApiAuthHelper.get_auth().username
+    access_token = ApiAuthHelper.get_access_token()
+    job_id = None
+
+    try:
+        work_dir = next(
+            filesystem.path
+            for filesystem in system.file_systems
+            if filesystem.default_work_dir
+        )
+    except StopIteration as e:
+        raise ValueError(
+            f"The system {system_name} has no filesystem dafined as default_work_dir"
+        ) from e
+
+    source_dir = os.path.dirname(request.path)
+    source_file = os.path.basename(request.path)
+
+    options = ""
+    if request.dereference:
+        options += "--dereference"
+
+    parameters = {
+        "sbatch_directives": _format_directives(
+            system.datatransfer_jobs_directives, request.account
+        ),
+        "source_dir": source_dir,
+        "source_file": source_file,
+        "target_path": request.target_path,
+        "options": options,
+    }
+
+    joj_script = _build_script("slurm_job_compress.sh", parameters)
+    job = JobHelper(f"{work_dir}/{username}", joj_script, "CompressFiles")
+
+    job_id = await scheduler_client.submit_job(
+        job_description=SlurmJobDescription(**job.job_param),
+        username=username,
+        jwt_token=access_token,
+    )
+
+    return {
+        "transferJob": TransferJob(
+            job_id=job_id,
+            system=system_name,
+            working_directory=job.working_dir,
+            logs=TransferJobLogs(
+                output_log=job.job_param["standard_output"],
+                error_log=job.job_param["standard_error"],
+            ),
+        ),
+    }
+
+
+@router.post(
+    "/extract",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ExtractResponse,
+    response_description="Extract files from a compressed file",
+)
+async def extract(
+    request: ExtractRequest,
+    system_name: Annotated[str, Path(description="System where the jobs are running")],
+    scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        use_cache=False,
+    ),
+) -> Any:
+    username = ApiAuthHelper.get_auth().username
+    access_token = ApiAuthHelper.get_access_token()
+    job_id = None
+
+    try:
+        work_dir = next(
+            filesystem.path
+            for filesystem in system.file_systems
+            if filesystem.default_work_dir
+        )
+    except StopIteration as e:
+        raise ValueError(
+            f"The system {system_name} has no filesystem dafined as default_work_dir"
+        ) from e
+
+    parameters = {
+        "sbatch_directives": _format_directives(
+            system.datatransfer_jobs_directives, request.account
+        ),
+        "source_path": request.path,
+        "target_path": request.target_path,
+    }
+
+    joj_script = _build_script("slurm_job_extract.sh", parameters)
+    job = JobHelper(f"{work_dir}/{username}", joj_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),

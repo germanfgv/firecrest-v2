@@ -68,3 +68,22 @@ class MoveRequest(FilesystemRequestBase):
 
 class MoveResponse(CamelModel):
     transfer_job: TransferJob
+
+
+class CompressRequest(FilesystemRequestBase):
+    target_path: str
+    account: Optional[str] = None
+    dereference: Optional[bool] = False
+
+
+class CompressResponse(CamelModel):
+    transfer_job: TransferJob
+
+
+class ExtractRequest(FilesystemRequestBase):
+    target_path: str
+    account: Optional[str] = None
+
+
+class ExtractResponse(CamelModel):
+    transfer_job: TransferJob
