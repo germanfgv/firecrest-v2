@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Tuple, Type
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     field_validator,
 )
@@ -82,6 +83,8 @@ class Scheduler(CamelModel):
     api_version: Optional[str] = None
     timeout: Optional[int] = 10
 
+    model_config = ConfigDict(use_enum_values=True)
+
 
 class ServiceAccount(CamelModel):
     client_id: str
@@ -106,6 +109,8 @@ class BaseServiceHealth(CamelModel):
     healthy: Optional[bool] = False
     message: Optional[str] = None
 
+    model_config = ConfigDict(use_enum_values=True)
+
 
 class SchedulerServiceHealth(BaseServiceHealth):
     nodes: Optional[ClusterNodesHealth] = None
@@ -128,6 +133,8 @@ class FileSystem(CamelModel):
     path: str
     data_type: FileSystemDataType
     default_work_dir: Optional[bool] = False
+
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class SSHTimeouts(CamelModel):
@@ -201,7 +208,10 @@ class Settings(BaseSettings):
     storage: Optional[Storage] = None
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", secrets_dir="/run/secrets/"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        secrets_dir="/run/secrets/",
+        use_enum_values=True,
     )
 
     @field_validator("clusters", mode="before")
