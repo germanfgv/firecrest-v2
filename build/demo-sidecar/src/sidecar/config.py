@@ -1,11 +1,11 @@
 import sys
-from typing import Dict
+from typing import Dict, List
 from humps import camelize
 from pydantic import BaseModel, ConfigDict
 
 sys.path.append("../../../src")
 sys.path.append("../")
-from firecrest.config import Settings
+from firecrest.config import Settings, HPCCluster, ServiceAccount
 
 
 class CamelModel(BaseModel):
@@ -22,6 +22,16 @@ class UnsafeSSHUserKeys(CamelModel):
     public_key: str
 
 
+class UnsafeServiceAccount(ServiceAccount):
+    client_id: str
+    secret: str
+
+
+class UnsafeHPCCluster(HPCCluster):
+    service_account: UnsafeServiceAccount
+
+
 class UnsafeSettings(Settings):
 
     ssh_credentials: Dict[str, UnsafeSSHUserKeys]
+    clusters: List[UnsafeHPCCluster] = []
