@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 from fastapi import FastAPI, Query
 
 
@@ -11,7 +12,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import yaml
 
-from booter.config import UnsafeSettings
+from sidecar.config import UnsafeSettings
 
 keys = {}
 
@@ -97,7 +98,9 @@ def boot():
     settings = UnsafeSettings()
     dump: dict[str, Any] = settings.model_dump()
 
-    with open("settings.yaml", "w") as yaml_file:
+    settings_file = os.getenv("YAML_CONFIG_FILE", None)
+
+    with open(settings_file, "w") as yaml_file:
         yaml.dump(dump, yaml_file)
     return {"message": "Settings saved successfully."}
 

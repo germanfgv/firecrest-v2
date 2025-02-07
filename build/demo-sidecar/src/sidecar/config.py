@@ -4,6 +4,7 @@ from humps import camelize
 from pydantic import BaseModel, ConfigDict
 
 sys.path.append("../../../src")
+sys.path.append("../")
 from firecrest.config import Settings
 
 
