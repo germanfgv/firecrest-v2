@@ -302,9 +302,10 @@ class S3ClientDependency:
     def __init__(
         self, connection: S3ClientConnectionType = S3ClientConnectionType.public
     ):
-        self.url = settings.storage.public_url
-        if connection == S3ClientConnectionType.private:
-            self.url = settings.storage.private_url
+        if settings.storage:
+            self.url = settings.storage.public_url
+            if connection == S3ClientConnectionType.private:
+                self.url = settings.storage.private_url
 
     async def __call__(self):
         async with get_session().create_client(
