@@ -11,7 +11,7 @@ from jose.utils import base64url_encode
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import yaml
-
+from xmlrpc.client import ServerProxy
 from sidecar.config import UnsafeSettings
 
 keys = {}
@@ -92,16 +92,28 @@ def get_token(
     return {"access_token": token, "token_type": "bearer", "decoded": decoded_token}
 
 
+@app.get("/certs")
+def download_certificate():
+    return {"keys": [get_jwk()]}
+
+
 @app.get("/boot")
 def boot():
 
     settings = UnsafeSettings()
+
+    # TODO: inject demo's user settings
+
     dump: dict[str, Any] = settings.model_dump()
-
     settings_file = os.getenv("YAML_CONFIG_FILE", None)
-
     with open(settings_file, "w") as yaml_file:
         yaml.dump(dump, yaml_file)
+
+    # TODO: strat supervisord proc: https://gist.github.com/jalp/10016188
+
+    server = ServerProxy("http://localhost:9001/RPC2")
+    server.supervisor.startProcess("firecrest")
+
     return {"message": "Settings saved successfully."}
 
 
@@ -109,9 +121,3 @@ def boot():
 @app.get("/static-html")
 def serve_static_html():
     return {"message": "Static HTML file can be accessed at /static/<filename>.html"}
-
-
-@app.get("/certs")
-def download_certificate():
-
-    return {"keys": [get_jwk()]}
