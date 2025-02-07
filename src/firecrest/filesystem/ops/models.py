@@ -135,6 +135,7 @@ class PostMkdirResponse(CamelModel):
 
 class PostCompressRequest(FilesystemRequestBase):
     target_path: str
+    pattern: Optional[str] = None
     dereference: Optional[bool] = False
 
 

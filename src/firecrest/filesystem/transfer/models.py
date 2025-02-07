@@ -73,6 +73,7 @@ class MoveResponse(CamelModel):
 class CompressRequest(FilesystemRequestBase):
     target_path: str
     account: Optional[str] = None
+    pattern: Optional[str] = None
     dereference: Optional[bool] = False
 
 

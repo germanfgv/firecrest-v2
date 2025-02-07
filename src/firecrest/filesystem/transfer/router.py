@@ -432,8 +432,8 @@ async def move_mv(
         "target_path": request.target_path,
     }
 
-    joj_script = _build_script("slurm_job_move.sh", parameters)
-    job = JobHelper(f"{work_dir}/{username}", joj_script, "MoveFiles")
+    job_script = _build_script("slurm_job_move.sh", parameters)
+    job = JobHelper(f"{work_dir}/{username}", job_script, "MoveFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
@@ -493,9 +493,9 @@ async def post_cp(
             f"The system {system_name} has no filesystem dafined as default_work_dir"
         ) from e
 
-    joj_script = _build_script("slurm_job_copy.sh", parameters)
+    job_script = _build_script("slurm_job_copy.sh", parameters)
 
-    job = JobHelper(f"{work_dir}/{username}", joj_script, "CopyFiles")
+    job = JobHelper(f"{work_dir}/{username}", job_script, "CopyFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
@@ -554,8 +554,8 @@ async def delete_rm(
         ),
         "path": path,
     }
-    joj_script = _build_script("slurm_job_delete.sh", parameters)
-    job = JobHelper(f"{work_dir}/{username}", joj_script, "DeleteFiles")
+    job_script = _build_script("slurm_job_delete.sh", parameters)
+    job = JobHelper(f"{work_dir}/{username}", job_script, "DeleteFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
@@ -620,11 +620,15 @@ async def compress(
         "source_dir": source_dir,
         "source_file": source_file,
         "target_path": request.target_path,
+        "pattern": request.pattern,
         "options": options,
     }
+    if not request.pattern:
+        job_script = _build_script("slurm_job_compress.sh", parameters)
+    else:
+        job_script = _build_script("slurm_job_compress_with_pattern.sh", parameters)
 
-    joj_script = _build_script("slurm_job_compress.sh", parameters)
-    job = JobHelper(f"{work_dir}/{username}", joj_script, "CompressFiles")
+    job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
@@ -683,8 +687,8 @@ async def extract(
         "target_path": request.target_path,
     }
 
-    joj_script = _build_script("slurm_job_extract.sh", parameters)
-    job = JobHelper(f"{work_dir}/{username}", joj_script, "CompressFiles")
+    job_script = _build_script("slurm_job_extract.sh", parameters)
+    job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
         job_description=SlurmJobDescription(**job.job_param),
