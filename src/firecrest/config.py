@@ -204,7 +204,6 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         secrets_dir="/app/secrets/",
-        use_enum_values=True,
     )
 
     @field_validator("clusters", mode="before")
