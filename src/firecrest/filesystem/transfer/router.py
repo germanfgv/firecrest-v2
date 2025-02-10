@@ -155,16 +155,11 @@ async def post_upload(
     job_id = None
     object_name = f"{str(uuid.uuid4())}/{upload_request.file_name}"
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     async with s3_client_private:
         try:
@@ -284,16 +279,11 @@ async def post_download(
     job_id = None
     object_name = f"{download_request.path.split('/')[-1]}_{str(uuid.uuid4())}"
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     stat = StatCommand(download_request.path, True)
     async with ssh_client.get_client(username, access_token) as client:
@@ -409,16 +399,11 @@ async def move_mv(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     parameters = {
         "sbatch_directives": _format_directives(
@@ -478,16 +463,11 @@ async def post_cp(
         "target_path": request.target_path,
     }
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     job_script = _build_script("slurm_job_copy.sh", parameters)
 
@@ -533,16 +513,11 @@ async def delete_rm(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     parameters = {
         "sbatch_directives": _format_directives(
@@ -591,16 +566,11 @@ async def compress(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     source_dir = os.path.dirname(request.path)
     source_file = os.path.basename(request.path)
@@ -662,16 +632,11 @@ async def extract(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    try:
-        work_dir = next(
-            filesystem.path
-            for filesystem in system.file_systems
-            if filesystem.default_work_dir
-        )
-    except StopIteration as e:
+    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
-        ) from e
+        )
 
     parameters = {
         "sbatch_directives": _format_directives(
