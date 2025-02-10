@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
 import os
-from fastapi import FastAPI, Query
+from fastapi import Depends, FastAPI, Form
 
 
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import jwt
 from datetime import datetime, timedelta
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 from jose import jwk, jwt as jwt_jpose
 from jose.utils import base64url_encode
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -64,11 +65,22 @@ def get_jwk():
     return jwk_data
 
 
+security = HTTPBasic(auto_error=False)
+
+
 # Endpoint 1: Get token
-@app.get("/token")
+@app.post("/token")
 def get_token(
-    username: Annotated[str, Query(description="The username to be added in the JWT")]
+    credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
+    grant_type: Optional[str] = Form(default=None),
+    client_id: Optional[str] = Form(default=None),
+    client_secret: Optional[str] = Form(default=None),
 ):
+    username: str = None
+    if client_id:
+        username = client_id
+    if credentials and credentials.username:
+        username = credentials.username
 
     # Generate JWT token
     expiration = datetime.utcnow() + timedelta(days=360)
