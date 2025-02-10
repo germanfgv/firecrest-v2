@@ -23,7 +23,7 @@ class TarCommand(BaseCommand, BaseCommandErrorHandling):
         self,
         source_path: str,
         target_path: str,
-        pattern: str = "",
+        pattern: str = None,
         dereference: bool = False,
         operation: Operation = Operation.compress,
     ) -> None:
