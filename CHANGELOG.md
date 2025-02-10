@@ -17,12 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+
+## [2.1.4]
+
+### Fixed
+
+Helm Chart now allows to dynamically set volumes and annotations.
+
+
 ## [2.1.3]
 
 ### Added
 
 Initial release.
-
-### Changed
-
-### Fixed
