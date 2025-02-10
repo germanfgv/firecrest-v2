@@ -52,10 +52,10 @@ class TarCommand(BaseCommand, BaseCommandErrorHandling):
         source_dir = os.path.dirname(self.source_path)
         source_file = os.path.basename(self.source_path)
 
-        if not self.pattern:
-            return f"timeout {UTILITIES_TIMEOUT} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
+        if self.pattern:
+            return f"timeout {UTILITIES_TIMEOUT} bash -c \"cd {source_dir}; timeout {UTILITIES_TIMEOUT} find . -type f -regex '{self.pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
 
-        return f"timeout {UTILITIES_TIMEOUT} bash -c \"cd {source_dir}; timeout {UTILITIES_TIMEOUT} find . -type f -regex '{self.pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
+        return f"timeout {UTILITIES_TIMEOUT} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
 
 
     def get_extract_command(self) -> str:

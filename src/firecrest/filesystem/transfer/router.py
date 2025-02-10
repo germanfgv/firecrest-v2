@@ -421,7 +421,7 @@ async def move_mv(
         )
     except StopIteration as e:
         raise ValueError(
-            f"The system {system_name} has no filesystem dafined as default_work_dir"
+            f"The system {system_name} has no filesystem defined as default_work_dir"
         ) from e
 
     parameters = {
@@ -490,7 +490,7 @@ async def post_cp(
         )
     except StopIteration as e:
         raise ValueError(
-            f"The system {system_name} has no filesystem dafined as default_work_dir"
+            f"The system {system_name} has no filesystem defined as default_work_dir"
         ) from e
 
     job_script = _build_script("slurm_job_copy.sh", parameters)
@@ -545,7 +545,7 @@ async def delete_rm(
         )
     except StopIteration as e:
         raise ValueError(
-            f"The system {system_name} has no filesystem dafined as default_work_dir"
+            f"The system {system_name} has no filesystem defined as default_work_dir"
         ) from e
 
     parameters = {
@@ -603,7 +603,7 @@ async def compress(
         )
     except StopIteration as e:
         raise ValueError(
-            f"The system {system_name} has no filesystem dafined as default_work_dir"
+            f"The system {system_name} has no filesystem defined as default_work_dir"
         ) from e
 
     source_dir = os.path.dirname(request.path)
@@ -623,10 +623,10 @@ async def compress(
         "pattern": request.pattern,
         "options": options,
     }
-    if not request.pattern:
-        job_script = _build_script("slurm_job_compress.sh", parameters)
-    else:
+    if request.pattern:
         job_script = _build_script("slurm_job_compress_with_pattern.sh", parameters)
+    else:
+        job_script = _build_script("slurm_job_compress.sh", parameters)
 
     job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
@@ -676,7 +676,7 @@ async def extract(
         )
     except StopIteration as e:
         raise ValueError(
-            f"The system {system_name} has no filesystem dafined as default_work_dir"
+            f"The system {system_name} has no filesystem defined as default_work_dir"
         ) from e
 
     parameters = {
