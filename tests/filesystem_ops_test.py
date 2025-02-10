@@ -456,7 +456,7 @@ async def test_tar_compress_with_pattern_command(client, ssh_client, mocked_ssh_
             json={
                 "source_path": "/home/files/",
                 "target_path": "/home/compressed.tar.gz",
-                "pattern": "./[ab].*.txt"
+                "match_pattern": "./[ab].*\\.txt"
             },
         )
         assert response.status_code == 204

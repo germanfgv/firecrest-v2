@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `/filesystem/{system_name}/transfer/compress` and `/filesystem/{system_name}/transfer/extract`
-  - `compress` operations (on `transfer` and `ops` endpoints) accept `pattern` parameter to compress files using `regex` syntax.
+  - `compress` operations (on `transfer` and `ops` endpoints) accept `match_pattern` parameter to compress files using `regex` syntax.
 
 ### Changed
 

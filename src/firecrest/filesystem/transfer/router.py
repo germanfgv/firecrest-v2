@@ -155,7 +155,7 @@ async def post_upload(
     job_id = None
     object_name = f"{str(uuid.uuid4())}/{upload_request.file_name}"
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -279,7 +279,7 @@ async def post_download(
     job_id = None
     object_name = f"{download_request.path.split('/')[-1]}_{str(uuid.uuid4())}"
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -399,7 +399,7 @@ async def move_mv(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -463,7 +463,7 @@ async def post_cp(
         "target_path": request.target_path,
     }
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -513,7 +513,7 @@ async def delete_rm(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -566,7 +566,7 @@ async def compress(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -586,7 +586,7 @@ async def compress(
         "source_dir": source_dir,
         "source_file": source_file,
         "target_path": request.target_path,
-        "pattern": request.pattern,
+        "match_pattern": request.match_pattern,
         "options": options,
     }
 
@@ -632,7 +632,7 @@ async def extract(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"

@@ -9,7 +9,7 @@
 
 echo $(date -u) "Compress Files Job (id:${SLURM_JOB_ID})"
 
-{% if pattern %}
+{% if match_pattern %}
 
 status=$(cd {{ source_dir }})
 if [[ "$?" == '0' ]]
@@ -20,7 +20,7 @@ else
     exit $? 
 fi
 
-status=$(find . -type f -regex '{{ pattern }}' -print0 | tar {{ options }} -czvf '{{ target_path }}' --null --files-from - )
+status=$(find . -type f -regex '{{ match_pattern }}' -print0 | tar {{ options }} -czvf '{{ target_path }}' --null --files-from - )
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully compressed."

@@ -23,14 +23,14 @@ class TarCommand(BaseCommand, BaseCommandErrorHandling):
         self,
         source_path: str,
         target_path: str,
-        pattern: str = None,
+        match_pattern: str = None,
         dereference: bool = False,
         operation: Operation = Operation.compress,
     ) -> None:
         super().__init__()
         self.target_path = target_path
         self.source_path = source_path
-        self.pattern = pattern
+        self.match_pattern = match_pattern
         self.dereference = dereference
         self.operation = operation
 
@@ -52,8 +52,8 @@ class TarCommand(BaseCommand, BaseCommandErrorHandling):
         source_dir = os.path.dirname(self.source_path)
         source_file = os.path.basename(self.source_path)
 
-        if self.pattern:
-            return f"timeout {UTILITIES_TIMEOUT} bash -c \"cd {source_dir}; timeout {UTILITIES_TIMEOUT} find . -type f -regex '{self.pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
+        if self.match_pattern:
+            return f"timeout {UTILITIES_TIMEOUT} bash -c \"cd {source_dir}; timeout {UTILITIES_TIMEOUT} find . -type f -regex '{self.match_pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
 
         return f"timeout {UTILITIES_TIMEOUT} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
 
