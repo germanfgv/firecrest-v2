@@ -92,10 +92,10 @@ class JobHelper:
 
 def _build_script(filename: str, parameters):
 
-    environment = Environment(loader=FileSystemLoader(imp_resources.files(scripts)))
-    template = environment.get_template(filename)
+    script_environment = Environment(loader=FileSystemLoader(imp_resources.files(scripts)))
+    script_template = script_environment.get_template(filename)
 
-    script_code = template.render(parameters)
+    script_code = script_template.render(parameters)
 
     return script_code
 
@@ -353,8 +353,6 @@ async def post_download(
             "F7T_MP_INPUT_FILE": download_request.path,
             "F7T_MP_COMPLETE_URL": complete_multipart_url,
         }
-
-        print(parameters)
 
         job = JobHelper(
             f"{work_dir}/{username}",
@@ -619,10 +617,8 @@ async def compress(
         "pattern": request.pattern,
         "options": options,
     }
-    if request.pattern:
-        job_script = _build_script("slurm_job_compress_with_pattern.sh", parameters)
-    else:
-        job_script = _build_script("slurm_job_compress.sh", parameters)
+
+    job_script = _build_script("slurm_job_compress.sh", parameters)
 
     job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
