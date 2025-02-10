@@ -206,7 +206,9 @@ class Settings(BaseSettings):
     storage: Storage = None
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", secrets_dir="/run/secrets/"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        secrets_dir="/app/secrets/",
     )
 
     @field_validator("clusters", mode="before")
