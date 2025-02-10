@@ -91,7 +91,10 @@ class JobHelper:
 
 def _build_script(filename: str, parameters):
 
-    script_environment = Environment(loader=FileSystemLoader(imp_resources.files(scripts)))
+    script_environment = Environment(
+        loader=FileSystemLoader(imp_resources.files(scripts)),
+        autoescape=True
+        )
     script_template = script_environment.get_template(filename)
 
     script_code = script_template.render(parameters)
