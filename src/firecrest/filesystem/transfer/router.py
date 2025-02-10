@@ -10,6 +10,7 @@ import os
 from fastapi import Depends, Path, Query, status, HTTPException
 from typing import Annotated, Any, List, Optional
 from importlib import resources as imp_resources
+from jinja2 import Environment, FileSystemLoader
 
 
 # plugins
@@ -90,20 +91,13 @@ class JobHelper:
 
 
 def _build_script(filename: str, parameters):
-    script_file = imp_resources.files(scripts) / filename
-    with script_file.open("r") as file:
-        script_code = file.read()
 
-        # Replace {{tags}} in script code
-        script_code = re.sub(
-            r"\{\{(\s*\w+\s*)\}\}",
-            lambda x: parameters.get(x.group(1).strip()),
-            script_code,
-        )
+    environment = Environment(loader=FileSystemLoader(imp_resources.files(scripts)))
+    template = environment.get_template(filename)
 
-        # Remove comments
-        script_code = re.sub(r"\n\s*#[^!|^SBATCH]\s*.*", "", script_code)
-        return script_code
+    script_code = template.render(parameters)
+
+    return script_code
 
 
 async def _generate_presigned_url(client, action, params, method=None):
@@ -359,6 +353,8 @@ async def post_download(
             "F7T_MP_INPUT_FILE": download_request.path,
             "F7T_MP_COMPLETE_URL": complete_multipart_url,
         }
+
+        print(parameters)
 
         job = JobHelper(
             f"{work_dir}/{username}",

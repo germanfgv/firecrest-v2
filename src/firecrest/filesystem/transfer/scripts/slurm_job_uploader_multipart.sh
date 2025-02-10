@@ -188,7 +188,7 @@ fi
 
 # Define padding for part files naming
 tmp=$(printf "%d" "$num_parts")
-[ "$num_parts" -lt 10 ] && padding="2" || padding=${#tmp}
+[ "$num_parts" -lt 10 ] && padding="2" || padding=$(expr length $tmp)
 
 echo "[INFO] Creating temporary folder:$tmp_directory"
 
