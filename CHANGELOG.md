@@ -17,7 +17,3 @@ Helm Chart now allows to dynamically set volumes and annotations.
 ### Added
 
 Initial release.
-
-### Changed
-
-### Fixed
