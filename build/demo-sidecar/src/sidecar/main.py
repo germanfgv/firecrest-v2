@@ -7,13 +7,17 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import jwt
 from datetime import datetime, timedelta
 from typing import Annotated, Any, Optional
-from jose import jwk, jwt as jwt_jpose
 from jose.utils import base64url_encode
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import yaml
 from xmlrpc.client import ServerProxy
-from sidecar.config import UnsafeSettings
+from sidecar.config import (
+    UnsafeSSHClientPool,
+    UnsafeSSHUserKeys,
+    UnsafeServiceAccount,
+    UnsafeSettings,
+)
 
 keys = {}
 
@@ -97,11 +101,7 @@ def get_token(
         payload, keys["private_key_pem"], algorithm="RS256", headers=headers
     )
 
-    key = jwk.construct(get_jwk())
-    options = {"verify_signature": True, "verify_aud": False, "verify_exp": True}
-    decoded_token = jwt_jpose.decode(token=token, key=key, options=options)
-
-    return {"access_token": token, "token_type": "bearer", "decoded": decoded_token}
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @app.get("/certs")
@@ -109,8 +109,42 @@ def download_certificate():
     return {"keys": [get_jwk()]}
 
 
+@app.post("/boot")
+def post_boot(
+    username: Optional[str] = Form(default=None),
+    private_key: Optional[str] = Form(default=None),
+    public_key: Optional[str] = Form(default=None),
+    ssh_hostname: Optional[str] = Form(default=None),
+    ssh_port: Optional[str] = Form(default=None),
+):
+
+    settings = UnsafeSettings()
+
+    ssh_credential = UnsafeSSHUserKeys(
+        **{"private_key": private_key, "public_key": public_key}
+    )
+    settings.ssh_credentials[username] = ssh_credential
+
+    demo_cluster = settings.clusters[0]
+    ssh_client_pool = UnsafeSSHClientPool(**{"host": ssh_hostname, "port": ssh_port})
+    service_account = UnsafeServiceAccount(**{"client_id": username, "secret": ""})
+
+    demo_cluster.ssh = ssh_client_pool
+    demo_cluster.service_account = service_account
+
+    dump: dict[str, Any] = settings.model_dump()
+    settings_file = os.getenv("YAML_CONFIG_FILE", None)
+    with open(settings_file, "w") as yaml_file:
+        yaml.dump(dump, yaml_file)
+
+    server = ServerProxy("http://localhost:9001/RPC2")
+    server.supervisor.startProcess("firecrest")
+
+    return {"message": "Settings saved successfully."}
+
+
 @app.get("/boot")
-def boot():
+def get_boot():
 
     settings = UnsafeSettings()
 
@@ -120,8 +154,6 @@ def boot():
     settings_file = os.getenv("YAML_CONFIG_FILE", None)
     with open(settings_file, "w") as yaml_file:
         yaml.dump(dump, yaml_file)
-
-    # TODO: strat supervisord proc: https://gist.github.com/jalp/10016188
 
     server = ServerProxy("http://localhost:9001/RPC2")
     server.supervisor.startProcess("firecrest")
