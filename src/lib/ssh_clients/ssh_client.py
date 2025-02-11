@@ -7,7 +7,7 @@ import asyncio
 from time import time
 from typing import Any, Dict
 import asyncssh
-from asyncssh import ConnectionLost, SSHClientConnection
+from asyncssh import ChannelOpenError, ConnectionLost, SSHClientConnection
 from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
 
@@ -98,6 +98,8 @@ class SSHClient:
             ) from e
         except ConnectionLost as e:
             raise SSHConnectionError("Unable to establish SSH connection.") from e
+        except ChannelOpenError as e:
+            raise SSHConnectionError("Unable to open a new SSH channel.") from e
 
     def reset_idle(
         self,
