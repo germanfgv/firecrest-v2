@@ -14,7 +14,7 @@ class SSHStaticKeysProvider(SSHKeysProvider):
         if username in self.users_keys:
             return {
                 "private": self.users_keys[username].private_key.get_secret_value(),
-                "public": self.users_keys[username].public_key,
+                "public": self.users_keys[username].public_cert,
             }
         else:
             raise SSHCredentials(f"No SSH credentials found for user:{username}")

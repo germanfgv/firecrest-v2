@@ -11,10 +11,8 @@ auth:
 ssh_credentials:
   fireuser:
     private_key: "secret_file:/run/secrets/ssh_private_key_fireuser"
-    public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJOZWkEPhVLsQ7pHI09A7XU8YXYUG0x0OMDUjC6p7lSG fireuser@cluster"
   firesrv:
     private_key: "secret_file:/run/secrets/ssh_private_key_firesrv"
-    public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDEDvgDXtHRf88VaThzNz2MtPk7Ux81ZJ/isUgfW6D5C firesrv@cluster"
 clusters:
 - name: "cluster-slurm-api"
   ssh:
