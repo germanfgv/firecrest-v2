@@ -5,11 +5,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
-{{sbatch_directives}}
+{{ sbatch_directives }}
 
 echo $(date -u) "Delete Files Job (id:${SLURM_JOB_ID})"
 
-status=$(rm -R  -- '{{path}}')
+status=$(rm -R  -- '{{ path }}')
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully deleted."

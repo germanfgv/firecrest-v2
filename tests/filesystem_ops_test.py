@@ -447,6 +447,21 @@ async def test_tar_compress_command(client, ssh_client, mocked_ssh_tar_output):
         assert response.status_code == 204
 
 
+async def test_tar_compress_with_pattern_command(client, ssh_client, mocked_ssh_tar_output):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_tar_output)]):
+
+        response = client.post(
+            "/filesystem/cluster-slurm-ssh/ops/compress",
+            json={
+                "source_path": "/home/files/",
+                "target_path": "/home/compressed.tar.gz",
+                "match_pattern": "./[ab].*\\.txt"
+            },
+        )
+        assert response.status_code == 204
+
+
 async def test_tar_extract_command(client, ssh_client, mocked_ssh_tar_output):
 
     async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_tar_output)]):

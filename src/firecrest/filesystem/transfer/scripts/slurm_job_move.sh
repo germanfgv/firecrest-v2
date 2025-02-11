@@ -5,11 +5,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
-{{sbatch_directives}}
+{{ sbatch_directives }}
 
 echo $(date -u) "Move Files Job (id:${SLURM_JOB_ID})"
 
-status=$(mv  -- '{{source_path}}' '{{target_path}}')
+status=$(mv  -- '{{ source_path }}' '{{ target_path }}')
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully moved."
