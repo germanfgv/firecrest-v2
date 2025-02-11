@@ -219,6 +219,8 @@ class SSHClientDependency:
             client_pool = SSHClientPool(
                 host=system.ssh.host,
                 port=system.ssh.port,
+                proxy_host=system.ssh.proxy_host,
+                proxy_port=system.ssh.proxy_port,
                 key_provider=self.key_provider,
                 connect_timeout=system.ssh.timeout.connection,
                 login_timeout=system.ssh.timeout.login,

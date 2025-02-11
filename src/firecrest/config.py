@@ -148,6 +148,8 @@ class SSHTimeouts(CamelModel):
 class SSHClientPool(CamelModel):
     host: str
     port: int
+    proxy_host: Optional[str] = None
+    proxy_port: Optional[int] = None
     max_clients: Optional[int] = 100
     timeout: Optional[SSHTimeouts] = SSHTimeouts()
 

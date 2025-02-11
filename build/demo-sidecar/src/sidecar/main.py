@@ -113,20 +113,28 @@ def download_certificate():
 def post_boot(
     username: Optional[str] = Form(default=None),
     private_key: Optional[str] = Form(default=None),
-    public_key: Optional[str] = Form(default=None),
+    public_cert: Optional[str] = Form(default=None),
     ssh_hostname: Optional[str] = Form(default=None),
     ssh_port: Optional[str] = Form(default=None),
+    proxy_hostname: Optional[str] = Form(default=None),
 ):
 
     settings = UnsafeSettings()
 
     ssh_credential = UnsafeSSHUserKeys(
-        **{"private_key": private_key, "public_key": public_key}
+        **{"private_key": private_key, "public_cert": public_cert}
     )
     settings.ssh_credentials[username] = ssh_credential
 
     demo_cluster = settings.clusters[0]
-    ssh_client_pool = UnsafeSSHClientPool(**{"host": ssh_hostname, "port": ssh_port})
+    ssh_client_pool = UnsafeSSHClientPool(
+        **{
+            "host": ssh_hostname,
+            "port": ssh_port,
+            "proxy_host": proxy_hostname,
+            "proxy_port": ssh_port,
+        }
+    )
     service_account = UnsafeServiceAccount(**{"client_id": username, "secret": ""})
 
     demo_cluster.ssh = ssh_client_pool

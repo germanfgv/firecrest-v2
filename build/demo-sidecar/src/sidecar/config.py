@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List
+from typing import Dict, List, Optional
 from humps import camelize
 from pydantic import BaseModel, ConfigDict
 
@@ -23,7 +23,7 @@ class UnsafeSSHClientPool(SSHClientPool):
 
 class UnsafeSSHUserKeys(CamelModel):
     private_key: str
-    public_key: str
+    public_cert: Optional[str] = None
 
 
 class UnsafeServiceAccount(ServiceAccount):

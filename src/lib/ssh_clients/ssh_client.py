@@ -118,6 +118,8 @@ class SSHClientPool:
         self,
         host: str,
         port: int,
+        proxy_host: str = None,
+        proxy_port: int = None,
         key_provider: SSHKeysProvider = None,
         buffer_limit: int = 5 * 1024 * 1024,
         connect_timeout: int = 5,
@@ -131,6 +133,8 @@ class SSHClientPool:
         assert idle_timeout > execute_timeout
         self.host = host
         self.port = port
+        self.proxy_host = proxy_host
+        self.proxy_port = proxy_port
         self.buffer_limit = buffer_limit
         self.connect_timeout = connect_timeout
         self.login_timeout = login_timeout
@@ -164,7 +168,7 @@ class SSHClientPool:
 
         match self.key_provider:
             case SSHKeygenClient():
-                sshkey_private = asyncssh.import_private_key(keys["private"])
+                sshkey_private = asyncssh.import_private_key(["private"])
                 sshkey_cert_public = asyncssh.import_certificate(keys["public"])
                 options = asyncssh.SSHClientConnectionOptions(
                     username=username,
@@ -177,9 +181,13 @@ class SSHClientPool:
                 )
             case SSHStaticKeysProvider():
                 sshkey_private = asyncssh.import_private_key(keys["private"])
+                sshkey_cert_public = ()
+                if keys["public"]:
+                    sshkey_cert_public = asyncssh.import_certificate(keys["public"])
                 options = asyncssh.SSHClientConnectionOptions(
                     username=username,
                     client_keys=[sshkey_private],
+                    client_certs=[sshkey_cert_public],
                     known_hosts=None,
                     connect_timeout=self.connect_timeout,
                     login_timeout=self.login_timeout,
@@ -202,9 +210,16 @@ class SSHClientPool:
                             "SSH connection pool capacity exceeded"
                         )
 
+                    proxy = ()
+                    if self.proxy_host:
+                        proxy = await asyncssh.connect(
+                            host=self.proxy_host, port=self.proxy_port, options=options
+                        )
+
                     conn = await asyncssh.connect(
-                        host=self.host, port=self.port, options=options
+                        host=self.host, port=self.port, options=options, tunnel=proxy
                     )
+
                     client = SSHClient(
                         conn,
                         idle_timeout=self.idle_timeout,
