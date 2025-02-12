@@ -26,6 +26,34 @@
                     "remoteRoot": "/tests"
                 }
             ]
-        }
+        },
+        {
+            "name": "FirecrestAPI Playground [Docker]",
+            "type": "debugpy",
+            "request": "attach",
+            "preLaunchTask": "Firecrest_v2 playground booter",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+            {
+                "localRoot": "${workspaceFolder}/build/demo-sidecar/src",
+                "remoteRoot": "/app/sidecar"
+            },
+            {
+                "localRoot": "${workspaceFolder}/src/firecrest",
+                "remoteRoot": "/app/firecrest"
+            },
+            {
+                "localRoot": "${workspaceFolder}/src/lib",
+                "remoteRoot": "/app/lib"
+            },
+            {
+                "localRoot": "${workspaceFolder}/tests",
+                "remoteRoot": "/tests"
+            }
+        ]
+          }
     ]
 }
