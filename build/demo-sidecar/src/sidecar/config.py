@@ -37,6 +37,5 @@ class UnsafeHPCCluster(HPCCluster):
 
 
 class UnsafeSettings(Settings):
-
     ssh_credentials: Dict[str, UnsafeSSHUserKeys]
     clusters: List[UnsafeHPCCluster] = []
