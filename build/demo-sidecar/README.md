@@ -4,4 +4,4 @@
 docker run --name demo --restart=always  -p 8080:8080 -p 8000:5000 f7tdemo   
 
 
-http://localhost:8080/boot
+http://localhost:8080/play/
