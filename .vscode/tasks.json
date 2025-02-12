@@ -4,9 +4,9 @@
 		{
 			"label": "Set certificate permission",
 			"type": "shell",
-			"command": "chmod 0400 ${workspaceFolder}/build/environment/keys/ca-key && chmod 0400 ${workspaceFolder}/build/environment/keys/user-key",
+			"command": "chmod 0400 ${workspaceFolder}/build/environment/keys/firesrv-key && chmod 0400 ${workspaceFolder}/build/environment/keys/fireuser-key",
 			"windows": {
-				"command": "attrib +r ${workspaceFolder}/build/environment/keys/ca-key"
+				"command": "attrib +r ${workspaceFolder}/build/environment/keys/firesrv-key"
 			  },
 		},
 		{
