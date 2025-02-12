@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # Add src folder to python paths
 import json
 
@@ -7,6 +12,8 @@ from firecrest.filesystem.transfer.models import (
     DownloadFileResponse,
     MoveResponse,
     UploadFileResponse,
+    CompressResponse,
+    ExtractResponse
 )
 
 from importlib import resources as impresources
@@ -316,3 +323,104 @@ async def test_rm(
 
         assert delete.transfer_job.job_id == mocked_job_submit_response["job_id"]
         assert delete.transfer_job.system == slurm_cluster_with_api_config.name
+
+
+@pytest.mark.asyncio
+async def test_compress(
+    client,
+    slurm_cluster_with_api_config,
+    mocked_job_submit_response,
+):
+
+    request_body = {
+        "sourcePath": "/home/test1/file1.txt",
+        "targetPath": "/home/test1/file1.tar",
+        "account": "fireuser",
+        "dereference": False,
+    }
+
+    with aioresponses() as mocked:
+        mocked.post(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/submit",
+            status=200,
+            body=json.dumps(mocked_job_submit_response),
+        )
+
+        # Testing storage end-point
+        response = client.post(
+            f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/compress",
+            json=request_body,
+        )
+        assert response.status_code == 201
+        assert response.json() is not None
+        compress = CompressResponse(**response.json())
+
+        assert compress.transfer_job.job_id == mocked_job_submit_response["job_id"]
+        assert compress.transfer_job.system == slurm_cluster_with_api_config.name
+
+@pytest.mark.asyncio
+async def test_compress_with_pattern(
+    client,
+    slurm_cluster_with_api_config,
+    mocked_job_submit_response,
+):
+
+    request_body = {
+        "sourcePath": "/home/test1/file1.txt",
+        "targetPath": "/home/test1/file1.tar",
+        "account": "fireuser",
+        "dereference": False,
+        "match_pattern": "./[ab].*\\.txt"
+    }
+
+    with aioresponses() as mocked:
+        mocked.post(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/submit",
+            status=200,
+            body=json.dumps(mocked_job_submit_response),
+        )
+
+        # Testing storage end-point
+        response = client.post(
+            f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/compress",
+            json=request_body,
+        )
+        assert response.status_code == 201
+        assert response.json() is not None
+        compress = CompressResponse(**response.json())
+
+        assert compress.transfer_job.job_id == mocked_job_submit_response["job_id"]
+        assert compress.transfer_job.system == slurm_cluster_with_api_config.name
+
+
+@pytest.mark.asyncio
+async def test_extract(
+    client,
+    slurm_cluster_with_api_config,
+    mocked_job_submit_response,
+):
+
+    request_body = {
+        "sourcePath": "/home/test1/file1.tar",
+        "targetPath": "/home/test1",
+        "account": "fireuser",
+    }
+
+    with aioresponses() as mocked:
+        mocked.post(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/submit",
+            status=200,
+            body=json.dumps(mocked_job_submit_response),
+        )
+
+        # Testing storage end-point
+        response = client.post(
+            f"/filesystem/{slurm_cluster_with_api_config.name}/transfer/extract",
+            json=request_body,
+        )
+        assert response.status_code == 201
+        assert response.json() is not None
+        compress = ExtractResponse(**response.json())
+
+        assert compress.transfer_job.job_id == mocked_job_submit_response["job_id"]
+        assert compress.transfer_job.system == slurm_cluster_with_api_config.name

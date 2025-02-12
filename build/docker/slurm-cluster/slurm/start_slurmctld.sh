@@ -1,10 +1,4 @@
 #!/bin/bash
-##
-##  Copyright (c) 2019-2023, ETH Zurich. All rights reserved.
-##
-##  Please, refer to the LICENSE file in the root directory.
-##  SPDX-License-Identifier: BSD-3-Clause
-##
 while true; do
    sleep 1
    t=$(tail -n 2 /var/log/slurm/slurmdbd.log | grep started)

@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from typing import Any, Optional
 
 # models
@@ -62,4 +67,24 @@ class MoveRequest(FilesystemRequestBase):
 
 
 class MoveResponse(CamelModel):
+    transfer_job: TransferJob
+
+
+class CompressRequest(FilesystemRequestBase):
+    target_path: str
+    account: Optional[str] = None
+    match_pattern: Optional[str] = None
+    dereference: Optional[bool] = False
+
+
+class CompressResponse(CamelModel):
+    transfer_job: TransferJob
+
+
+class ExtractRequest(FilesystemRequestBase):
+    target_path: str
+    account: Optional[str] = None
+
+
+class ExtractResponse(CamelModel):
     transfer_job: TransferJob

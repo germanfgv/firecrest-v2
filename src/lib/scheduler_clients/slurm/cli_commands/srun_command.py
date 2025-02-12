@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # commands
 from lib.exceptions import SlurmError
 from lib.ssh_clients.ssh_client import BaseCommand

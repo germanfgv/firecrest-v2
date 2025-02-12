@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from importlib import resources as impresources
 from firecrest.filesystem.ops.models import File
 from tests import mocked_ssh_outputs
@@ -437,6 +442,21 @@ async def test_tar_compress_command(client, ssh_client, mocked_ssh_tar_output):
             json={
                 "source_path": "/home/files/",
                 "target_path": "/home/compressed.tar.gz",
+            },
+        )
+        assert response.status_code == 204
+
+
+async def test_tar_compress_with_pattern_command(client, ssh_client, mocked_ssh_tar_output):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_tar_output)]):
+
+        response = client.post(
+            "/filesystem/cluster-slurm-ssh/ops/compress",
+            json={
+                "source_path": "/home/files/",
+                "target_path": "/home/compressed.tar.gz",
+                "match_pattern": "./[ab].*\\.txt"
             },
         )
         assert response.status_code == 204

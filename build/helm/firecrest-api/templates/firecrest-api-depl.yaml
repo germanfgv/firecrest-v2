@@ -1,10 +1,12 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: firecrest-api-depl
   annotations:
-    reloader.stakater.com/search: "true"
+  {{- range $key, $value := .Values.metadata.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -15,9 +17,10 @@ spec:
       labels:
         app: firecrest-api
       annotations:
-        co.elastic.logs/enabled: "true"
-        co.elastic.logs/json.keys_under_root: "true"
-        co.elastic.logs/json.add_error_key: "true"
+      {{- range $key, $value := .Values.template.annotations }}
+        {{ $key }}: {{ $value | quote}}
+      {{- end }}
+
     spec:
       containers:
         - name: firecrest-api
@@ -26,40 +29,41 @@ spec:
             - name: ENVIRONMENT
               value: {{ .Values.global.environment }}
             - name: YAML_CONFIG_FILE
-              value: "/app/config/firecrest-config.yaml"
+              value: "/app/configs/firecrest-config.yaml"
             - name: APP_VERSION
               value: {{ .Chart.AppVersion }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel }}
           volumeMounts:
-          - name: firecrest-config-volume
-            mountPath: /app/config/
+          - name: firecrest-configs-volume
+            mountPath: /app/configs/
             readOnly: true
-          - name: health-check-service-account-secret
-            mountPath: /run/secrets/health_check_service_account_secret
-            readOnly: true
-          - name: s3-secret-access-key
-            mountPath: /run/secrets/s3_secret_access_key
+          - name: firecrest-secrets-volume
+            mountPath: /app/secrets/
             readOnly: true
       volumes:
-        - name: firecrest-config-volume
+        {{- range .Values.volumes }}
+        - name: {{ .name }}
+          {{- if .configMap }}
           configMap:
-            name: firecrest-configmap
+            name: {{ .configMap.name }}
             items:
-                - key: firecrest-config
-                  path: firecrest-config.yaml
-        - name: health-check-service-account-secret
+            {{- range .configMap.items }}
+              - key: {{ .key }}
+                path: {{ .path }}
+            {{- end }}
+          {{- end }}
+          {{- if .secret }}
           secret:
-            secretName: firecrest-v2
+            secretName: {{ .secret.secretName }}
             items:
-              - key: health-check-service-account-secret
-                path: secret
-        - name: s3-secret-access-key
-          secret:
-            secretName: firecrest-v2
-            items:
-              - key: s3-secret-access-key
-                path: secret
+            {{- range .secret.items }}
+              - key: {{ .key }}
+                path: {{ .path }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+
             
 ---
 apiVersion: v1
@@ -72,5 +76,5 @@ spec:
   ports:
     - name: firecrest-api
       protocol: TCP
-      port: 5001
+      port: {{ .Values.service.port }}
       targetPort: 5000

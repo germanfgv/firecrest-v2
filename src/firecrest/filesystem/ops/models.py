@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from enum import Enum
 from typing import Optional
 
@@ -130,6 +135,7 @@ class PostMkdirResponse(CamelModel):
 
 class PostCompressRequest(FilesystemRequestBase):
     target_path: str
+    match_pattern: Optional[str] = None
     dereference: Optional[bool] = False
 
 

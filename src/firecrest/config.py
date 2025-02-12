@@ -1,3 +1,8 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from enum import Enum
 import os
 import yaml
@@ -212,8 +217,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        secrets_dir="/run/secrets/",
-        use_enum_values=True,
+        secrets_dir="/app/secrets/",
     )
 
     @field_validator("clusters", mode="before")

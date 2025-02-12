@@ -1,19 +1,24 @@
 #!/bin/bash 
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
 
-{{sbatch_directives}}
+
+{{ sbatch_directives }}
 
 echo $(date -u) "Ingress File Transfer Job (id:${SLURM_JOB_ID})"
 echo $(date -u) "Waiting till file to tranfer is available..."
 for i in `seq 1440` 
 do 
-    status=$(curl --silent --head -o /dev/null --silent -Iw '%{http_code}' "{{download_head_url}}")
+    status=$(curl --silent --head -o /dev/null --silent -Iw '%{http_code}' "{{ download_head_url }}")
     if [[ "$status" == '200' ]]
         then
             echo $(date -u) "File to transfer found in S3 bucket"
-            echo $(date -u) "Downloading file to: {{target_path}} ..."
+            echo $(date -u) "Downloading file to: {{ target_path }} ..."
 
-            range_length={{max_part_size}}
-            target_file="{{target_path}}"
+            range_length={{ max_part_size }}
+            target_file="{{ target_path }}"
 
             download_complete="false"
             downloaded_data_count=0
@@ -28,7 +33,7 @@ do
                 part_file="$target_file.$part_i"
                 range_to=$(( range_from + range_length - 1 ))
 
-                http_code=$(curl --compressed --silent -D "$headers_file" --output "$part_file" --range "$range_from-$range_to" -w "%{http_code}" "{{download_url}}")
+                http_code=$(curl --compressed --silent -D "$headers_file" --output "$part_file" --range "$range_from-$range_to" -w "%{http_code}" "{{ download_url }}")
                 content_range=$(grep -i "Content-Range" "$headers_file")
                 file_length=$(echo ${content_range##*/} | tr -cd '[:digit:]')
                 content_length=$(grep -i "Content-Length" "$headers_file")
