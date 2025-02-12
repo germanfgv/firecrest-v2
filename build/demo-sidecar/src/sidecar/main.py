@@ -1,8 +1,10 @@
 from contextlib import asynccontextmanager
 import os
-from fastapi import Depends, FastAPI, Form
-
-
+import sys
+from fastapi import Depends, FastAPI, Form, HTTPException
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+import asyncssh
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import jwt
 from datetime import datetime, timedelta
@@ -18,6 +20,17 @@ from sidecar.config import (
     UnsafeServiceAccount,
     UnsafeSettings,
 )
+
+from sidecar.pwd_command import PwdCommand
+
+
+sys.path.append("../../../src")
+sys.path.append("../")
+from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
+from firecrest.config import FileSystem
+from lib.ssh_clients.ssh_client import SSHClient
+from firecrest.config import FileSystemDataType
+
 
 keys = {}
 
@@ -47,6 +60,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+security = HTTPBasic(auto_error=False)
+settings = UnsafeSettings()
 
 
 def get_jwk():
@@ -68,25 +83,7 @@ def get_jwk():
     }
     return jwk_data
 
-
-security = HTTPBasic(auto_error=False)
-
-
-# Endpoint 1: Get token
-@app.post("/token")
-def get_token(
-    credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
-    grant_type: Optional[str] = Form(default=None),
-    client_id: Optional[str] = Form(default=None),
-    client_secret: Optional[str] = Form(default=None),
-):
-    username: str = None
-    if client_id:
-        username = client_id
-    if credentials and credentials.username:
-        username = credentials.username
-
-    # Generate JWT token
+def generate_token( username: str):
     expiration = datetime.utcnow() + timedelta(days=360)
     payload = {
         "sub": f"{username}-client",
@@ -100,6 +97,23 @@ def get_token(
     token = jwt.encode(
         payload, keys["private_key_pem"], algorithm="RS256", headers=headers
     )
+    return token
+
+
+@app.post("/token")
+def get_token(
+    credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
+    grant_type: Optional[str] = Form(default=None),
+    client_id: Optional[str] = Form(default=None),
+    client_secret: Optional[str] = Form(default=None),
+):
+    username: str = None
+    if client_id:
+        username = client_id
+    if credentials and credentials.username:
+        username = credentials.username
+
+    token = generate_token(username)
 
     return {"access_token": token, "token_type": "bearer"}
 
@@ -119,26 +133,6 @@ def post_boot(
     proxy_hostname: Optional[str] = Form(default=None),
 ):
 
-    settings = UnsafeSettings()
-
-    ssh_credential = UnsafeSSHUserKeys(
-        **{"private_key": private_key, "public_cert": public_cert}
-    )
-    settings.ssh_credentials[username] = ssh_credential
-
-    demo_cluster = settings.clusters[0]
-    ssh_client_pool = UnsafeSSHClientPool(
-        **{
-            "host": ssh_hostname,
-            "port": ssh_port,
-            "proxy_host": proxy_hostname,
-            "proxy_port": ssh_port,
-        }
-    )
-    service_account = UnsafeServiceAccount(**{"client_id": username, "secret": ""})
-
-    demo_cluster.ssh = ssh_client_pool
-    demo_cluster.service_account = service_account
 
     dump: dict[str, Any] = settings.model_dump()
     settings_file = os.getenv("YAML_CONFIG_FILE", None)
@@ -154,9 +148,7 @@ def post_boot(
 @app.get("/boot")
 def get_boot():
 
-    settings = UnsafeSettings()
-
-    # TODO: inject demo's user settings
+    username = next(iter(settings.ssh_credentials))
 
     dump: dict[str, Any] = settings.model_dump()
     settings_file = os.getenv("YAML_CONFIG_FILE", None)
@@ -166,10 +158,102 @@ def get_boot():
     server = ServerProxy("http://localhost:9001/RPC2")
     server.supervisor.startProcess("firecrest")
 
-    return {"message": "Settings saved successfully."}
+    token = generate_token(username)
+
+    return {"message": "Firecrest v2 playground successfully.", "access_token":token}
 
 
-# Endpoint 3: Serve static HTML file
-@app.get("/static-html")
-def serve_static_html():
-    return {"message": "Static HTML file can be accessed at /static/<filename>.html"}
+class Credentials(BaseModel):
+    username: str
+    private_key: str
+    public_cert: Optional[str] = None
+
+
+@app.post("/credentials")
+def credentials(credentials:Credentials):
+
+    if not credentials.username:
+         raise HTTPException(status_code=400, detail="Provide a valid username")
+
+    try:
+        asyncssh.import_private_key(credentials.private_key)
+        if credentials.public_cert:
+            asyncssh.import_certificate(credentials.public_cert)
+
+            ssh_credential = UnsafeSSHUserKeys(
+            **{"private_key": credentials.private_key, "public_cert": credentials.public_cert}
+            )
+            settings.ssh_credentials.clear()
+            settings.ssh_credentials[credentials.username] = ssh_credential
+
+    except Exception as e:
+         raise HTTPException(status_code=400, detail=repr(e)) from e
+
+    return {"message": "Credentials saved successfully."}
+
+class SSHConnection(BaseModel):
+    hostname: str
+    hostport: int
+    proxyhost: Optional[str] = None
+    proxyport: Optional[int] = None
+
+
+@app.post("/sshconnection")
+async def ssh_connection(ssh_connection:SSHConnection):
+    
+    username = next(iter(settings.ssh_credentials))
+    try:
+        sshkey_private = asyncssh.import_private_key(settings.ssh_credentials[username].private_key)
+        sshkey_cert_public = ()
+        if settings.ssh_credentials[username].public_cert:
+            sshkey_cert_public = asyncssh.import_certificate(settings.ssh_credentials[username].public_cert)
+        options = asyncssh.SSHClientConnectionOptions(
+            username=username,
+            client_keys=[sshkey_private],
+            client_certs=[sshkey_cert_public],
+            known_hosts=None
+        )
+
+        proxy = ()
+        if ssh_connection.proxyhost:
+            proxy = await asyncssh.connect(
+                host=ssh_connection.proxyhost, port=ssh_connection.proxyport, options=options
+            )
+            conn = await asyncssh.connect(
+                host=ssh_connection.hostname, port=ssh_connection.hostport, options=options, tunnel=proxy
+            )
+            client = SSHClient(conn)
+            pwd = PwdCommand()
+            user_home = await client.execute(pwd)
+
+            file_system= FileSystem(**{"path":user_home, "data_type":FileSystemDataType.users, "default_work_dir":True })
+
+    
+        demo_cluster = settings.clusters[0]
+        ssh_client_pool = UnsafeSSHClientPool(
+            **{
+                "host": ssh_connection.hostname,
+                "port": ssh_connection.hostport,
+                "proxy_host": ssh_connection.proxyhost,
+                "proxy_port": ssh_connection.proxyport,
+            }
+        )
+        service_account = UnsafeServiceAccount(**{"client_id": username, "secret": ""})
+
+        demo_cluster.ssh = ssh_client_pool
+        demo_cluster.service_account = service_account
+        demo_cluster.file_systems=[file_system]
+    
+
+    except Exception as e:
+         raise HTTPException(status_code=400, detail=repr(e)) from e
+
+    return {"message": "Credentials saved successfully.", "user_home": user_home}
+
+
+
+
+
+
+
+app.mount("/play", StaticFiles(directory="/app/sidecar/static",html = True), name="static-play")
