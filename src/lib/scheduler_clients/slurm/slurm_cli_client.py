@@ -115,7 +115,7 @@ class SlurmCliClient(SlurmBaseClient):
 
         cmd_result_i: int = 0
 
-        # fallback to sacct command if scontrol failde to retreive job info
+        # fallback to sacct command if scontrol failed to retreieve job info
         if not isinstance(results[cmd_result_i], list) and len(results) == 4:
             cmd_result_i = 2
 
