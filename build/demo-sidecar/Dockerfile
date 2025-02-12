@@ -27,11 +27,12 @@ WORKDIR /app
 
 # Copy the requirements
 COPY ./requirements.txt ./requirements.txt
+COPY ./requirements-testing.txt ./requirements-testing.txt
 
 
 # Build the dependencies
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
-
+RUN pip install --no-cache-dir --upgrade -r ./requirements-testing.txt
 
 # Copy the code
 COPY ./build/demo-sidecar/src/sidecar/ ./sidecar

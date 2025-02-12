@@ -36,6 +36,6 @@ clusters:
     timeout: 10
     startup_grace_period: 300
   file_systems:
-    - path: '/home'
+    - path: '/users'
       data_type: 'users'
       default_work_dir: true
