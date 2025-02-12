@@ -175,7 +175,7 @@ class SSHClientPool:
 
         match self.key_provider:
             case SSHKeygenClient():
-                sshkey_private = asyncssh.import_private_key(["private"])
+                sshkey_private = asyncssh.import_private_key(keys["private"])
                 sshkey_cert_public = asyncssh.import_certificate(keys["public"])
                 options = asyncssh.SSHClientConnectionOptions(
                     username=username,
