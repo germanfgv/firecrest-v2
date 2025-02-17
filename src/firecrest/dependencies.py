@@ -334,7 +334,8 @@ class S3ClientDependency:
     # To allow for dependency override eq checks for class equality
     def __eq__(self, other):
         if isinstance(other, S3ClientDependency):
-            return self.url == other.url
+            if hasattr(self, "url") and hasattr(other, "url"):
+                return self.url == other.url
         return False
 
     # To allow for dependency override hash is based on class
