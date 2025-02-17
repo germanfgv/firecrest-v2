@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
     """
     )
 
-    print("Navigte to http://localhost:8080/ to get started!")
+    print("Navigte to http://localhost:8080/ to get started!\n\n")
 
     yield
 
@@ -149,7 +149,7 @@ def get_boot():
     with open(settings_file, "w") as yaml_file:
         yaml.dump(dump, yaml_file)
 
-    server = ServerProxy("http://localhost:9001/RPC2")
+    server = ServerProxy("http://dummy:dummy@localhost:9001/RPC2")
 
     state = server.supervisor.getProcessInfo("firecrest")
 

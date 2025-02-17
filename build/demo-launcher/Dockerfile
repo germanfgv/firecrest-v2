@@ -45,4 +45,4 @@ ADD ./build/demo-launcher/supervisord.conf /etc/supervisord.conf
 # Run the app with uvicorn
 #CMD ["uvicorn", "launcher.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8080"]
 
-ENTRYPOINT ["supervisord"]
+ENTRYPOINT ["supervisord","-c","/etc/supervisord.conf"]
