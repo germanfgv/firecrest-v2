@@ -27,7 +27,7 @@ from lib.request_vars import g
 from lib.models import ApiAuthUser, ApiAuthType
 
 # app
-from firecrest import create_app
+from firecrest.main import create_app
 from aiobotocore.session import get_session
 from aiobotocore.config import AioConfig
 
