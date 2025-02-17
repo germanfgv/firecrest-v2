@@ -127,12 +127,12 @@ class ServiceAvailabilityDependency:
         if service is None:
             raise HTTPException(
                 status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail="No scheduler service for the requested system ({system.name}) was found.",
+                detail=f"No scheduler service for the requested system ({system.name}) was found.",
             )
         if not service.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="The scheduler service for the requested system ({system.name}) is unhealthy.",
+                detail=f"The scheduler service for the requested system ({system.name}) is unhealthy.",
             )
 
     def __ssh_health(self, system: HPCCluster):
