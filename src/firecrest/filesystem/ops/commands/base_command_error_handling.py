@@ -30,7 +30,7 @@ class BaseCommandErrorHandling:
 
     def error_handling(self, stderr: str, exit_status: int):
 
-        error_mess = f"Remote process faild with exit status:{exit_status}"
+        error_mess = f"Remote process failed with exit status:{exit_status}"
         if len(stderr) > 0:
             error_mess += f" and error message:{stderr.strip()}"
 

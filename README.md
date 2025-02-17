@@ -12,7 +12,7 @@ To start a local Firecrest environment in VS Code right click the selected envir
 
 Alternatively, use the command line:
 ```console
-docker-compose -f docker-compose-minimal-env.yml up
+docker compose -f docker-compose.yml up
 ```
 ## Local Environments
 
@@ -105,7 +105,7 @@ The Docker environments also include third-party services required by Firecrest 
 
 To access Keycloak’s admin console, navigate to: http://localhost:8080/auth/admin with user-name:admin and password:admin2
 
-Retreive JWT keys to be used by Slurm for token verification: http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/certs
+Retrieve JWT keys to be used by Slurm for token verification: http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/certs
 
 Slurm and Firecrest requires the JWT token to inclue the following fields:
 - iat: Unix timestamp of creation date.
@@ -127,7 +127,7 @@ To ssh into the Slurm Dummy Cluster you can use the fireuser
 ```console
 
 ssh-keygen -p -s build/environment/keys/fireuser-key -n fireuser -I fireuser -f user-key-cert.pub build/environment/keys/fireuser.pub
-chmod 0400 build/environment/keys/fireuser.pub       
+chmod 0400 build/environment/keys/fireuser.pub
 ssh -i build/environment/keys/fireuser.pub fireuser@localhost -p 2222
 
 ```
