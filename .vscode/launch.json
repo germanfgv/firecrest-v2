@@ -28,10 +28,10 @@
             ]
         },
         {
-            "name": "FirecrestAPI Playground [Docker]",
+            "name": "FirecrestAPI Demo [Docker]",
             "type": "debugpy",
             "request": "attach",
-            "preLaunchTask": "Firecrest_v2 playground booter",
+            "preLaunchTask": "Firecrest_v2 demo booter",
             "connect": {
                 "host": "localhost",
                 "port": 5678

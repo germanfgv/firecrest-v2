@@ -35,14 +35,14 @@ RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 RUN pip install --no-cache-dir --upgrade -r ./requirements-testing.txt
 
 # Copy the code
-COPY ./build/demo-sidecar/src/sidecar/ ./sidecar
+COPY ./build/demo-launcher/src/launcher/ ./launcher
 COPY ./src/firecrest/ ./firecrest/
 COPY ./src/lib/ ./lib/
-COPY ./build/demo-sidecar/src/sidecar/f7t-api-config.demo-env.yaml  ./config/app-config.yaml
+COPY ./build/demo-launcher/src/launcher/f7t-api-config.demo-env.yaml  ./config/app-config.yaml
 
-ADD ./build/demo-sidecar/supervisord.conf /etc/supervisord.conf
+ADD ./build/demo-launcher/supervisord.conf /etc/supervisord.conf
 
 # Run the app with uvicorn
-#CMD ["uvicorn", "sidecar.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8080"]
+#CMD ["uvicorn", "launcher.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8080"]
 
 ENTRYPOINT ["supervisord"]
