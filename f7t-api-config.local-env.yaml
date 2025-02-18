@@ -91,3 +91,5 @@ storage:
     parallel_runs: 3
     tmp_folder: "tmp"
   max_ops_file_size: 1048576 # 1M
+  probing:
+    timeout: 10
