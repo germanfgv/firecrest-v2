@@ -12,7 +12,6 @@ from firecrest.dependencies import (
     S3ClientDependency,
 )
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
-from fastapi import Depends
 
 
 class S3HealthCheck(HealthCheckBase):
