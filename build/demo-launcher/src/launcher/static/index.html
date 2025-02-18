@@ -140,6 +140,8 @@
             <!-- Form Body -->
             <div class="px-4 py-5 sm:p-6">
 
+                <p class="mb-6">The SSH credentials are required by Firecrest to access your cluster’s login node.<br/> The credentials are only <b>temporarily</b> stored in the Docker container.</p>
+
                 <!-- Form grid -->
                 <div class="grid grid-cols-6 gap-6">
 
@@ -149,7 +151,7 @@
                             <span class="italic text-red-400">*</span>
                         </label>
                         
-                        <input type="text" id="username" placeholder="Enter your username" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
+                        <input type="text" id="username" placeholder="Enter SSH username" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
                     </div>
 
                     <!-- Private Key -->
@@ -158,7 +160,7 @@
                             <span class="italic text-red-400">*</span>
                         </label>
                         
-                        <textarea id="private_key"  rows="4" cols="50" placeholder="Enter ssh private key" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
+                        <textarea id="private_key"  rows="4" cols="50" placeholder="Enter SSH private key" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
                     </div>
 
                     <!-- Public Certificate -->
@@ -167,7 +169,7 @@
                             <span class="italic text-gray-400">Optional</span>
                         </label>
                         
-                        <textarea id="public_cert"  rows="4" cols="50" placeholder="Enter ssh public certificate" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none"></textarea>
+                        <textarea id="public_cert"  rows="4" cols="50" placeholder="Enter SSH public certificate" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none"></textarea>
                     </div>
 
                 </div>
@@ -197,6 +199,9 @@
 
             <!-- Form Body -->
             <div class="px-4 py-5 sm:p-6">
+
+                <p class="mb-6">Provide your cluster’s login node hostname and SSH port.<br/>If a SSH tunneling is required please provide the proxy hostname and port.</p>
+
 
                 <!-- Form grid -->
                 <div class="grid grid-cols-6 gap-6">
@@ -267,6 +272,9 @@
 
             <!-- Form Body -->
             <div class="px-4 py-5 sm:p-6">
+
+                <p class="mb-6">Select the type of scheduler running on your cluster.</p>
+
 
                 <!-- Form grid -->
                 <div class="grid grid-cols-6 gap-6">
