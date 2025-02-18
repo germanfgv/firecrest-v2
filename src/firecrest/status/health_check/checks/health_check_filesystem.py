@@ -6,7 +6,6 @@
 from firecrest.config import (
     FilesystemServiceHealth,
     HPCCluster,
-    SchedulerServiceHealth,
 )
 from firecrest.dependencies import SSHClientDependency
 from firecrest.filesystem.ops.commands.ls_command import LsCommand
@@ -22,7 +21,7 @@ class FilesystemHealthCheck(HealthCheckBase):
         self.token = token
         self.path = path
 
-    async def execute_check(self) -> SchedulerServiceHealth:
+    async def execute_check(self) -> FilesystemServiceHealth:
 
         self.ssh_client = await SSHClientDependency(ignore_health=True)(
             system_name=self.system.name
