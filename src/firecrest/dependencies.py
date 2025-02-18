@@ -326,7 +326,7 @@ class S3ClientDependency:
                 client.meta.events.unregister(
                     "before-parameter-build.s3", validate_bucket_name
                 )
-            yield client
+            return client
 
     # To allow for dependency override eq checks for class equality
     def __eq__(self, other):
