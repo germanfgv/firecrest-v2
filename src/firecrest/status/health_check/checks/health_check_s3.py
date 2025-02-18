@@ -30,7 +30,7 @@ class S3HealthCheck(HealthCheckBase):
             connection=S3ClientConnectionType.private
         )() as s3_client:
 
-            buckets = await s3_client.list_buckets(MaxBuckets=1)
+            await s3_client.list_buckets(MaxBuckets=1)
 
         return health
 
