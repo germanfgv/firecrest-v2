@@ -11,6 +11,7 @@ from firecrest.config import HPCCluster
 from firecrest.status.health_check.checks.health_check_filesystem import (
     FilesystemHealthCheck,
 )
+from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
 from firecrest.status.health_check.checks.health_check_scheduler import (
     SchedulerHealthCheck,
 )
@@ -73,6 +74,12 @@ class SchedulerHealthChecker:
                 timeout=self.cluster.probing.timeout,
             )
             checks += [filesystemCheck.check()]
+
+        if settings.storage and settings.storage.probing:
+            s3Check = S3HealthCheck(
+                system=self.cluster, timeout=settings.storage.probing.timeout
+            )
+            checks += [s3Check.check()]
 
         results = await asyncio.gather(*checks, return_exceptions=True)
         self.cluster.servicesHealth = results
