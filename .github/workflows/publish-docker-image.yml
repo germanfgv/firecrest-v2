@@ -20,7 +20,7 @@ jobs:
         include:
           - dockerfile: ./build/docker/firecrest-api/Dockerfile
             image: ${{ github.repository }}
-          - dockerfile: .build/demo-launcher/Dockerfile
+          - dockerfile: ./build/demo-launcher/Dockerfile
             image: ${{ github.repository }}-demo
     permissions:
       contents: read
