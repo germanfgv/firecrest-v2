@@ -51,6 +51,10 @@ class BucketLifestyleConfiguration(BaseModel):
         }
 
 
+class StorageProbing(CamelModel):
+    timeout: int
+
+
 class Storage(BaseModel):
     name: str
     private_url: str
@@ -65,6 +69,7 @@ class Storage(BaseModel):
         BucketLifestyleConfiguration()
     )
     max_ops_file_size: Optional[int] = 5 * 1024 * 1024
+    probing: Optional[StorageProbing] = None
 
 
 class SchedulerType(str, Enum):
@@ -102,6 +107,7 @@ class HealthCheckType(str, Enum):
     scheduler = "scheduler"
     filesystem = "filesystem"
     ssh = "ssh"
+    s3 = "s3"
 
 
 class BaseServiceHealth(CamelModel):
@@ -121,6 +127,10 @@ class FilesystemServiceHealth(BaseServiceHealth):
 
 
 class SSHServiceHealth(BaseServiceHealth):
+    pass
+
+
+class S3ServiceHealth(BaseServiceHealth):
     pass
 
 
@@ -156,7 +166,12 @@ class HPCCluster(CamelModel):
     scheduler: Scheduler
     service_account: ServiceAccount = Field(exclude=True)
     servicesHealth: Optional[
-        List[SchedulerServiceHealth | FilesystemServiceHealth | SSHServiceHealth]
+        List[
+            SchedulerServiceHealth
+            | FilesystemServiceHealth
+            | SSHServiceHealth
+            | S3ServiceHealth
+        ]
     ] = None
     probing: Optional[ClusterProbing] = None
     file_systems: Optional[List[FileSystem]] = None
@@ -189,7 +204,7 @@ class Settings(BaseSettings):
     auth: Auth = None
     # SSH Credentials
     ssh_credentials: SSHKeysService | Dict[str, SSHUserKeys]
-    # HPC Clusters definition 
+    # HPC Clusters definition
     clusters: List[HPCCluster] = []
     # HPC Storage definition
     storage: Storage = None
