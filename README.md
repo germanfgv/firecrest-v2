@@ -2,8 +2,26 @@
 
 FirecREST provides a REST API through which developers can interact with HPC resources (Schedulers, Filesystems, etc.). In addition FirecREST provides methods to authenticate and authorize, execution of  jobs through, file-system operations, and access to accounting or status information.
 
+# FirecREST v2 Demo
 
-# Running FirecREST v2
+The FirecREST demo allows you to run FirecREST on your machine and connect to your local HPC cluster using your personal credentials.
+This setup is for *illustrative and evaluation purposes only* and is *not intended for production use*.
+
+## Running the FirecREST v2 Demo  
+
+Ensure that [Docker](https://www.docker.com/) is installed and running on your machine, then execute the following command to start the FirecREST v2 demo container:
+
+```console
+docker run -p 8080:8080 -p 8000:5000 ghcr.io/eth-cscs/firecrest-v2-demo:latest
+```
+
+Once the container is running, open your browser and navigate to:
+
+➡️ **[http://localhost:8080](http://localhost:8080)**
+
+
+
+# Running FirecREST v2 with Docker-Compose
 
 To simplify running FirecREST locally we provide a set of local Docker environments that already contain all required dependencies. Please make sure [Docker](https://www.docker.com/) is installed and running on your machine.
 
