@@ -35,6 +35,9 @@ from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
+from fastapi.security import HTTPBearer
+from fastapi import Depends
+
 
 class APIAuthDependency(AuthDependency):
 
@@ -67,7 +70,9 @@ class APIAuthDependency(AuthDependency):
             scopes=settings.auth.authentication.scopes,
         )
 
-    async def __call__(self, request: Request, system_name: str = None):
+    async def __call__(
+        self, request: Request, system_name: str = None, _api_key=Depends(HTTPBearer())
+    ):
         auth, token = await super().__call__(system_name, request)
         # TODO: rename ApiAuthHelper to something like Session Auth Helper
         ApiAuthHelper.set_auth(auth=auth)
