@@ -1,0 +1,41 @@
+apis_root_path: ""
+doc_servers:
+  - url: "http://localhost:8000"
+    description: "Local environment"
+auth:
+  authentication:
+    scopes:  {}
+    tokenUrl:  "http://localhost:8080/token"
+    publicCerts:
+        - "http://localhost:8080/certs"
+ssh_credentials:
+  tempuser:
+    private_key: "tempuser"
+    public_key: "tempuser"
+clusters:
+- name: "cluster"
+  ssh:
+    host: "192.168.240.2"
+    port: 22
+    max_clients: 5
+    timeout:
+      connection: 5
+      login: 5
+      command_execution: 5
+      idle_timeout: 60
+      keep_alive: 5
+  scheduler:
+    type: "slurm"
+    version: "24.11.0"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-health-check"
+    secret: "demo-secret"
+  probing:
+    interval: 120
+    timeout: 10
+    startup_grace_period: 300
+  file_systems:
+    - path: '/users'
+      data_type: 'users'
+      default_work_dir: true

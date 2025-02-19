@@ -39,15 +39,53 @@
 			"dependsOn": "Firecrest_v2 cluster up",
 		  },
 		  {
+			"type": "docker-run",
+			"label": "Firecrest_v2 demo",
+			"dependsOn": ["Firecrest_v2 demo-build"],
+			"dockerRun": {
+				"containerName": "firecrest-demo",
+				"image": "firecrest_v2-demo:latest",
+				"volumes": [
+					{
+					  "containerPath": "/app/launcher", "localPath": "${workspaceFolder}/build/demo-launcher/src/launcher"
+					}
+				  ],
+				"ports": [
+				  {
+					"containerPort": 8080,
+					"hostPort": 8080
+				  },
+				  {
+					"containerPort": 5000,
+					"hostPort": 8000
+				  },
+				  {
+					"containerPort": 5678,
+					"hostPort": 5678
+				  }
+				  
+				]
+			  },
+		  },
+		  {
+			"label": "Firecrest_v2 demo-build",
+			"type": "docker-build",
+			"dockerBuild": {
+				"context": "${workspaceFolder}",
+				"dockerfile": "${workspaceFolder}/build/demo-launcher/Dockerfile",
+				"tag": "firecrest_v2-demo:latest"
+			}
+		  },
+		  {
 			// Waits for Firecrest API to be up and running ensuring the debugger can successfully be attached
-			"label": "SSH-Keygen booter",
+			"label": "Firecrest_v2 demo booter",
 			"type": "shell",
-			"command": "i=0 ; while [ true ] ; do ((i++)) ; curl http://localhost:8081 &> /dev/null ; if [[ \"$?\" -eq 0 ]] || [ \"$i\" -gt \"60\" ]; then exit 0 ; else sleep 0.5 ; fi ; done",
+			"command": "i=0 ; while [ true ] ; do ((i++)) ; curl http://localhost:8080 &> /dev/null ; if [[ \"$?\" -eq 0 ]] || [ \"$i\" -gt \"60\" ]; then exit 0 ; else sleep 0.5 ; fi ; done",
 			"windows": {
 				//TODO: replace with a batch script like the linux/mac one
 				"command": "timeout 5"
 			  },
-			"dependsOn": "Firecrest_v2 cluster up",
+			"dependsOn": "Firecrest_v2 demo",
 		  },
 	],
 }

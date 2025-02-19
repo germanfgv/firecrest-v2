@@ -35,6 +35,9 @@ from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
+from fastapi.security import HTTPBearer
+from fastapi import Depends
+
 
 class APIAuthDependency(AuthDependency):
 
@@ -67,7 +70,15 @@ class APIAuthDependency(AuthDependency):
             scopes=settings.auth.authentication.scopes,
         )
 
-    async def __call__(self, request: Request, system_name: str = None):
+    async def __call__(
+        self,
+        request: Request,
+        _api_key=Depends(HTTPBearer()),
+    ):
+        system_name: str = None
+        if "system_name" in request.path_params:
+            system_name = request.path_params["system_name"]
+
         auth, token = await super().__call__(system_name, request)
         # TODO: rename ApiAuthHelper to something like Session Auth Helper
         ApiAuthHelper.set_auth(auth=auth)
@@ -224,6 +235,8 @@ class SSHClientDependency:
             client_pool = SSHClientPool(
                 host=system.ssh.host,
                 port=system.ssh.port,
+                proxy_host=system.ssh.proxy_host,
+                proxy_port=system.ssh.proxy_port,
                 key_provider=self.key_provider,
                 connect_timeout=system.ssh.timeout.connection,
                 login_timeout=system.ssh.timeout.login,
@@ -307,9 +320,10 @@ class S3ClientDependency:
     def __init__(
         self, connection: S3ClientConnectionType = S3ClientConnectionType.public
     ):
-        self.url = settings.storage.public_url
-        if connection == S3ClientConnectionType.private:
-            self.url = settings.storage.private_url
+        if settings.storage:
+            self.url = settings.storage.public_url
+            if connection == S3ClientConnectionType.private:
+                self.url = settings.storage.private_url
 
     async def __call__(self):
         async with get_session().create_client(
@@ -331,7 +345,8 @@ class S3ClientDependency:
     # To allow for dependency override eq checks for class equality
     def __eq__(self, other):
         if isinstance(other, S3ClientDependency):
-            return self.url == other.url
+            if hasattr(self, "url") and hasattr(other, "url"):
+                return self.url == other.url
         return False
 
     # To allow for dependency override hash is based on class

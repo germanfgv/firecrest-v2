@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        .step { display: none; }
+        .active { display: block; }
+    </style>
+    <title>FirecREST v2 Demo Launcher</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script>
+
+        function showSSHTunnel() {
+            if (document.getElementById("ssh-tunnel").checked){
+                document.getElementById('ssh-tunnel-options').classList.add('active');
+            }else{
+                document.getElementById('ssh-tunnel-options').classList.remove('active');
+            }
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+        }
+
+        function showSpinner(id) {
+            document.getElementById(id).innerHTML = '<svg aria-hidden="true" class="loading w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>';
+        }
+        function removeSpinner(id) {
+            document.getElementById(id).innerHTML = 'Next';
+        }
+
+
+
+        async function submitCredentials() {
+            const username = document.getElementById('username').value;
+            const private_key = document.getElementById('private_key').value;
+            const public_cert = document.getElementById('public_cert').value;
+
+            showSpinner('credentials_button')
+
+            const response = await fetch('/credentials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "username":username, "private_key":private_key,"public_cert":public_cert })
+            });
+
+            removeSpinner('credentials_button')
+            if (response.ok) {
+                showStep(2)
+            } else {
+                error = await response.json()
+                console.log(error);
+                alert('Invalid SSH credentials: ' + error.detail);
+            }
+        }
+
+        async function submitSSHConnection() {
+            const hostname = document.getElementById('hostname').value;
+            const hostport = document.getElementById('hostport').value;
+            var proxyhost = document.getElementById('proxyhost').value;
+            var proxyport = document.getElementById('proxyport').value;
+
+            if (proxyhost.length === 0) {
+                proxyhost = null
+                proxyport = null
+            }    
+            showSpinner('ssh_connection_button')
+            const response = await fetch('/sshconnection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "hostname":hostname, "hostport":hostport,"proxyhost":proxyhost,"proxyport":proxyport })
+            });
+            removeSpinner('ssh_connection_button')
+            if (response.ok) {
+                response_json = await response.json()
+                document.querySelectorAll('.user-home').forEach(el => el.textContent=response_json.user_home);
+                showStep(3)
+            } else {
+                error = await response.json()
+                console.log(error);
+                alert('Invalid SSH credentials: ' + error.detail);
+            }
+        }
+
+        async function bootPlayground() {
+          
+            var cluster_name = document.getElementById('cluster-name').value;
+
+
+            showSpinner('boot_button')
+            const response = await fetch('/boot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "cluster_name":cluster_name })
+            });
+
+
+            
+            removeSpinner('boot_button')
+            if (response.ok) {
+                response_json = await response.json()
+                document.getElementById("token").value=response_json.access_token;
+                document.getElementById("system-name").innerHTML=response_json.system_name;
+                document.querySelectorAll('.demo-token').forEach(el => el.textContent=response_json.access_token);
+                showStep(4)
+            } else {
+                error = await response.json()
+                console.log(error);
+                alert('Invalid SSH credentials: ' + error.detail);
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <div class="min-h-full bg-gray-100">
+
+    <main class="flex-1">
+        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4" role="alert">
+            <p class="font-bold">Important security note!</p>
+            <p>This demo application is for illustrative and evaluation purposes only. It is not intended for use in a production environment.</p>
+          </div>
+    <div class="py-6">
+
+    <div class="mx-auto px-4 sm:px-6 md:px-8 md:flex md:items-center md:justify-between">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.45 125.91" class="h-12 w-auto"><defs><style>.cls-2{fill:#7a7a7a}</style></defs><path d="m2.38 61.642 20.797-20.796 20.796 20.796-20.796 20.796zM.05 105.38l20.8-20.79-20.8-20.8v41.59zM98.86 96.5H69.45v29.41L98.86 96.5zM67.66 93.34l27.48-27.48 27.49 27.48H67.66zM66.38 125.67l-41-41 41-41v82zM127.45 29.03H69.47v57.98l57.98-57.98z" class="cls-2"></path><path d="M31.03 0 0 30.64l.08 28.71 30.89-30.48L31.03 0z" style="fill:#ec671a"></path></svg>
+
+        <div class="min-w-0 flex-1">
+            <h1 class="ml-3 text-2xl font-semibold text-gray-900">
+                FirecREST v2 Demo Launcher
+            </h1>
+        </div>
+    </div>
+
+
+    <div class=" mx-auto px-4 sm:px-6 md:px-8 pt-4">
+    
+        <!-- Card Credentials -->
+        <div id="step1" class="step active bg-white shadow rounded-lg divide-y divide-gray-200 mb-4">
+            <!-- Title -->
+            <div class="px-4 sm:px-6 pt-[13px] pb-[13px]">
+                <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-nowrap">
+                    <div class="ml-4 mt-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Step 1: Set-up your SSH Credentials</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="px-4 py-5 sm:p-6">
+
+                <p class="mb-6">The SSH credentials are required by FirecREST to access your cluster’s login node.<br/> The credentials are only <b>temporarily</b> stored in the Docker container.</p>
+
+                <!-- Form grid -->
+                <div class="grid grid-cols-6 gap-6">
+
+                    <!-- username field -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">Username
+                            <span class="italic text-red-400">*</span>
+                        </label>
+                        
+                        <input type="text" id="username" placeholder="Enter SSH username" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
+                    </div>
+
+                    <!-- Private Key -->
+                    <div class="col-span-6 sm:col-span-4">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">Private key
+                            <span class="italic text-red-400">*</span>
+                        </label>
+                        
+                        <textarea id="private_key"  rows="4" cols="50" placeholder="Enter SSH private key" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
+                    </div>
+
+                    <!-- Public Certificate -->
+                    <div class="col-span-6 sm:col-span-4">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">Public certificate
+                            <span class="italic text-gray-400">Optional</span>
+                        </label>
+                        
+                        <textarea id="public_cert"  rows="4" cols="50" placeholder="Enter SSH public certificate" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none"></textarea>
+                    </div>
+
+                </div>
+                <!-- Footer -->
+                <div class="items-center justify-end bg-gray-50 mt-6 px-4 py-3 text-right sm:px-6">
+                    <button id="credentials_button" type="button" onclick="submitCredentials()" class="h-9 inline-flex justify-center rounded-md border border-transparent bg-emerald-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+     
+
+        <!-- Card Connection -->
+        <div id="step2" class="step bg-white shadow rounded-lg divide-y divide-gray-200 mb-4">
+            <!-- Title -->
+            <div class="px-4 sm:px-6 pt-[13px] pb-[13px]">
+                <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-nowrap">
+                    <div class="ml-4 mt-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Step 2: Set-up your SSH Connection</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="px-4 py-5 sm:p-6">
+
+                <p class="mb-6">Provide your cluster’s login node hostname and SSH port.<br/>If a SSH tunneling is required please provide the proxy hostname and port.</p>
+
+
+                <!-- Form grid -->
+                <div class="grid grid-cols-6 gap-6">
+
+                    <!-- hostname field -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">SSH Hostname
+                            <span class="italic text-red-400">*</span>
+                        </label>
+                        
+                        <input type="text" id="hostname" placeholder="Enter your SSH hostname" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
+                    </div>
+
+                    <!-- port field -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">SSH Port
+                            <span class="italic text-red-400">*</span>
+                        </label>
+                        
+                        <input type="text" id="hostport" value="22" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required>
+                    </div>
+
+                    <div class="col-span-6 sm:col-span-6">
+                        <input id="ssh-tunnel" type="checkbox" onclick="showSSHTunnel()" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="checked-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Enable SSH tunneling</label>
+                    </div>
+                    <div id="ssh-tunnel-options" class="step col-span-6 sm:col-span-3">
+                        <!-- proxy hostname field -->
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="username" class="class="block text-sm font-medium text-gray-700"">SSH Proxy Hostname
+                                <span class="italic text-gray-400">Optional</span>
+                            </label>
+                            
+                            <input type="text" id="proxyhost" placeholder="Enter your SSH proxy hostname" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
+                        </div>
+
+                        <!-- proxy port field -->
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="username" class="class="block text-sm font-medium text-gray-700"">SSH Proxy Port
+                                <span class="italic text-gray-400">Optional</span>
+                            </label>
+                            
+                            <input type="text" id="proxyport" value="22" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required>
+                        </div>
+                    </div>
+
+
+                </div>
+                <!-- Footer -->
+                <div class="items-center justify-end bg-gray-50 mt-6 px-4 py-3 text-right sm:px-6">
+                    <button type="button" onclick="showStep(1)" class="h-9 mr-2 inline-flex justify-center rounded-md border border-transparent bg-gray-800 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">Back</button>
+                    <button type="button" id="ssh_connection_button" onclick="submitSSHConnection()" class="h-9 inline-flex justify-center rounded-md border border-transparent bg-emerald-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2">Next</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Card Scheduler -->
+        <div id="step3" class="step bg-white shadow rounded-lg divide-y divide-gray-200 mb-4">
+            <!-- Title -->
+            <div class="px-4 sm:px-6 pt-[13px] pb-[13px]">
+                <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-nowrap">
+                    <div class="ml-4 mt-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Step 3: Setup your Scheduler</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="px-4 py-5 sm:p-6">
+
+                <p class="mb-6">Enter your HPC cluster’s name and choose its scheduler type.</p>
+
+                <!-- Form grid -->
+                <div class="grid grid-cols-6 gap-6">
+
+                  
+
+                    <!-- username field -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">Cluster name
+                            <span class="italic text-red-400">*</span>
+                        </label>
+                        
+                        <input type="text" id="cluster-name" placeholder="Enter Cluster name" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
+                    </div>
+
+                    
+
+                    <!-- scheduler field -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="username" class="class="block text-sm font-medium text-gray-700"">Scheduler Type
+                            <span class="italic text-red-400">*</span>
+                        </label>
+                        
+                        <select id="scheduler" class="mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none border-gray-300 focus:border-blue-300 focus:ring-blue-300">
+                            <option value="slurm" selected>Slurm</option>
+                            <option value="openPBS" disabled>openPBS (not available on playground)</option>
+                        </select>
+                    </div>
+
+                
+
+                </div>
+                <!-- Footer -->
+                <div class="items-center justify-end bg-gray-50 mt-6 px-4 py-3 text-right sm:px-6">
+                    <button type="button" onclick="showStep(2)" class="h-9 mr-2 inline-flex justify-center rounded-md border border-transparent bg-gray-800 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">Back</button>
+                    <button type="button" id="boot_button" onclick="bootPlayground()" class="h-9 inline-flex justify-center rounded-md border border-transparent bg-emerald-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2">Next</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Card Instructions -->
+        <div id="step4" class="step bg-white shadow rounded-lg divide-y divide-gray-200 mb-4">
+            <!-- Title -->
+            <div class="px-4 sm:px-6 pt-[13px] pb-[13px]">
+                <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-nowrap">
+                    <div class="ml-4 mt-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Step 4: Access your FirecREST playground</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="px-4 py-5 sm:p-6">
+
+                <!-- Form grid -->
+                <div class="grid grid-cols-6 gap-6">
+
+
+                    <div class="col-span-6 sm:col-span-6">
+                        <h3 class="text-lg leading-6 font-small text-gray-900">The FirecREST v2 demo instance is up and running!</h3>
+                    </div>
+
+                     <!-- Private Key -->
+                     <div class="col-span-6 sm:col-span-6">
+                        <div class="bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+                            <div class="flex">
+                              <div class="py-1"><svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
+                              <div style="width: 100%;">
+                                <p class="font-medium">The system name is:</p>
+                                <span id="system-name" class="bg-green-100 text-green-800 text-xs font-bold me-3 px-4.5 py-1 rounded-sm dark:bg-green-900 dark:text-green-300"></span>
+                                <p class="font-medium mt-4">Your HTTPBearer JWT access token is:</p>
+                                <textarea id="token"  rows="4" cols="50" style="background: white;" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
+                              </div>
+                            </div>
+                          </div>
+                        
+                        <p class="mt-4">Some API end-points will require you to provide the above system name. Use this token to authorize your API calls. You can for instance copy-paste it in the Swagger UI the system-name and the HTTPBearer token the enable the interactive documentation functionality.</p>
+                    </div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Documentation</h3>    
+                    <div class="col-span-6 sm:col-span-6">
+                        <p>The Frirecrest API documentation (Swagger) is available at: <a class="underline font-medium" href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></p>
+                        <p>The Swagger UI allows you to browse all FirecREST end-point and perform actuall calls.</p>
+                    </div>
+
+
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Examples</h3>    
+                    <div class="col-span-6 sm:col-span-6">
+                        <h3 class="text-lg leading-6 font-small text-gray-900">The following are a set of curl examples you can copy and paste in your terminal to quicky interact with the FirecREST API.</h3>
+                    </div>
+
+                    
+                    <div class="col-span-6 sm:col-span-6">
+                        <div class="bg-gray-900 text-white p-4 rounded-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-400">Submit Job:</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                    <code class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:8000/compute/cluster/jobs"
+                                    </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-6 sm:col-span-6">
+                        <div class="bg-gray-900 text-white p-4 rounded-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-400">List Jobs:</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                    <code class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:8000/compute/cluster/jobs"</code>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-span-6 sm:col-span-6">
+                        <div class="bg-gray-900 text-white p-4 rounded-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-400">List folder content:</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                    <code class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:8000/filesystem/cluster/ops/ls?path=<span class="user-home"></span>"</code>
+                            </div>
+                        </div>
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+</main>
+</div>
+</body>
+</html>

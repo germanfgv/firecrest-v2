@@ -517,9 +517,7 @@ async def post_symlink(
     "/download",
     status_code=status.HTTP_200_OK,
     response_model=None,
-    response_description="Download a small file ("
-    + f"{settings.storage.max_ops_file_size}"
-    + "B) max",
+    response_description=f"Download a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
 )
 async def get_download(
     ssh_client: Annotated[
@@ -547,9 +545,7 @@ async def get_download(
     "/upload",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
-    response_description="Upload a small file "
-    + f"({settings.storage.max_ops_file_size}"
-    + "B max)",
+    response_description=f"Upload a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
 )
 async def post_upload(
     ssh_client: Annotated[

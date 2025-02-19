@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, Tuple, Type
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     field_validator,
 )
@@ -92,6 +93,8 @@ class Scheduler(CamelModel):
     api_version: Optional[str] = None
     timeout: Optional[int] = 10
 
+    model_config = ConfigDict(use_enum_values=True)
+
 
 class ServiceAccount(CamelModel):
     client_id: str
@@ -116,6 +119,8 @@ class BaseServiceHealth(CamelModel):
     latency: Optional[float] = None
     healthy: Optional[bool] = False
     message: Optional[str] = None
+
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class SchedulerServiceHealth(BaseServiceHealth):
@@ -144,6 +149,8 @@ class FileSystem(CamelModel):
     data_type: FileSystemDataType
     default_work_dir: Optional[bool] = False
 
+    model_config = ConfigDict(use_enum_values=True)
+
 
 class SSHTimeouts(CamelModel):
     connection: Optional[int] = 5
@@ -156,6 +163,8 @@ class SSHTimeouts(CamelModel):
 class SSHClientPool(CamelModel):
     host: str
     port: int
+    proxy_host: Optional[str] = None
+    proxy_port: Optional[int] = None
     max_clients: Optional[int] = 100
     timeout: Optional[SSHTimeouts] = SSHTimeouts()
 
@@ -207,7 +216,7 @@ class Settings(BaseSettings):
     # HPC Clusters definition
     clusters: List[HPCCluster] = []
     # HPC Storage definition
-    storage: Storage = None
+    storage: Optional[Storage] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
