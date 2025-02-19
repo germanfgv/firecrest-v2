@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 import os
 import sys
 from fastapi import Depends, FastAPI, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import asyncssh
@@ -75,6 +76,21 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 security = HTTPBasic(auto_error=False)
 settings = UnsafeSettings()
 
