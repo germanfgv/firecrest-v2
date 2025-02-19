@@ -70,7 +70,7 @@ async def lifespan(app: FastAPI):
     """
     )
 
-    print("Navigte to http://localhost:8080/ to get started!\n\n")
+    print("Navigate to http://localhost:8080/ to get started!\n\n")
 
     yield
 
@@ -155,10 +155,17 @@ def download_certificate():
     return {"keys": [get_jwk()]}
 
 
-@app.get("/boot")
-def get_boot():
+class Scheduler(BaseModel):
+    cluster_name: str
+
+
+@app.post("/boot")
+def boot(scheduler: Scheduler):
 
     username = next(iter(settings.ssh_credentials))
+
+    demo_cluster = settings.clusters[0]
+    demo_cluster.name = scheduler.cluster_name
 
     dump: dict[str, Any] = settings.model_dump()
     settings_file = os.getenv("YAML_CONFIG_FILE", None)
@@ -176,7 +183,13 @@ def get_boot():
 
     token = generate_token(username)
 
-    return {"message": "Firecrest v2 started successfully.", "access_token": token}
+    # TODO: check for slurm version and throw an error if it's to old. <22
+
+    return {
+        "message": "Firecrest v2 started successfully.",
+        "access_token": token,
+        "system_name": demo_cluster.name,
+    }
 
 
 class Credentials(BaseModel):
