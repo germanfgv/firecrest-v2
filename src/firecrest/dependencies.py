@@ -71,8 +71,14 @@ class APIAuthDependency(AuthDependency):
         )
 
     async def __call__(
-        self, request: Request, system_name: str = None, _api_key=Depends(HTTPBearer())
+        self,
+        request: Request,
+        _api_key=Depends(HTTPBearer()),
     ):
+        system_name: str = None
+        if "system_name" in request.path_params:
+            system_name = request.path_params["system_name"]
+
         auth, token = await super().__call__(system_name, request)
         # TODO: rename ApiAuthHelper to something like Session Auth Helper
         ApiAuthHelper.set_auth(auth=auth)
