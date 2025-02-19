@@ -56,10 +56,8 @@ logger = logging.getLogger(__name__)
 
 
 def create_app(settings: config.Settings) -> FastAPI:
-    # Register trackers
-    register_errors_reporting()
-    # Instance app
 
+    # Instance app
     app = FastAPI(
         title="FirecREST",
         version=settings.app_version,
@@ -68,7 +66,6 @@ def create_app(settings: config.Settings) -> FastAPI:
         root_path=settings.apis_root_path,
         root_path_in_servers=not settings.doc_servers,
         lifespan=lifespan,
-        # middleware=middleware,
     )
     # Register middlewares
     register_middlewares(app=app)
@@ -99,11 +96,6 @@ async def lifespan(app: FastAPI):
     # Clean up Slurm REST Client
     await SlurmRestClient.close_aiohttp_client()
     await SSHKeygenClient.close_aiohttp_client()
-
-
-def register_errors_reporting():
-    # ***SENTRY_INTEGRATION***
-    pass
 
 
 async def schedule_tasks(scheduler: AsyncScheduler):
