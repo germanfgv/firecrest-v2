@@ -1,6 +1,6 @@
 apis_root_path: ""
 doc_servers:
-  - url: "http://localhost:8000"
+  - url: "http://localhost:5000"
     description: "Local environment"
 auth:
   authentication:

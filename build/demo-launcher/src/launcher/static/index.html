@@ -103,7 +103,7 @@
             if (response.ok) {
                 response_json = await response.json()
                 document.getElementById("token").value=response_json.access_token;
-                document.getElementById("system-name").innerHTML=response_json.system_name;
+                document.querySelectorAll('.system-name').forEach(el => el.innerHTML=response_json.system_name);
                 document.querySelectorAll('.demo-token').forEach(el => el.textContent=response_json.access_token);
                 showStep(4)
             } else {
@@ -356,19 +356,19 @@
                               <div class="py-1"><svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
                               <div style="width: 100%;">
                                 <p class="font-medium">The system name is:</p>
-                                <span id="system-name" class="bg-green-100 text-green-800 text-xs font-bold me-3 px-4.5 py-1 rounded-sm dark:bg-green-900 dark:text-green-300"></span>
-                                <p class="font-medium mt-4">Your HTTPBearer JWT access token is:</p>
+                                <span class="system-name bg-green-100 text-green-800 text-xs font-bold me-3 px-4.5 py-1 rounded-sm dark:bg-green-900 dark:text-green-300"></span>
+                                <p class="font-medium mt-4">Your HTTP Bearer JWT access token is:</p>
                                 <textarea id="token"  rows="4" cols="50" style="background: white;" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
                               </div>
                             </div>
                           </div>
                         
-                        <p class="mt-4">Some API end-points will require you to provide the above system name. Use this token to authorize your API calls. You can for instance copy-paste it in the Swagger UI the system-name and the HTTPBearer token the enable the interactive documentation functionality.</p>
+                        <p class="mt-4">Some API end-points will require you to provide the above system name. Use this token to authorize your API calls. You can, for instance, copy and paste the system name and HTTP Bearer token into the Swagger UI to enable interactive documentation functionality.</p>
                     </div>
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Documentation</h3>    
                     <div class="col-span-6 sm:col-span-6">
-                        <p>The Frirecrest API documentation (Swagger) is available at: <a class="underline font-medium" href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></p>
                         <p>The Swagger UI allows you to browse all FirecREST end-point and perform actuall calls.</p>
+                        <p>The Frirecrest API documentation (Swagger) is available at: <br/> ➡️ <a class="underline font-medium" href="http://localhost:5000/docs" target="_blank">http://localhost:5000/docs</a></p>
                     </div>
 
 
@@ -384,7 +384,7 @@
                                 <span class="text-gray-400">Submit Job:</span>
                             </div>
                             <div class="overflow-x-auto">
-                                    <code class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:8000/compute/cluster/jobs"
+                                    <code class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:5000/compute/<span class="system-name"></span>/jobs"
                                     </code>
                             </div>
                         </div>
@@ -396,7 +396,7 @@
                                 <span class="text-gray-400">List Jobs:</span>
                             </div>
                             <div class="overflow-x-auto">
-                                    <code class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:8000/compute/cluster/jobs"</code>
+                                    <code class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/compute/<span class="system-name"></span>/jobs"</code>
                             </div>
                         </div>
                     </div>
@@ -408,7 +408,7 @@
                                 <span class="text-gray-400">List folder content:</span>
                             </div>
                             <div class="overflow-x-auto">
-                                    <code class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:8000/filesystem/cluster/ops/ls?path=<span class="user-home"></span>"</code>
+                                    <code class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/filesystem/<span class="system-name"></span>/ops/ls?path=<span class="user-home"></span>"</code>
                             </div>
                         </div>
                     </div>
