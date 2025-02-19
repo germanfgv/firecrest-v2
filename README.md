@@ -12,52 +12,42 @@ This setup is for *illustrative and evaluation purposes only* and is *not intend
 Ensure that [Docker](https://www.docker.com/) is installed and running on your machine, then execute the following command to start the FirecREST v2 demo container:
 
 ```console
-docker run -p 8080:8080 -p 8000:5000 ghcr.io/eth-cscs/firecrest-v2-demo:latest
+docker run -p 8080:8080 -p 5000:5000 ghcr.io/eth-cscs/firecrest-v2-demo:latest
 ```
 
 Once the container is running, open your browser and navigate to:
 
-➡️ **[http://localhost:8080](http://localhost:8080)**
+➡️ **[http://localhost:8080/](http://localhost:8080/)**
 
 
 
 # Running FirecREST v2 with Docker-Compose
 
-To simplify running FirecREST locally we provide a set of local Docker environments that already contain all required dependencies. Please make sure [Docker](https://www.docker.com/) is installed and running on your machine.
+To test and debug FirecREST locally we provide a local Docker environment that already contain all required dependencies (Slurm cluster, identity provider, storage, etc.). Please make sure [Docker](https://www.docker.com/) is installed and running on your machine.
 
-
-To start a local Firecrest environment in VS Code right click the selected environment (e.g."docker-compose-minimal-env.yml") and select "Compose up"
+To start a local Firecrest environment in VS Code right click the selected environment (e.g."docker-compose.yml") and select "Compose up"
 
 Alternatively, use the command line:
 ```console
 docker compose -f docker-compose.yml up
 ```
-## Local Environments
+## Local Environment
 
-### minimal-env
-This environment comes with an identity provider (Keycloack) for authentication and a dummy hpc cluster (local Slurm).
+The environment comes with an identity provider (Keycloack) for authentication, a dummy hpc cluster (with Slurm) and a storage service.
 
-The Firecrest endpoints are accessible at: http://localhost:8000/
-The Firecrest API swagger: http://localhost:8000/docs
 
-Firecrest connects to the dummy hpc cluster using a static pair of private/public keys.
+### Users
 
-```credentials
-private:
------BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-QyNTUxOQAAACCTmVpBD4VS7EO6RyNPQO11PGF2FBtMdDjA1Iwuqe5UhgAAAJBOJ9RhTifU
-YQAAAAtzc2gtZWQyNTUxOQAAACCTmVpBD4VS7EO6RyNPQO11PGF2FBtMdDjA1Iwuqe5Uhg
-AAAEBg4tXpOBlCkwr9e3RNOgz/e78Gs82oTb6J+OMkxajSSZOZWkEPhVLsQ7pHI09A7XU8
-YXYUG0x0OMDUjC6p7lSGAAAAC2FsZUByb3F1ZXJhAQI=
------END OPENSSH PRIVATE KEY-----
+The environment comes with two predefined users:
 
-public:
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJOZWkEPhVLsQ7pHI09A7XU8YXYUG0x0OMDUjC6p7lSG ca@cluster
-```
+- **fireuser** this account represents an actual user
+- **firesrv** this account represents a service account 
 
 
 ## Accessing Firecrest
+
+- The Firecrest endpoints are accessible at: http://localhost:8000/
+- The Firecrest API swagger: http://localhost:8000/docs and http://localhost:8000/redoc
 
 To access most of the end-points you need an authorization token. Firecrest authorization is based on the standard [Oauth2 Client Credentials Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/client-credentials-flow)
 
