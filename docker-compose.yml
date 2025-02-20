@@ -15,8 +15,10 @@ secrets:
     file: ./build/environment/keys/fireuser-key
   ssh_private_key_firesrv:
     file: ./build/environment/keys/firesrv-key
+  ssh_passphrase_firesrv:
+    file: ./build/environment/keys/firesrv-passphrase
 
-  
+
 services:
   firecrest:
     image: firecrestv2
@@ -25,6 +27,7 @@ services:
       - s3_secret_access_key
       - ssh_private_key_fireuser
       - ssh_private_key_firesrv
+      - ssh_passphrase_firesrv
     environment:
       ENVIRONMENT: development
       APP_VERSION: local
