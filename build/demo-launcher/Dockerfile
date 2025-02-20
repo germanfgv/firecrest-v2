@@ -17,7 +17,8 @@ ENV YAML_CONFIG_FILE="/app/config/app-config.yaml"
 
 RUN apt update -y \
     && apt install -y sudo \
-    supervisor
+    supervisor \
+    iputils-ping
 
 RUN mkdir /run/secrets
 
