@@ -38,8 +38,8 @@
             },
             "pathMappings": [
             {
-                "localRoot": "${workspaceFolder}/build/demo-sidecar/src/sidecar",
-                "remoteRoot": "/app/sidecar"
+                "localRoot": "${workspaceFolder}/build/demo-launcher/src/launcher",
+                "remoteRoot": "/app/launcher"
             },
             {
                 "localRoot": "${workspaceFolder}/src/firecrest",
