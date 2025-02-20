@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `/filesystem/{system_name}/transfer/compress` and `/filesystem/{system_name}/transfer/extract`
   - `compress` operations (on `transfer` and `ops` endpoints) accept `match_pattern` parameter to compress files using `regex` syntax.
-
+- Added new FirecREST demo image. 
 ### Changed
+- Images are now built for multiple platforms: inux/amd64, linux/arm64
 
 ### Fixed
 
