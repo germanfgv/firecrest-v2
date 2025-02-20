@@ -21,6 +21,8 @@ from launcher.config import (
     UnsafeServiceAccount,
     UnsafeSettings,
 )
+import subprocess
+
 
 from launcher.pwd_command import PwdCommand
 
@@ -132,6 +134,11 @@ def generate_token(username: str):
     return token
 
 
+def ping(host):
+    command = ["ping", "-c", "1", host]
+    return subprocess.call(command) == 0
+
+
 @app.post("/token")
 def get_token(
     credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
@@ -199,69 +206,47 @@ class Credentials(BaseModel):
 
 
 @app.post("/credentials")
-def credentials(credentials: Credentials):
+async def credentials(credentials: Credentials):
 
     if not credentials.username:
         raise HTTPException(status_code=400, detail="Provide a valid username")
 
+    demo_cluster = settings.clusters[0]
+    sshkey_cert_public = ()
+    sshkey_private = None
+
     try:
-        asyncssh.import_private_key(credentials.private_key)
+        sshkey_private = asyncssh.import_private_key(credentials.private_key)
         if credentials.public_cert:
-            asyncssh.import_certificate(credentials.public_cert)
+            sshkey_cert_public = asyncssh.import_certificate(credentials.public_cert)
 
-            ssh_credential = UnsafeSSHUserKeys(
-                **{
-                    "private_key": credentials.private_key,
-                    "public_cert": credentials.public_cert,
-                }
-            )
-            settings.ssh_credentials.clear()
-            settings.ssh_credentials[credentials.username] = ssh_credential
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=repr(e)) from e
-
-    return {"message": "Credentials saved successfully."}
-
-
-class SSHConnection(BaseModel):
-    hostname: str
-    hostport: int
-    proxyhost: Optional[str] = None
-    proxyport: Optional[int] = None
-
-
-@app.post("/sshconnection")
-async def ssh_connection(ssh_connection: SSHConnection):
-
-    username = next(iter(settings.ssh_credentials))
-    try:
-        sshkey_private = asyncssh.import_private_key(
-            settings.ssh_credentials[username].private_key
+        ssh_credential = UnsafeSSHUserKeys(
+            **{
+                "private_key": credentials.private_key,
+                "public_cert": credentials.public_cert,
+            }
         )
-        sshkey_cert_public = ()
-        if settings.ssh_credentials[username].public_cert:
-            sshkey_cert_public = asyncssh.import_certificate(
-                settings.ssh_credentials[username].public_cert
-            )
+        settings.ssh_credentials.clear()
+        settings.ssh_credentials[credentials.username] = ssh_credential
+
         options = asyncssh.SSHClientConnectionOptions(
-            username=username,
+            username=credentials.username,
             client_keys=[sshkey_private],
             client_certs=[sshkey_cert_public],
             known_hosts=None,
         )
 
         proxy = ()
-        if ssh_connection.proxyhost:
+        if demo_cluster.ssh.proxy_host:
             proxy = await asyncssh.connect(
-                host=ssh_connection.proxyhost,
-                port=ssh_connection.proxyport,
+                host=demo_cluster.ssh.proxy_host,
+                port=demo_cluster.ssh.proxy_port,
                 options=options,
             )
 
         conn = await asyncssh.connect(
-            host=ssh_connection.hostname,
-            port=ssh_connection.hostport,
+            host=demo_cluster.ssh.host,
+            port=demo_cluster.ssh.port,
             options=options,
             tunnel=proxy,
         )
@@ -277,6 +262,42 @@ async def ssh_connection(ssh_connection: SSHConnection):
             }
         )
 
+        service_account = UnsafeServiceAccount(
+            **{"client_id": credentials.username, "secret": ""}
+        )
+
+        demo_cluster.service_account = service_account
+        demo_cluster.file_systems = [file_system]
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=repr(e)) from e
+
+    return {"message": "Credentials saved successfully.", "user_home": user_home}
+
+
+class SSHConnection(BaseModel):
+    hostname: str
+    hostport: int
+    proxyhost: Optional[str] = None
+    proxyport: Optional[int] = None
+
+
+@app.post("/sshconnection")
+async def ssh_connection(ssh_connection: SSHConnection):
+
+    try:
+
+        if ssh_connection.proxyhost:
+            if not ping(ssh_connection.proxyhost):
+                raise HTTPException(
+                    status_code=400, detail="Unable to ping ssh proxy hostname"
+                )
+        else:
+            if not ping(ssh_connection.hostname):
+                raise HTTPException(
+                    status_code=400, detail="Unable to ping login node hostname"
+                )
+
         demo_cluster = settings.clusters[0]
         ssh_client_pool = UnsafeSSHClientPool(
             **{
@@ -286,16 +307,12 @@ async def ssh_connection(ssh_connection: SSHConnection):
                 "proxy_port": ssh_connection.proxyport,
             }
         )
-        service_account = UnsafeServiceAccount(**{"client_id": username, "secret": ""})
-
         demo_cluster.ssh = ssh_client_pool
-        demo_cluster.service_account = service_account
-        demo_cluster.file_systems = [file_system]
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=repr(e)) from e
 
-    return {"message": "SSH connection saved successfully.", "user_home": user_home}
+    return {"message": "SSH hosts saved successfully."}
 
 
 app.mount(
