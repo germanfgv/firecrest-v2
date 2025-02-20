@@ -20,6 +20,16 @@
             }
         }
 
+        function showSSHPassphrase() {
+            if (document.getElementById("ssh-passphrase").checked){
+                document.getElementById('ssh-passphrase-options').classList.add('active');
+            }else{
+                document.getElementById('ssh-passphrase-options').classList.remove('active');
+            }
+        }
+
+        
+
         function showStep(step) {
             document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
             document.getElementById('step' + step).classList.add('active');
@@ -38,13 +48,14 @@
             const username = document.getElementById('username').value;
             const private_key = document.getElementById('private_key').value;
             const public_cert = document.getElementById('public_cert').value;
+            const passphrase = document.getElementById('passphrase').value;
 
             showSpinner('credentials_button')
 
             const response = await fetch('/credentials', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ "username":username, "private_key":private_key,"public_cert":public_cert })
+                body: JSON.stringify({ "username":username, "private_key":private_key,"public_cert":public_cert , "passphrase":passphrase})
             });
 
             removeSpinner('credentials_button')
@@ -106,6 +117,12 @@
                 document.querySelectorAll('.system-name').forEach(el => el.innerHTML=response_json.system_name);
                 document.querySelectorAll('.demo-token').forEach(el => el.textContent=response_json.access_token);
                 showStep(4)
+
+                if (!response_json.scheduler.is_compatible){
+                    alert('The scheduler version might not be fully compatible with Firecrest (version: ' + response_json.scheduler.version +' )');
+                }
+
+
             } else {
                 error = await response.json()
                 console.log(error);
@@ -246,6 +263,24 @@
                         </label>
                         
                         <textarea id="private_key"  rows="4" cols="50" placeholder="Enter SSH private key" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
+                    </div>
+                    
+                    <!-- Private Key Passphrase -->
+                    <div class="col-span-6 sm:col-span-6">
+                        <input id="ssh-passphrase" type="checkbox" onclick="showSSHPassphrase()" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="checked-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">SSH Key with Passphrase</label>
+                    </div>
+
+                    
+                    <div id="ssh-passphrase-options" class="step col-span-6 sm:col-span-3">
+                        <!-- proxy hostname field -->
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="passphrase" class="class="block text-sm font-medium text-gray-700""> Key Passphrase
+                                <span class="italic text-gray-400">Optional</span>
+                            </label>
+                            
+                            <input type="password" id="passphrase" placeholder="Enter the key Passphrase" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
+                        </div>
                     </div>
 
                     <!-- Public Certificate -->

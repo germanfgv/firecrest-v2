@@ -24,6 +24,7 @@ class UnsafeSSHClientPool(SSHClientPool):
 class UnsafeSSHUserKeys(CamelModel):
     private_key: str
     public_cert: Optional[str] = None
+    passphrase: Optional[str] = None
 
 
 class UnsafeServiceAccount(ServiceAccount):

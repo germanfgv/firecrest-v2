@@ -16,3 +16,4 @@ requests-file
 aiofiles
 python-json-logger
 PyJWT
+bcrypt
