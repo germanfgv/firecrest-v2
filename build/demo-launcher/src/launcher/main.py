@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import os
 import sys
+from packaging.version import Version
 from fastapi import Depends, FastAPI, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +26,7 @@ import subprocess
 
 
 from launcher.pwd_command import PwdCommand
+from launcher.sinfo_command import SinfoVersionCommand
 
 
 sys.path.append("../../../src")
@@ -139,6 +141,32 @@ def ping(host):
     return subprocess.call(command) == 0
 
 
+async def sshClient(username, sshkey_private, sshkey_cert_public):
+    demo_cluster = settings.clusters[0]
+    options = asyncssh.SSHClientConnectionOptions(
+        username=username,
+        client_keys=[sshkey_private],
+        client_certs=[sshkey_cert_public],
+        known_hosts=None,
+    )
+
+    proxy = ()
+    if demo_cluster.ssh.proxy_host:
+        proxy = await asyncssh.connect(
+            host=demo_cluster.ssh.proxy_host,
+            port=demo_cluster.ssh.proxy_port,
+            options=options,
+        )
+
+    conn = await asyncssh.connect(
+        host=demo_cluster.ssh.host,
+        port=demo_cluster.ssh.port,
+        options=options,
+        tunnel=proxy,
+    )
+    return SSHClient(conn)
+
+
 @app.post("/token")
 def get_token(
     credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
@@ -167,9 +195,10 @@ class Scheduler(BaseModel):
 
 
 @app.post("/boot")
-def boot(scheduler: Scheduler):
+async def boot(scheduler: Scheduler):
 
     username = next(iter(settings.ssh_credentials))
+    credentials = settings.ssh_credentials[username]
 
     demo_cluster = settings.clusters[0]
     demo_cluster.name = scheduler.cluster_name
@@ -178,6 +207,21 @@ def boot(scheduler: Scheduler):
     settings_file = os.getenv("YAML_CONFIG_FILE", None)
     with open(settings_file, "w") as yaml_file:
         yaml.dump(dump, yaml_file)
+
+    scheduler_campatible: bool = True
+    try:
+        sshkey_private = asyncssh.import_private_key(
+            credentials.private_key, passphrase=credentials.passphrase
+        )
+        if credentials.public_cert:
+            sshkey_cert_public = asyncssh.import_certificate(credentials.public_cert)
+
+        client = await sshClient(username, sshkey_private, sshkey_cert_public)
+        sinfo = SinfoVersionCommand()
+        version = await client.execute(sinfo)
+        scheduler_campatible = Version(version) > Version("22.05")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=repr(e)) from e
 
     server = ServerProxy("http://dummy:dummy@localhost:9001/RPC2")
 
@@ -196,6 +240,11 @@ def boot(scheduler: Scheduler):
         "message": "Firecrest v2 started successfully.",
         "access_token": token,
         "system_name": demo_cluster.name,
+        "scheduler": {
+            "type": "Slurm",
+            "version": version,
+            "is_compatible": scheduler_campatible,
+        },
     }
 
 
@@ -203,6 +252,7 @@ class Credentials(BaseModel):
     username: str
     private_key: str
     public_cert: Optional[str] = None
+    passphrase: Optional[str] = None
 
 
 @app.post("/credentials")
@@ -216,7 +266,9 @@ async def credentials(credentials: Credentials):
     sshkey_private = None
 
     try:
-        sshkey_private = asyncssh.import_private_key(credentials.private_key)
+        sshkey_private = asyncssh.import_private_key(
+            credentials.private_key, passphrase=credentials.passphrase
+        )
         if credentials.public_cert:
             sshkey_cert_public = asyncssh.import_certificate(credentials.public_cert)
 
@@ -224,33 +276,15 @@ async def credentials(credentials: Credentials):
             **{
                 "private_key": credentials.private_key,
                 "public_cert": credentials.public_cert,
+                "passphrase": credentials.passphrase,
             }
         )
         settings.ssh_credentials.clear()
         settings.ssh_credentials[credentials.username] = ssh_credential
 
-        options = asyncssh.SSHClientConnectionOptions(
-            username=credentials.username,
-            client_keys=[sshkey_private],
-            client_certs=[sshkey_cert_public],
-            known_hosts=None,
+        client = await sshClient(
+            credentials.username, sshkey_private, sshkey_cert_public
         )
-
-        proxy = ()
-        if demo_cluster.ssh.proxy_host:
-            proxy = await asyncssh.connect(
-                host=demo_cluster.ssh.proxy_host,
-                port=demo_cluster.ssh.proxy_port,
-                options=options,
-            )
-
-        conn = await asyncssh.connect(
-            host=demo_cluster.ssh.host,
-            port=demo_cluster.ssh.port,
-            options=options,
-            tunnel=proxy,
-        )
-        client = SSHClient(conn)
         pwd = PwdCommand()
         user_home = await client.execute(pwd)
 
