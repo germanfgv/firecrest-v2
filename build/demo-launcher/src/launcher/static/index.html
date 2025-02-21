@@ -18,6 +18,7 @@
     </style>
     <title>FirecREST v2 Demo Launcher</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script>
 
         function showSSHTunnel() {
@@ -144,7 +145,7 @@
             removeSpinner('boot_button')
             if (response.ok) {
                 response_json = await response.json()
-                document.getElementById("token").value=response_json.access_token;
+                document.getElementById("token").innerText=response_json.access_token;
                 document.querySelectorAll('.system-name').forEach(el => el.innerHTML=response_json.system_name);
                 document.querySelectorAll('.demo-token').forEach(el => el.textContent=response_json.access_token);
                 showStep(4)
@@ -207,11 +208,13 @@
                         </label>
                         <span class="has-tooltip">
                             <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                                It can be any FQDN where you usually connect from this container to the cluster using SSH like "cluster.site.com" or "192.168.0.11"
+                                It can be a DNS or IP that you use to connect to the cluster using SSH like "cluster.site.com" or "192.168.0.11"
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                    class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                           text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         <input type="text" id="hostname" placeholder="Enter your SSH hostname" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
                     </div>
@@ -223,11 +226,13 @@
                         </label>
                         <span class="has-tooltip">
                             <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                                Port number where you usually connect to the cluster using SSH
+                                Port number you use to connect to the cluster using SSH
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                    class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                           text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         
                         <input type="text" id="hostport" value="22" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required>
@@ -238,11 +243,13 @@
                         <label for="checked-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Enable SSH tunneling</label>
                         <span class="has-tooltip">
                             <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                               Check this if you use a jump host to connect to the target cluster
+                               Check this box if you use a jump host to connect to the target cluster
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                    class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                           text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                     </div>
                     <div id="ssh-tunnel-options" class="step col-span-6 sm:col-span-3">
@@ -253,11 +260,13 @@
                             </label>
                             <span class="has-tooltip">
                                 <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                                    It can be any FQDN where you usually connect from this container to the cluster using SSH like "cluster.site.com" or "192.168.0.11"
+                                    It can be a DNS or IP that you use to connect to the jump host using SSH like "cluster.site.com" or "192.168.0.11"
                                 </span>
                                 <button type="button" 
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                                text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                    class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                           text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                                </button>
                             </span>
                             <input type="text" id="proxyhost" placeholder="Enter your SSH proxy hostname" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
                         </div>
@@ -269,11 +278,13 @@
                             </label>
                             <span class="has-tooltip">
                                 <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                                    Port number where you usually connect to the cluster using SSH
+                                    Port number you use to connect to the jump host using SSH
                                 </span>
                                 <button type="button" 
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                                text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                    class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                           text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                                </button>
                             </span>
                             
                             <input type="text" id="proxyport" value="22" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required>
@@ -320,8 +331,10 @@
                                Unix username (UID) on the cluster, it has to match with the identities in the SSH keys
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                        text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         
                         <input type="text" id="username" placeholder="Enter SSH username" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
@@ -334,11 +347,13 @@
                         </label>
                         <span class="has-tooltip">
                             <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                               Has to match with the username provided
+                               Has to be a valid credential for the user provided above
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                        text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         <textarea id="private_key"  rows="4" cols="50" placeholder="Enter SSH private key" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
                     </div>
@@ -350,11 +365,13 @@
                         </label>
                         <span class="has-tooltip">
                             <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                               Has to match with the username provided
+                               Has to match with the private key provided above
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                        text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         <textarea id="public_cert"  rows="4" cols="50" placeholder="Enter SSH public certificate" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none"></textarea>
                     </div>
@@ -403,8 +420,10 @@
                               Use a familiar name for the cluster (no spaces or special chars), it would be use later as machine name parameter
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                        text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         
                         <input type="text" id="cluster-name" placeholder="Enter Cluster name" required class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none">
@@ -422,8 +441,10 @@
                                Workload manager and scheduler used in the cluster to submit and manage compute jobs
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                        text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                         <select id="scheduler" class="mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none border-gray-300 focus:border-blue-300 focus:ring-blue-300">
                             <option value="slurm" selected>Slurm</option>
@@ -469,173 +490,140 @@
                      <div class="col-span-6 sm:col-span-6">
                         <div class="bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
                             <div class="flex">
-                                <div class="py-1"><svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
-                                    <div style="width: 100%;">
-                                        <p class="font-medium">The system name is:</p>
-                                        <span class="system-name bg-green-100 text-green-800 text-xs font-bold me-3 px-4.5 py-1 rounded-sm dark:bg-green-900 dark:text-green-300"></span>
-                                        <p class="font-medium mt-4">Your HTTP Bearer JWT access token is:</p>
-                                        <textarea id="token"  rows="4" cols="50" style="background: white;" class="border-gray-300 focus:border-blue-300 focus:ring-blue-300 mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none" required></textarea>
-                                    </div>
-                                    <div class="grid grid-cols-1 place-items-end gap-6">
-                                        <button data-copy-to-clipboard-target="code-block"
-                                                data-copy-to-clipboard-content-type="innerHTML"
-                                                data-copy-to-clipboard-html-entities="true"
-                                                class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8"
-                                                onclick="copyToClipboard('token', 'copy-default-token', 'copy-success-token');">
-                                            <span id="copy-default-token">
-                                                <span class="inline-flex items-center">
-                                                    <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                                                        <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
-                                                    </svg>
-                                                    <span class="text-xs font-semibold">Copy Token</span>
+                                <div style="width: 100%;">
+                                    <p class="font-medium">The system name is:</p>
+                                    <span class="system-name bg-green-100 text-green-800 text-xs font-bold me-3 px-4.5 py-1 rounded-sm dark:bg-green-900 dark:text-green-300"></span>
+                                    <p class="font-medium mt-4">Your HTTP Bearer JWT access token is:</p>
+                                    <div class="relative bg-gray-50 rounded-lg dark:bg-gray-700">
+                                        <div class="overflow-x-auto">
+                                            <pre style="white-space: pre-wrap; word-break: break-all;"><code id="token">
+                                            </code></pre>                                                
+                                        </div>
+                                        <div class="absolute top-2 end-2 bg-gray-50 dark:bg-gray-700">
+                                            <button onclick="copyToClipboard('token', 'copy-default-token', 'copy-success-token');" class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8">
+                                                <span id="copy-default-token">
+                                                    <span class="inline-flex items-center">                                                            
+                                                        <span class="text-xs font-semibold"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy token</span>
+                                                    </span>
                                                 </span>
-                                            </span>
-                                            <span id="copy-success-token" class="hidden">
-                                                <span class="inline-flex items-center">
-                                                    <svg class="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
-                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
-                                                    </svg>
-                                                    <span class="text-xs font-semibold text-blue-700 dark:text-blue-500">Copied</span>
+                                                <span id="copy-success-token" class="hidden">
+                                                    <span class="inline-flex items-center">                            
+                                                        <span class="text-xs font-semibold text-blue-700 dark:text-blue-500"><i class="fa fa-check" aria-hidden="true"></i> Copied</span>
+                                                    </span>
                                                 </span>
-                                            </span>
-                                        </button>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                        
-                        
+                                </div>                                    
+                            </div>
+                        </div>
                         <p class="mt-4">Some API end-points will require you to provide the above system name. Use this token to authorize your API calls. You can, for instance, copy and paste the system name and HTTP Bearer token into the Swagger UI to enable interactive documentation functionality.</p>
                     </div>
-                    <br/>
+                        
+                                        
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Documentation</h3>    
                     <div class="col-span-6 sm:col-span-6">
                         <span>The Swagger UI allows you to browse all FirecREST end-point and perform actuall calls.</span> <br/>
-                        <span>The FirecREST-v2 API documentation (Swagger) is available at: <br/> ➡️ <a class="underline font-medium" href="http://localhost:5000/docs" target="_blank">http://localhost:5000/docs</a></span>
+                        <span>The FirecREST-v2 API documentation (Swagger) is available at: <br/> ➡️ <a class="underline font-medium" href="http://localhost:5000/docs" target="_blank">http://localhost:5000/docs <i class="fa fa-external-link" aria-hidden="true"></i></a></span>
                         <span class="has-tooltip">
                             <span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-700 -mt-8">
-                              If you configured the target port on your container remember to change it when calling FirecREST
+                              If you configured a target port other than "5000" on your container remember to change it when calling FirecREST
                             </span>
                             <button type="button" 
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700
-                                            text-white drop-shadow-sm transition-colors duration-150 hover:bg-gray-800">i</button>
+                                class="inline-flex h-5 w-5 rounded-full items-center justify-center
+                                        text-blue-800 drop-shadow-sm transition-colors duration-150 hover:text-blue-500">
+                                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            </button>
                         </span>
                     </div>
-                    
-                    <br/>
+                                        
 
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Examples</h3>    
                     <div class="col-span-6 sm:col-span-6">
-                        <h3 class="text-lg leading-6 font-small text-gray-900">The following are a set of curl examples you can copy and paste in your terminal to quicky interact with the FirecREST API.</h3>
+                        <h3 class="text-lg leading-6 font-small text-gray-900">The following are a set of <code class="text-gray-300 bg-gray-900">curl</code> command examples you can copy and paste in your terminal to quicky interact with the FirecREST API.</h3>
                     </div>
 
                     
                     <div class="col-span-6 sm:col-span-6">
-                        <div class="bg-gray-900 text-white p-4 rounded-md">
+                        <div class="relative bg-gray-900 text-white p-4 rounded-md">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-gray-400">Submit Job:</span>
                             </div>
-                            <div class="overflow-x-auto">
-                                    <code id="submit-code" 
-                                            class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:5000/compute/<span class="system-name"></span>/jobs"
-                                    </code>
-                            </div>
-                            <div class="grid grid-cols-1 place-items-end gap-6">
-                                <button data-copy-to-clipboard-target="code-block"
-                                        data-copy-to-clipboard-content-type="innerHTML"
-                                        data-copy-to-clipboard-html-entities="true"
-                                        class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8"
-                                        onclick="copyToClipboard('submit-code', 'copy-default-submit', 'copy-success-submit');">
+                            <div class="absolute top-2 end-2 dark:bg-gray-700">
+                                <button onclick="copyToClipboard('submit-code', 'copy-default-submit', 'copy-success-submit');" class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8">
                                     <span id="copy-default-submit">
-                                        <span class="inline-flex items-center">
-                                            <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                                                <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
-                                            </svg>
-                                            <span class="text-xs font-semibold">Copy Submit Code</span>
+                                        <span class="inline-flex items-center">                                                            
+                                            <span class="text-xs font-semibold"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy code</span>
                                         </span>
                                     </span>
                                     <span id="copy-success-submit" class="hidden">
-                                        <span class="inline-flex items-center">
-                                            <svg class="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
-                                            </svg>
-                                            <span class="text-xs font-semibold text-blue-700 dark:text-blue-500">Copied</span>
+                                        <span class="inline-flex items-center">                            
+                                            <span class="text-xs font-semibold text-blue-700 dark:text-blue-500"><i class="fa fa-check" aria-hidden="true"></i> Copied</span>
                                         </span>
                                     </span>
                                 </button>
+                            </div>
+                            <div class="relative">
+                                <div class="overflow-x-auto">
+                                    <code id="submit-code" 
+                                            class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:5000/compute/<span class="system-name"></span>/jobs"
+                                    </code>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-span-6 sm:col-span-6">
-                        <div class="bg-gray-900 text-white p-4 rounded-md">
+                        <div class="relative bg-gray-900 text-white p-4 rounded-md">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-gray-400">List Jobs:</span>
                             </div>
-                            <div class="overflow-x-auto">
-                                    <code id="listjob-code"
-                                          class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/compute/<span class="system-name"></span>/jobs"</code>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 place-items-end gap-6">
-                                <button data-copy-to-clipboard-target="code-block"
-                                        data-copy-to-clipboard-content-type="innerHTML"
-                                        data-copy-to-clipboard-html-entities="true"
-                                        class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8"
-                                        onclick="copyToClipboard('listjob-code', 'copy-default-listjob', 'copy-success-listjob');">
+                            <div class="absolute top-2 end-2 dark:bg-gray-700">
+                                <button onclick="copyToClipboard('listjob-code', 'copy-default-listjob', 'copy-success-listjob');" class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8">
                                     <span id="copy-default-listjob">
-                                        <span class="inline-flex items-center">
-                                            <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                                                <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
-                                            </svg>
-                                            <span class="text-xs font-semibold">Copy List Job Code</span>
+                                        <span class="inline-flex items-center">                                                            
+                                            <span class="text-xs font-semibold"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy code</span>
                                         </span>
                                     </span>
                                     <span id="copy-success-listjob" class="hidden">
-                                        <span class="inline-flex items-center">
-                                            <svg class="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
-                                            </svg>
-                                            <span class="text-xs font-semibold text-blue-700 dark:text-blue-500">Copied</span>
+                                        <span class="inline-flex items-center">                            
+                                            <span class="text-xs font-semibold text-blue-700 dark:text-blue-500"><i class="fa fa-check" aria-hidden="true"></i> Copied</span>
                                         </span>
                                     </span>
                                 </button>
                             </div>
+                            <div class="overflow-x-auto">
+                                <code id="listjob-code"
+                                        class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/compute/<span class="system-name"></span>/jobs"</code>
+                            </div>                            
                         </div>
                     </div>
 
 
                     <div class="col-span-6 sm:col-span-6">
-                        <div class="bg-gray-900 text-white p-4 rounded-md">
+                        <div class="relative bg-gray-900 text-white p-4 rounded-md">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-gray-400">List folder content:</span>
+                            </div>
+                            <div class="absolute top-2 end-2 dark:bg-gray-700">
+                                <button onclick="copyToClipboard('listdir-code', 'copy-default-listdir', 'copy-success-listdir');" class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8">
+                                    <span id="copy-default-listdir">
+                                        <span class="inline-flex items-center">                                                            
+                                            <span class="text-xs font-semibold"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy code</span>
+                                        </span>
+                                    </span>
+                                    <span id="copy-success-listdir" class="hidden">
+                                        <span class="inline-flex items-center">                            
+                                            <span class="text-xs font-semibold text-blue-700 dark:text-blue-500"><i class="fa fa-check" aria-hidden="true"></i> Copied</span>
+                                        </span>
+                                    </span>
+                                </button>
                             </div>
                             <div class="overflow-x-auto">
                                     <code id="listdir-code"
                                           class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/filesystem/<span class="system-name"></span>/ops/ls?path=<span class="user-home"></span>"</code>
                             </div>
-                            <div class="grid grid-cols-1 place-items-end gap-6">
-                                <button data-copy-to-clipboard-target="code-block"
-                                        data-copy-to-clipboard-content-type="innerHTML"
-                                        data-copy-to-clipboard-html-entities="true"
-                                        class="text-gray-900 dark:text-gray-400 m-0.5 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border h-8"
-                                        onclick="copyToClipboard('listdir-code', 'copy-default-listdir', 'copy-success-listdir');">
-                                    <span id="copy-default-listdir">
-                                        <span class="inline-flex items-center">
-                                            <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                                                <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
-                                            </svg>
-                                            <span class="text-xs font-semibold">Copy List Dir Code</span>
-                                        </span>
-                                    </span>
-                                    <span id="copy-success-listdir" class="hidden">
-                                        <span class="inline-flex items-center">
-                                            <svg class="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
-                                            </svg>
-                                            <span class="text-xs font-semibold text-blue-700 dark:text-blue-500">Copied</span>
-                                        </span>
-                                    </span>
-                                </button>
-                            </div>
+                            
                         </div>
                     </div>
                 
