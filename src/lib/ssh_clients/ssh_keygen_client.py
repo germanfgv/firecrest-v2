@@ -64,4 +64,5 @@ class SSHKeygenClient(SSHKeysProvider):
                     f"Unexpected SSHService response. status:{response.status} message:{message}"
                 )
             job_submit_result = await response.json()
+            job_submit_result["sshKey"]["passphrase"] = None
         return job_submit_result["sshKey"]

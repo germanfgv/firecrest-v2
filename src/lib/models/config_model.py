@@ -30,3 +30,4 @@ class LoadFileSecretStr(SecretStr):
 class SSHUserKeys(CamelModel):
     private_key: LoadFileSecretStr
     public_cert: Optional[str] = None
+    passphrase: Optional[LoadFileSecretStr] = None

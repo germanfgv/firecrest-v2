@@ -13,6 +13,7 @@ ssh_credentials:
     private_key: "secret_file:/run/secrets/ssh_private_key_fireuser"
   firesrv:
     private_key: "secret_file:/run/secrets/ssh_private_key_firesrv"
+    passphrase: "secret_file:/run/secrets/ssh_passphrase_firesrv"
 clusters:
 - name: "cluster-slurm-api"
   ssh:
