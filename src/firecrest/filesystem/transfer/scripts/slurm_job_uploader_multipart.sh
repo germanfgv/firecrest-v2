@@ -14,7 +14,7 @@ BLOCK_SIZE=1048576
 MAX_PART_SIZE={{ F7T_MAX_PART_SIZE }}
 
 # Global parts array
-parts_url=({{ F7T_MP_PARTS_URL }})
+parts_url=({{ F7T_MP_PARTS_URL | safe }})
 
 # ----------------------------------------------------------------------------
 # UTILITY FUNCTIONS
@@ -174,7 +174,7 @@ parallel_run={{ F7T_MP_PARALLEL_RUN }}
 use_split={{ F7T_MP_USE_SPLIT }}
 num_parts={{ F7T_MP_NUM_PARTS }}
 input_file={{ F7T_MP_INPUT_FILE }}
-complete_multipart_url='{{ F7T_MP_COMPLETE_URL }}'
+complete_multipart_url='{{ F7T_MP_COMPLETE_URL | safe }}'
 
 echo "[INFO] Uploading file:$input_file into $num_parts chunks"
 
