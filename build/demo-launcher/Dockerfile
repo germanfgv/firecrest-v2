@@ -19,8 +19,14 @@ RUN apt update -y \
     && apt install -y sudo \
     supervisor \
     iputils-ping \
-    && curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
-    && apt install -y nodejs
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add NodeSource repository and install Node.js 21
+RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - && \
+    apt update && apt install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /run/secrets
 
@@ -48,7 +54,8 @@ ADD ./build/demo-launcher/supervisord.conf /etc/supervisord.conf
 # Run the app with uvicorn
 #CMD ["uvicorn", "launcher.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8080"]
 
-# Copy the UI code
+# Copy the UI code and install yarn to run the UI
 COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app /usr/server/app
+RUN npm install --global yarn
 
 ENTRYPOINT ["supervisord","-c","/etc/supervisord.conf"]
