@@ -19,6 +19,8 @@ RUN apt update -y \
     && apt install -y sudo \
     supervisor \
     iputils-ping \
+    ca-certificates \
+    curl \
     && curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
     && apt install -y nodejs npm
 
