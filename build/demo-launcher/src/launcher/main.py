@@ -2,12 +2,15 @@ from contextlib import asynccontextmanager
 import os
 import sys
 from packaging.version import Version
-from fastapi import Depends, FastAPI, Form, HTTPException
+from fastapi import Depends, FastAPI, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import asyncssh
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
+
+
 import jwt
 from datetime import datetime, timedelta
 from typing import Annotated, Any, Optional
@@ -53,7 +56,7 @@ async def lifespan(app: FastAPI):
     )
     public_key = private_key.public_key()
     public_numbers = public_key.public_numbers()
-
+    keys["public_key"] = public_key
     keys["public_numbers"] = public_numbers
     keys["kid"] = "42"  # unique key identifier
 
@@ -81,17 +84,18 @@ async def lifespan(app: FastAPI):
     """
     )
 
-    print("Navigate to http://localhost:8080/ to get started!\n\n")
+    print("Navigate to http://localhost:8025/ to get started!\n\n")
 
     yield
 
 
 app = FastAPI(lifespan=lifespan)
 
+
 origins = [
     "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:8000",
+    "http://localhost:8025",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -103,6 +107,7 @@ app.add_middleware(
 )
 
 security = HTTPBasic(auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 settings = UnsafeSettings()
 
 
@@ -174,6 +179,13 @@ async def sshClient(username, sshkey_private, sshkey_cert_public):
     return SSHClient(conn)
 
 
+@app.get("/auth/realms/default/protocol/openid-connect/auth")
+def auth(state: str, redirect_uri: str):
+    redirect_url = f"{redirect_uri}?state={state}&code=secret-code"
+    return RedirectResponse(redirect_url, status_code=status.HTTP_302_FOUND)
+
+
+@app.post("/auth/realms/default/protocol/openid-connect/token")
 @app.post("/token")
 def get_token(
     credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
@@ -189,7 +201,29 @@ def get_token(
 
     token = generate_token(username)
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": 31556952,
+        "refresh_token": token,
+    }
+
+
+@app.get("/auth/realms/default/protocol/openid-connect/userinfo")
+def userinfo_endpoint(token: Annotated[str, Depends(oauth2_scheme)]):
+
+    payload = jwt.decode(token, keys["public_key"], algorithms=["RS256"])
+    username = payload.get("name")
+    if "username" in payload:
+        username = payload.get("username")
+    return {
+        "id": username,
+        "username": username,
+        "preferred_username": username,
+        "firstName": username,
+        "lastName": "client",
+        "email": username,
+    }
 
 
 @app.get("/certs")
@@ -233,15 +267,16 @@ async def boot(scheduler: Scheduler):
     server = ServerProxy("http://dummy:dummy@localhost:9001/RPC2")
 
     state = server.supervisor.getProcessInfo("firecrest")
-
     if state["statename"] == "RUNNING":
         server.supervisor.stopProcess("firecrest")
-
     server.supervisor.startProcess("firecrest")
 
-    token = generate_token(username)
+    state = server.supervisor.getProcessInfo("firecrest-ui")
+    if state["statename"] == "RUNNING":
+        server.supervisor.stopProcess("firecrest-ui")
+    server.supervisor.startProcess("firecrest-ui")
 
-    # TODO: check for slurm version and throw an error if it's to old. <22
+    token = generate_token(username)
 
     return {
         "message": "Firecrest v2 started successfully.",
@@ -268,6 +303,10 @@ async def credentials(credentials: Credentials):
     if not credentials.username:
         raise HTTPException(status_code=400, detail="Provide a valid username")
 
+    # Set OIDC client for web-ui
+    with open("/app/config/webui-client", "a") as f:
+        f.write(credentials.username)
+
     demo_cluster = settings.clusters[0]
     sshkey_cert_public = ()
     sshkey_private = None
@@ -293,7 +332,7 @@ async def credentials(credentials: Credentials):
             credentials.username, sshkey_private, sshkey_cert_public
         )
         pwd = PwdCommand()
-        user_home = await client.execute(pwd)
+        user_home = (await client.execute(pwd)).removesuffix("/" + credentials.username)
 
         file_system = FileSystem(
             **{
@@ -325,7 +364,6 @@ class SSHConnection(BaseModel):
 
 @app.post("/sshconnection")
 async def ssh_connection(ssh_connection: SSHConnection):
-
     try:
 
         if ssh_connection.proxyhost:
