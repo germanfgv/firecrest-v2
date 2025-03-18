@@ -7,9 +7,6 @@
 from firecrest.filesystem.ops.commands.ls_base_command import LsBaseCommand
 
 
-UTILITIES_TIMEOUT = 5
-
-
 class LsCommand(LsBaseCommand):
 
     def __init__(
@@ -26,5 +23,4 @@ class LsCommand(LsBaseCommand):
         )
 
     def get_command(self) -> str:
-        ls_cmd = super().get_command()
-        return f"timeout {UTILITIES_TIMEOUT} " f"{ls_cmd}"
+        return super().get_command()
