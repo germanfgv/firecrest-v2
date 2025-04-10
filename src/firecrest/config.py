@@ -176,9 +176,6 @@ class ServiceAccount(CamelModel):
 class ClusterNodesHealth(CamelModel):
     """Basic info about cluster node availability."""
 
-    available: int = Field(0, description="Number of healthy nodes.")
-    total: int = Field(0, description="Total nodes in the cluster.")
-
 
 class HealthCheckType(str, Enum):
     """Types of services that can be health-checked."""
@@ -213,9 +210,7 @@ class BaseServiceHealth(CamelModel):
 class SchedulerServiceHealth(BaseServiceHealth):
     """Health check result for the job scheduler."""
 
-    nodes: Optional[ClusterNodesHealth] = Field(
-        None, description="Details on scheduler-managed cluster nodes."
-    )
+    pass
 
 
 class FilesystemServiceHealth(BaseServiceHealth):
