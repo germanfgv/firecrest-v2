@@ -102,9 +102,7 @@ class Storage(BaseModel):
         ),
     )
     region: str = Field(..., description="Region of the storage bucket.")
-    ttl: int = Field(
-        ..., description="Time-to-live (in seconds) for generated URLs or tokens."
-    )
+    ttl: int = Field(..., description="Time-to-live (in seconds) for generated URLs.")
     tenant: Optional[str] = Field(
         None, description="Optional tenant identifier for multi-tenant setups."
     )
@@ -123,7 +121,6 @@ class Storage(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    # TODO: is this value actually used?
     probing: Optional[StorageProbing] = Field(
         None, description="Configuration for probing storage availability."
     )
