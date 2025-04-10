@@ -66,8 +66,9 @@ def format_type(annotation):
     elif hasattr(annotation, "__name__"):
         if annotation.__name__ == "NoneType":
             return "None"
-        if inspect.isclass(annotation) and issubclass(annotation, Enum):
-            return f"{annotation.__name__} (enum)"
+        elif inspect.isclass(annotation) and issubclass(annotation, Enum):
+            return f"str (enum {annotation.__name__})"
+
         return annotation.__name__
 
     return str(annotation)
