@@ -252,7 +252,7 @@ class FileSystem(CamelModel):
 
 
 class SSHTimeouts(CamelModel):
-    """Various SSH operation timeout settings."""
+    """Various SSH settings."""
 
     connection: int = Field(
         5, description="Timeout (seconds) for initial SSH connection."
