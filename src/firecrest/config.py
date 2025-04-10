@@ -352,7 +352,6 @@ class SSHKeysService(CamelModel):
 class Auth(CamelModel):
     """Authentication and authorization configuration."""
 
-    # TODO what happends if this is not set? How is it optional?
     authentication: Optional[Oidc] = Field(
         None, description="OIDC authentication settings."
     )
