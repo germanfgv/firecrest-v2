@@ -364,6 +364,36 @@ class Auth(CamelModel):
     )
 
 
+class DocServer(CamelModel):
+    """
+    Documentation server configuration of FastAPI. For complete
+    documentation see the `servers` parameter in the
+    [FastAPI docs](https://fastapi.tiangolo.com/reference/fastapi/#fastapi.FastAPI--example).
+    """
+
+    url: str = Field(
+        ...,
+        description=(
+            "A URL to the target host. This URL supports Server Variables "
+            "and MAY be relative, to indicate that the host location is "
+            "relative to the location where the OpenAPI document is being "
+            "served. Variable substitutions will be made when a variable "
+            "is named in {brackets}."
+        ),
+    )
+    description: Optional[str] = Field(
+        None,
+        description="An optional string describing the host designated by the URL.",
+    )
+    variables: Optional[Dict[str, str]] = Field(
+        None,
+        description=(
+            "A `dict` between a variable name and its value. The value is "
+            "used for substitution in the server's URL template."
+        ),
+    )
+
+
 class Settings(BaseSettings):
     """FirecREST configuration. Loaded from a YAML file."""
 
@@ -373,10 +403,10 @@ class Settings(BaseSettings):
     app_version: str = Field("2.x.x", description="Application version string.")
     apis_root_path: str = Field(
         "",
-        description="Base path prefix for exposing APIs (e.g., behind a reverse proxy).",
+        description="Base path prefix for exposing the APIs.",
     )
-    doc_servers: Optional[List[Dict]] = Field(
-        None, description="Optional documentation server definitions for UI purposes."
+    doc_servers: Optional[List[DocServer]] = Field(
+        None, description="Optional documentation server."
     )
     auth: Auth = Field(
         None, description="Authentication and authorization config (OIDC, FGA)."
