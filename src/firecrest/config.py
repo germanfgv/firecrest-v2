@@ -170,10 +170,6 @@ class ServiceAccount(CamelModel):
     )
 
 
-class ClusterNodesHealth(CamelModel):
-    """Basic info about cluster node availability."""
-
-
 class HealthCheckType(str, Enum):
     """Types of services that can be health-checked."""
 
