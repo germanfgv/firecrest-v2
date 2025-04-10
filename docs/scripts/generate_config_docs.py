@@ -5,6 +5,7 @@
 
 import inspect
 import sys
+import types
 
 from enum import Enum
 from importlib import import_module
@@ -29,7 +30,7 @@ def unwrap_type(field_type):
     origin = get_origin(field_type)
     args = get_args(field_type)
 
-    if origin is Union:
+    if origin is Union or origin is types.UnionType:
         return [t for arg in args for t in unwrap_type(arg)]
 
     elif origin in (list, List, tuple, set):
