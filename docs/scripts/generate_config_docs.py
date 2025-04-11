@@ -19,6 +19,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 MODEL_PATH = "firecrest.config.Settings"
 OUTPUT_FILE = "docs/setup/conf/README.md"
 EXAMPLE_FILE = "f7t-api-config.local-env.yaml"
+SKIP_FIELDS = {
+    "servicesHealth",
+}
 # ==============
 
 
@@ -95,6 +98,9 @@ def document_model(model: Type[BaseModel], seen: Set[Type] = None, title=None) -
     lines.append("|-------|------|-------------|---------|")
 
     for field_name in sorted(model.model_fields):
+        if field_name in SKIP_FIELDS:
+            continue
+
         field = model.model_fields[field_name]
         field_type = format_type(field.annotation)
         desc = field.description or "—"
@@ -122,6 +128,9 @@ def document_model(model: Type[BaseModel], seen: Set[Type] = None, title=None) -
 
     # Document nested models
     for field_name, field in model.model_fields.items():
+        if field_name in SKIP_FIELDS:
+            continue
+
         internal_types = unwrap_type(field.annotation)
         for t in internal_types:
             if inspect.isclass(t) and issubclass(t, BaseModel):
@@ -169,8 +178,10 @@ def main():
         example = f.read()
 
     markdown += (
-        "This page documents all available configuration options for FirecREST.\n\n"
-        "Below is an example configuration file showing how values can be structured:\n"
+        "This page documents all available configuration options for "
+        "FirecREST.\n\n"
+        "Below is an example configuration file showing how values can "
+        "be structured:\n"
         '??? example "Click to view a sample configuration file"\n'
         "    ```yaml\n"
     )
@@ -181,7 +192,7 @@ def main():
 
     markdown += "In the following tables, you can find all the "
     markdown += "supported configuration options, along with their types, "
-    markdown += "descriptions, and default values.:\n\n"
+    markdown += "descriptions, and default values:\n\n"
     markdown += document_model(model)
 
     output_path = Path(OUTPUT_FILE)
