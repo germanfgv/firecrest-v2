@@ -352,9 +352,7 @@ class SSHKeysService(CamelModel):
 class Auth(CamelModel):
     """Authentication and authorization configuration."""
 
-    authentication: Optional[Oidc] = Field(
-        None, description="OIDC authentication settings."
-    )
+    authentication: Oidc = Field(..., description="OIDC authentication settings.")
     authorization: Optional[OpenFGA] = Field(
         None,
         description=(
@@ -409,10 +407,14 @@ class Settings(BaseSettings):
         None, description="Optional documentation server."
     )
     auth: Auth = Field(
-        None, description="Authentication and authorization config (OIDC, FGA)."
+        ..., description="Authentication and authorization config (OIDC, FGA)."
     )
     ssh_credentials: SSHKeysService | Dict[str, SSHUserKeys] = Field(
-        ..., description="SSH keys service or manually defined user keys."
+        ...,
+        description=(
+            "SSH keys service or manually defined user keys. More details in "
+            "[this section](../arch/systems/#obtaining-ssh-credentials-on-behalf-of-the-user)."
+        ),
     )
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."
