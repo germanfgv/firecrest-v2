@@ -357,7 +357,7 @@ class Auth(CamelModel):
         None,
         description=(
             "Authorization settings via OpenFGA. More info in [the "
-            "authorization section](../arch/auth/#authorization)."
+            "authorization section](../arch/auth/README.md#authorization)."
         ),
     )
 
@@ -413,7 +413,7 @@ class Settings(BaseSettings):
         ...,
         description=(
             "SSH keys service or manually defined user keys. More details in "
-            "[this section](../arch/systems/#obtaining-ssh-credentials-on-behalf-of-the-user)."
+            "[this section](../arch/systems/README.md#obtaining-ssh-credentials-on-behalf-of-the-user)."
         ),
     )
     clusters: List[HPCCluster] = Field(

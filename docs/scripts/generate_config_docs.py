@@ -97,7 +97,7 @@ def document_model(model: Type[BaseModel], seen: Set[Type] = None, title=None) -
     lines.append("| Field | Type | Description | Default |")
     lines.append("|-------|------|-------------|---------|")
 
-    for field_name in sorted(model.model_fields):
+    for field_name in model.model_fields:
         if field_name in SKIP_FIELDS:
             continue
 
