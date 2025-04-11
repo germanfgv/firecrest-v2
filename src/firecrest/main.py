@@ -11,7 +11,6 @@ from firecrest.plugins import settings
 
 
 import logging
-import re
 import types
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
