@@ -375,7 +375,7 @@ class Auth(CamelModel):
 class Logger(CamelModel):
     enable_tracing_log: bool = Field(
         False,
-        description=("Enable logging."),
+        description="Enable logging.",
     )
 
 
