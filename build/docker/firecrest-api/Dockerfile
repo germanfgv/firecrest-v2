@@ -24,12 +24,9 @@ WORKDIR /app
 COPY ./requirements.txt ./requirements.txt
 COPY ./requirements-testing.txt ./requirements-testing.txt
 
-
-
 # Build the dependencies
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 RUN if [ "$ENVIRONMENT" = "development" ] ; then pip install --no-cache-dir --upgrade -r ./requirements-testing.txt ; fi
-
 
 # Copy the code
 COPY ./src/lib ./lib
