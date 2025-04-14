@@ -11,11 +11,10 @@ from typing import Optional, List
 from jose import jwt
 from packaging.version import Version
 
-# exceptions
+# Exceptions
 from lib.exceptions import SlurmAuthTokenError, SlurmError
 
-
-# models
+# Models
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
     SlurmJobDescription,
@@ -27,7 +26,17 @@ from lib.scheduler_clients.slurm.models import (
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 
+# Tracing logs
+from lib.loggers.tracing_log import log_http_scheduler
+
 SIZE_POOL_AIOHTTP = 100
+
+
+#### 
+# Channel HTTP
+# url: /jobs/xxx
+# returncode:200
+#
 
 
 def _slurm_headers(username: str, jwt_token: str):
@@ -107,12 +116,14 @@ class SlurmRestClient(SlurmBaseClient):
                 **{"script": job_description.script},
             }
 
+        url = f"{self.api_url}/slurm/v{self.api_version}/job/submit"
         async with client.post(
-            url=f"{self.api_url}/slurm/v{self.api_version}/job/submit",
+            url=url,
             data=json.dumps(post_data),
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_submit_result = await response.json()
@@ -133,11 +144,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurmdb/v{self.api_version}/job/{job_id}"
         async with client.get(
-            url=f"{self.api_url}/slurmdb/v{self.api_version}/job/{job_id}",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_result = await response.json()
@@ -159,11 +172,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs",
         async with client.get(
-            url=f"{self.api_url}/slurmdb/v{self.api_version}/jobs",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_result = await response.json()
@@ -179,11 +194,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurm/v{self.api_version}/job/{job_id}"
         async with client.delete(
-            url=f"{self.api_url}/slurm/v{self.api_version}/job/{job_id}",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status == status.HTTP_200_OK:
                 return True
             await _slurm_unexpected_response(response)
@@ -192,11 +209,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurm/v{self.api_version}/nodes"
         async with client.get(
-            url=f"{self.api_url}/slurm/v{self.api_version}/nodes",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             nodes_result = await response.json()
@@ -210,11 +229,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurm/v{self.api_version}/reservations"
         async with client.get(
-            url=f"{self.api_url}/slurm/v{self.api_version}/reservations",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             reservation_result = await response.json()
@@ -228,11 +249,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurm/v{self.api_version}/partitions"
         async with client.get(
-            url=f"{self.api_url}/slurm/v{self.api_version}/partitions",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
@@ -244,11 +267,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
+        url = f"{self.api_url}/slurm/v{self.api_version}/ping"
         async with client.get(
-            url=f"{self.api_url}/slurm/v{self.api_version}/ping",
+            url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
+            log_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()

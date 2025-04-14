@@ -10,11 +10,10 @@ from functools import wraps
 from fastapi import Request
 from starlette_context import context
 
-
 # The actual tracing logger
 tracing_logger = logging.getLogger("f7t_v2_tracing_log")
 
-
+# Wrapper
 def tracing_log_method(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -35,9 +34,36 @@ def get_tracing_data(key: str) -> str:
         return context[key]
     return ""
 
-# Set command exit status into context data map
-def log_exit_status(exit_status: int) -> None:
+# Get detailed backend logging dict
+def get_tracing_backend_log() -> str:
+    if "backend" in context:
+        match context["backend"]:
+            case "command":
+                return {
+                        "command":     get_tracing_data("command"), 
+                        "exit_status": get_tracing_data("exit_status") 
+                       }
+            case "http_scheduler":
+                return { 
+                        "url":             get_tracing_data("url"), 
+                        "response_status": get_tracing_data("response_status") 
+                       }
+            case _:
+                return None
+    else:
+        return None
+
+# Set command and exit status into context data map
+def log_command(command: str, exit_status: int) -> None:
+    set_tracing_data("backend", "command")
+    set_tracing_data("command", str(command))
     set_tracing_data("exit_status", str(exit_status))
+
+# Set url and response status into context data map
+def log_http_scheduler(url: str, response_status: int) -> None:
+    set_tracing_data("backend", "http_scheduler")
+    set_tracing_data("url", url)
+    set_tracing_data("response_status", str(response_status))
 
 @tracing_log_method
 def tracing_log_middleware(request: Request, username: str, status_code: int) -> None:
@@ -49,11 +75,9 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     # Normalize endpoint: remove prefix from root path, added by any API gateway
     endpoint = url_path.removeprefix(root_path) if root_path != "" else url_path
     # Initialize logging data
-    group = ""
     resource = ""
     system_name = ""
-    command = ""
-    # Extract data from endpoint format "/resource/system/(group/command)"
+    # Extract data from endpoint format "/resource/system/..."
     if match := re.search(
         r"^\/([^\/\s]+)\/([^\/\s]+)\/(.*)$",
         endpoint,
@@ -61,32 +85,24 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     ):
         resource = match.group(1)
         system_name = match.group(2)
-        # Get group and command
-        tmp = match.group(3)
-        if match_cmd := re.search(r"^([^\/\s]+)\/(.*)$", tmp, re.IGNORECASE):
-            group = match_cmd.group(1)
-            command = match_cmd.group(2)
-        else:
-            group = ""
-            command = tmp
-    # Extract data from endpoint format "/resource/command"
+    # Extract data from endpoint format "/resource/..."
     elif match := re.search(
         r"^\/([^\/\s]+)\/(.*)$",
         endpoint,
         re.IGNORECASE):
         resource = match.group(1)
-        command = match.group(2)
+        
     # Compose logging data packet
     log_data = {}
     log_data["username"] = username
     log_data["system_name"] = system_name
     log_data["endpoint"] = endpoint
-    log_data["status_code"] = status_code
-    log_data["exit_status"] = exit_status
     log_data["resource"] = resource
-    log_data["group"] = group
-    log_data["command"] = command
-    log_data["url_path"] = url_path
+    log_data["status_code"] = status_code
     log_data["user_agent"] = request.headers["user-agent"]
+    # Get backend log if any
+    backend = get_tracing_backend_log()
+    if backend is not None: 
+        log_data["backend"] = backend
     # Write log
     tracing_logger.info(log_data)
