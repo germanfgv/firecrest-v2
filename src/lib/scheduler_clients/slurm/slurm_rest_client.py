@@ -172,7 +172,7 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
-        url = (f"{self.api_url}/slurmdb/v{self.api_version}/jobs",)
+        url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs"
         async with client.get(
             url=url,
             headers=headers,
