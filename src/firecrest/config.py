@@ -372,6 +372,10 @@ class Auth(CamelModel):
     )
 
 
+class Logger(CamelModel):
+    enable_tracing_log: Optional[bool] = False
+
+
 class Settings(BaseSettings):
     """FirecREST configuration. Loaded from a YAML file."""
 
@@ -411,6 +415,7 @@ class Settings(BaseSettings):
             "[this section](../arch/external_storage/README.md)."
         ),
     )
+    logger: Optional[Logger] = Logger()
 
     model_config = SettingsConfigDict(
         env_file=".env",

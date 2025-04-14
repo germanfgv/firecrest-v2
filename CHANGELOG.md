@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.2.5] - OPEN
 
 ### Added
+- Log for request and command execution tracing
 
 ### Changed
 
 ### Fixed
+
+- Fix health check for older versions of Slurm REST API (< v0.0.42)
 
 ## [2.2.4]
 
@@ -23,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Disabled cluster health checks won't cause errors
 - Github pages changed to allow mkdocs syntax for notes and code samples
 
 ## [2.2.3]
@@ -71,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new FirecREST demo image.
 - Added support for private key passphrase.
 ### Changed
-- Images are now built for multiple platforms: inux/amd64, linux/arm64
+- Images are now built for multiple platforms: linux/amd64, linux/arm64
 
 ### Fixed
 
