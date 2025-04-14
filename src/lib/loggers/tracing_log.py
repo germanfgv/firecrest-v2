@@ -64,8 +64,6 @@ def log_backend_http_scheduler(url: str, response_status: int) -> None:
 
 @tracing_log_method
 def tracing_log_middleware(request: Request, username: str, status_code: int) -> None:
-    # Get action's exit status
-    exit_status = get_tracing_data("exit_status")
     # Get URL
     url_path = request.scope["path"]
     root_path = request.scope["root_path"]
