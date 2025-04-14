@@ -16,7 +16,7 @@ from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
-from lib.loggers.tracing_log import log_command
+from lib.loggers.tracing_log import log_backend_command
 
 
 class BaseCommand(ABC):
@@ -91,7 +91,7 @@ class SSHClient:
                 process.close()
                 await process.wait_closed()
                 # Log command
-                log_command(command_line, process.exit_status)
+                log_backend_command(command_line, process.exit_status)
                 return command.parse_output(
                     stdout_data, stdout_error, process.exit_status
                 )

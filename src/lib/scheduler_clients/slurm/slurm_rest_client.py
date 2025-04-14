@@ -27,12 +27,12 @@ from lib.scheduler_clients.slurm.models import (
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 
 # Tracing logs
-from lib.loggers.tracing_log import log_http_scheduler
+from lib.loggers.tracing_log import log_backend_http_scheduler
 
 SIZE_POOL_AIOHTTP = 100
 
 
-#### 
+####
 # Channel HTTP
 # url: /jobs/xxx
 # returncode:200
@@ -123,7 +123,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_submit_result = await response.json()
@@ -150,7 +150,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_result = await response.json()
@@ -172,13 +172,13 @@ class SlurmRestClient(SlurmBaseClient):
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
-        url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs",
+        url = (f"{self.api_url}/slurmdb/v{self.api_version}/jobs",)
         async with client.get(
             url=url,
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_result = await response.json()
@@ -200,7 +200,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status == status.HTTP_200_OK:
                 return True
             await _slurm_unexpected_response(response)
@@ -215,7 +215,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             nodes_result = await response.json()
@@ -235,7 +235,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             reservation_result = await response.json()
@@ -255,7 +255,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
@@ -273,7 +273,7 @@ class SlurmRestClient(SlurmBaseClient):
             headers=headers,
             timeout=timeout,
         ) as response:
-            log_http_scheduler(url, response.status)
+            log_backend_http_scheduler(url, response.status)
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
