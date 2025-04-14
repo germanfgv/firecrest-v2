@@ -35,6 +35,7 @@ jobs:
         make clean
         make docs
         mv site .site
+        git restore docs/setup/conf/README.md
     - name: Merge site with gh-pages branch
       run: |
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
