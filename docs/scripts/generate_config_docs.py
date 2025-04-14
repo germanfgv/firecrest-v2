@@ -54,7 +54,7 @@ def format_type(annotation):
     args = get_args(annotation)
 
     if origin is Union:
-        return " | ".join(format_type(a) for a in args)
+        return " `|` ".join(format_type(a) for a in args)
 
     elif origin in (list, List):
         if args:
