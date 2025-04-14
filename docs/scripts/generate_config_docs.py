@@ -58,21 +58,30 @@ def format_type(annotation):
 
     elif origin in (list, List):
         if args:
-            return f"List[{format_type(args[0])}]"
-        return "List"
+            return f"`List[` {format_type(args[0])} `]`"
+        return "`List`"
 
     elif origin in (dict, Dict):
         if len(args) == 2:
-            return f"Dict[{format_type(args[0])}, {format_type(args[1])}]"
-        return "Dict"
+            return f"`Dict[` {format_type(args[0])}, {format_type(args[1])} `]`"
+        return "`Dict`"
 
     elif hasattr(annotation, "__name__"):
         if annotation.__name__ == "NoneType":
-            return "None"
+            return "`None`"
         elif inspect.isclass(annotation) and issubclass(annotation, Enum):
-            return f"str (enum {annotation.__name__})"
+            available_options = ", ".join(
+                f"`{option.name.lower()}`" for option in annotation
+            )
+            return f"`enum str` (Available options: {available_options})"
 
-        return annotation.__name__
+        cname = annotation.__name__
+        if issubclass(annotation, BaseModel):
+            cname = f"[{cname}](#{cname.lower()})"
+        else:
+            cname = f"`{cname}`"
+
+        return cname
 
     return str(annotation)
 
@@ -122,7 +131,7 @@ def document_model(model: Type[BaseModel], seen: Set[Type] = None, title=None) -
         elif field.default is not ...:
             default = f"`{repr(field.default)}`"
 
-        lines.append(f"| `{field_name}` | `{field_type}` | {desc} | {default} |")
+        lines.append(f"| `{field_name}` | {field_type} | {desc} | {default} |")
 
     lines.append("")
 
@@ -141,16 +150,6 @@ def document_model(model: Type[BaseModel], seen: Set[Type] = None, title=None) -
                 )
                 lines.append(nested_block)
                 lines.append("")
-
-            if inspect.isclass(t) and issubclass(t, Enum):
-                lines.append("")
-                lines.append(
-                    f'??? note "Enum values for `{field_name}` ({t.__name__})"'
-                )
-                if t.__doc__:
-                    lines.append(f"    {t.__doc__.strip()}\n")
-                for member in t:
-                    lines.append(f"    - `{member.value}`")
 
     return "\n".join(lines)
 

@@ -360,7 +360,7 @@ class Auth(CamelModel):
         ...,
         description=(
             "OIDC authentication settings. More info in the "
-            "[authentication section](../arch/auth/README.md#Authentication)."
+            "[authentication section](../arch/auth/README.md#authentication)."
         ),
     )
     authorization: Optional[OpenFGA] = Field(
