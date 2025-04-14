@@ -287,7 +287,11 @@ class SSHClientPool(CamelModel):
 
 
 class HPCCluster(CamelModel):
-    """Definition of an HPC cluster, including SSH access, scheduling, and filesystem layout."""
+    """
+    Definition of an HPC cluster, including SSH access, scheduling, and
+    filesystem layout. More info in
+    [the systems' section](../arch/systems//README.md).
+    """
 
     name: str = Field(..., description="Unique name for the cluster.")
     ssh: SSHClientPool = Field(
@@ -352,7 +356,13 @@ class SSHKeysService(CamelModel):
 class Auth(CamelModel):
     """Authentication and authorization configuration."""
 
-    authentication: Oidc = Field(..., description="OIDC authentication settings.")
+    authentication: Oidc = Field(
+        ...,
+        description=(
+            "OIDC authentication settings. More info in the "
+            "[authentication section](../arch/auth/README.md#Authentication)."
+        ),
+    )
     authorization: Optional[OpenFGA] = Field(
         None,
         description=(
@@ -395,7 +405,11 @@ class Settings(BaseSettings):
         default_factory=list, description="List of configured HPC clusters."
     )
     storage: Optional[Storage] = Field(
-        None, description="Storage backend configuration."
+        None,
+        description=(
+            "Storage backend configuration. More details in "
+            "[this section](../arch/external_storage/README.md)."
+        ),
     )
 
     model_config = SettingsConfigDict(
