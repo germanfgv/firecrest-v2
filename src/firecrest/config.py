@@ -373,7 +373,10 @@ class Auth(CamelModel):
 
 
 class Logger(CamelModel):
-    enable_tracing_log: Optional[bool] = False
+    enable_tracing_log: bool = Field(
+        False,
+        description=("Enable logging."),
+    )
 
 
 class Settings(BaseSettings):
@@ -415,7 +418,9 @@ class Settings(BaseSettings):
             "[this section](../arch/external_storage/README.md)."
         ),
     )
-    logger: Optional[Logger] = Logger()
+    logger: Logger = Field(
+        default_factory=Logger, description="Logging configuration options."
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
