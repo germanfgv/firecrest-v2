@@ -103,11 +103,14 @@ When we are done with the tutorial, the deployment can be shutdown by pressing `
 
 ### Setting up the authorization
 
-A requirement for running JupyterHub with FirecRESTSpawner is to use an authenticator that prompts users for login and password in exchange for an access token.
+A requirement for running JupyterHub with FirecRESTSpawner is to use an authenticator that prompts users for login and password in exchange for an [OIDC/OAuth2 access token](https://datatracker.ietf.org/doc/html/rfc7519).
 That token is then be passed to the spawner, allowing users to authenticate with FirecREST when submitting, stopping or polling for jobs.
-For this purpose, we will use an Authorization Code Flow client, which we need to create on the Keycloak web interface.
+For this purpose, we will use an [Authorization Code Flow](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1) client, which we need to create on the Keycloak web interface.
 
-Let's go to the [Clients page](http://localhost:8080/auth/admin/master/console/#/master/clients) in Keycloak (username: admin, password: admin2) within the `kcrealm` realm.
+!!! info "More on AuthN"
+    For more information on how FirecREST uses the authentication layer, follow this [documentation](../../setup/arch/auth/README.md).  
+
+Let's go to the [Clients page](http://localhost:8080/auth/admin/master/console/#/master/clients) in Keycloak (username: `admin` and password: `admin2`) within the `kcrealm` realm.
 We click on "Import client" and then on "Browse".
 A file system explorer will open.
 Navigate to the tutorial's directory, choose the [jhub-client.json](jhub-client.json) file and click on "Save".
