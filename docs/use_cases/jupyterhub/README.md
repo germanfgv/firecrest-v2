@@ -1,4 +1,8 @@
-# FirecRESTSpawner with API v2 on Docker
+# JupyterHub FirecRESTSpawner
+
+For most setups, installing JupyterHub in HPC Centers requires the service to be installed on premises, while sharing workload scheduler admin keys and sudo access.
+
+Using FirecREST to spawn jobs as an abstraction for workload schedulers, enables HPC sysadmins to avoid these issues, allowing the service to be installed in cloud providers, avoiding the use of admin credentials installed in the service, and to use the same setup for systems with different schedulers and Identity Providers.
 
 This tutorial explains how to run [JupyterHub](https://jupyterhub.readthedocs.io/en/stable/) with [FirecRESTSpawner](https://github.com/eth-cscs/firecrestspawner) using the [Docker demo of FirecREST API v2](https://github.com/eth-cscs/firecrest-v2).
 
@@ -134,4 +138,7 @@ The IP address `127.0.0.1` is necessary to allow JupyterLab to connect back to t
 
 JupyterHub should be accessible in the browser at [http://localhost:8003](http://localhost:8003/) and it should be possible to launch notebooks on the slurm cluster.
 
-To access the interface use the following `fireuser` as username and `password` as password.
+To access the interface use the following credentials: 
+
+- Username: `fireuser`
+- Password: `password`
