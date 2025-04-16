@@ -1,8 +1,10 @@
 # FirecREST logging
 
-FirecREST utilizes [Uvicorn](https://www.uvicorn.org/) as HTTP server and it can be configured to accept different types of loggers and formatters using the [UVICORN_LOG_CONFIG](https://www.uvicorn.org/settings/#logging) file.
+FirecREST runs on the [Uvicorn](https://www.uvicorn.org/) web server from which it inherits the Python3 [logging configuration](https://docs.python.org/3/library/logging.config.html#object-connections).
 
-This file is based in the Python3 [logging configuration](https://docs.python.org/3/library/logging.config.html#object-connections) YAML format, and must be included as a FirecREST environment variable (ie, `UVICORN_LOG_CONFIG: /app/config/log-conf.yaml`) along with the set to `true` of the `logger.enable_tracing_log` configuration variable.
+By default, the FirecREST logger is disabled and the standard Uvicorn logging is applied. To enable it, and accept customized types of loggers and formatters, a configuration YAML file must be mounted into the firecrest-v2 container and the environment variable [UVICORN_LOG_CONFIG](https://www.uvicorn.org/settings/#logging) shall be set pointing to it.
+
+To enable the log in FirecREST configuration, set to `true` the [logger.enable_tracing_log](../../conf/#logger) configuration variable.
 
 ## Logging config file
 
@@ -58,9 +60,10 @@ Sysadmins can use the following file as a starting point to configure the FirecR
     propagate: no
     ```
 
-## Log formats
+## Tracing logger
 
-The format of the logs is defined in the `f7t_v2_tracing_log` tracer and currently allows the following formats:
+The format of the logs is defined in the configuration file above. As a standard FirecREST uses JSON formatted messages.
+The `f7t_v2_tracing_log` currently supports the following messages:
 
 ### Format for HTTP backend
 
@@ -89,7 +92,7 @@ When the backend service that FirecREST is interfacing (for instance, [SLURM RES
 
 #### Log output examples
 
-??? example "Sample output for JSON formatter `pythonjsonlogger.jsonlogger.JsonFormatter`"
+??? example "Sample output for JSON formatter (`pythonjsonlogger.jsonlogger.JsonFormatter`)"
     ```text
     firecrest-1             | {"asctime": "2025-04-15 16:46:09,900", "levelname": "INFO", "name": "f7t_v2_tracing_log", "message": "", "username": "fireuser", "endpoint": "/status/systems", "resource": "status", "status_code": 200, "user_agent": "PostmanRuntime/7.43.2"}
     firecrest-1             | {"asctime": "2025-04-15 16:47:06,075", "levelname": "INFO", "name": "f7t_v2_tracing_log", "message": "", "username": "fireuser", "system_name": "cluster", "endpoint": "/status/cluster/partitions", "resource": "status", "status_code": 404, "user_agent": "PostmanRuntime/7.43.2"}
@@ -102,7 +105,7 @@ When the backend service that FirecREST is interfacing (for instance, [SLURM RES
 
 ### Format for SSH backend
 
-On the other hand, if FirecREST is executing a command via an SSH command execution, the `backend` field provides the actual `command` to be executed, and the POSIX `exit_status` of the command.
+On the other hand, if FirecREST is executing a command via the SSH Client, then the `backend` field provides the actual `command` to be executed, and the POSIX `exit_status` of the command.
 
 !!! example "FirecREST Log format for SSH backend"
     ```json
