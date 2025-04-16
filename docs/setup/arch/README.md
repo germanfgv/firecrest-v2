@@ -27,3 +27,7 @@ FirecREST handles data transfer up to 5 TB. See how this is done [here](./extern
 ### (4) Health checks
 
 Periodically FirecREST will [check](./health_checks/README.md) that the underlying services are healthy.
+
+### (5) Logging
+
+FirecREST logs can be saved to different logging infrastructures; [here](./logging/README.md) we explain the background of this architecture.

@@ -162,7 +162,7 @@ When enabled, FirecREST will prevent execute commands on unhealthy services
     $ curl filesystem/system02/ops/ls?path=/path/to/filesystem02
     {
         "errorType": "error",
-        "message": "The ssh service for the requested system (zinal) is unhealthy.",
+        "message": "The ssh service for the requested system (system02) is unhealthy.",
         "data": null,
         "user": "firecr01"
     }
