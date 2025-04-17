@@ -27,7 +27,11 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                         "standard_input": "/dev/null",
                         "standard_output": "count_to_100.out",
                         "standard_error": "count_to_100.err",
-                        "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
+                        "env": {
+                            "LD_LIBRARY_PATH": "/path/to/library",
+                            "PATH": "/path/to/bin"
+                        },
+                        "script": "#!/bin/bash\n--partition=part01\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
                     }
                 }
             ]
@@ -49,3 +53,12 @@ class PostJobSubmissionResponse(CamelModel):
 
 class PostJobAttachRequest(CamelModel):
     command: str = None
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "command": "echo 'Attached with success' > $HOME/attach.out"
+                }
+            ]
+        }
+    }
