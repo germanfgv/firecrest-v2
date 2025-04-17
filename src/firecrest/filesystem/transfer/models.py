@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from typing import Any, Optional
+from pydantic import Field
 
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
@@ -11,9 +12,9 @@ from lib.models import CamelModel
 
 
 class PostFileUploadRequest(FilesystemRequestBase):
-    file_name: str
-    account: Optional[str] = None
-    file_size: int
+    file_name: str = Field(..., description="Name of the local file to upload")
+    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    file_size: int = Field(..., description="Size of the file to upload in bytes")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -29,7 +30,7 @@ class PostFileUploadRequest(FilesystemRequestBase):
 
 
 class PostFileDownloadRequest(FilesystemRequestBase):
-    account: Optional[str] = None
+    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -71,8 +72,8 @@ class DownloadFileResponse(CamelModel):
 
 
 class CopyRequest(FilesystemRequestBase):
-    target_path: str
-    account: Optional[str] = None
+    target_path: str = Field(..., description="Target path of the copy operation")
+    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -95,8 +96,8 @@ class DeleteResponse(CamelModel):
 
 
 class MoveRequest(FilesystemRequestBase):
-    target_path: str
-    account: Optional[str] = None
+    target_path: str = Field(..., description="Target path of the move operation")
+    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -115,10 +116,10 @@ class MoveResponse(CamelModel):
 
 
 class CompressRequest(FilesystemRequestBase):
-    target_path: str
-    account: Optional[str] = None
-    match_pattern: Optional[str] = None
-    dereference: Optional[bool] = False
+    target_path: str = Field(..., description="Target path of the compress operation")
+    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    match_pattern: Optional[str] = Field(default=None, description="Regex pattern to filter files to compress")
+    dereference: Optional[bool] = Field(default=False, description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -139,8 +140,8 @@ class CompressResponse(CamelModel):
 
 
 class ExtractRequest(FilesystemRequestBase):
-    target_path: str
-    account: Optional[str] = None
+    target_path: str = Field(..., description="Path to the directory where to extract the compressed file")
+    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
     model_config = {
         "json_schema_extra": {
             "examples": [

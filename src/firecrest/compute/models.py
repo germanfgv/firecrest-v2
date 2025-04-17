@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from typing import List, Optional
+from pydantic import Field
 
 # models
 from lib.models import CamelModel
@@ -52,7 +53,7 @@ class PostJobSubmissionResponse(CamelModel):
 
 
 class PostJobAttachRequest(CamelModel):
-    command: str = None
+    command: str = Field(default=None, description="Command to attach to the job")
     model_config = {
         "json_schema_extra": {
             "examples": [

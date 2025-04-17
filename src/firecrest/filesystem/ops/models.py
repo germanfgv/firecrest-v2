@@ -97,7 +97,7 @@ class PatchFileMetadataResponse(CamelModel):
 
 
 class PutFileChmodRequest(FilesystemRequestBase):
-    mode: str = Field(description="Mode in octal permission format")
+    mode: str = Field(..., description="Mode in octal permission format")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -149,7 +149,7 @@ class PostMakeDirRequest(FilesystemRequestBase):
 
 
 class PostFileSymlinkRequest(FilesystemRequestBase):
-    link_path: str = Field(description="Path to the new symlink")
+    link_path: str = Field(..., description="Path to the new symlink")
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -175,7 +175,7 @@ class PostMkdirResponse(CamelModel):
 
 
 class PostCompressRequest(FilesystemRequestBase):
-    target_path: str = Field(description="Path to the compressed file")
+    target_path: str = Field(..., description="Path to the compressed file")
     match_pattern: Optional[str] = Field(default=None, description="Regex pattern to filter files to compress")
     dereference: Optional[bool] = Field(default=False, description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.")
     model_config = {
@@ -193,7 +193,7 @@ class PostCompressRequest(FilesystemRequestBase):
 
 
 class PostExtractRequest(FilesystemRequestBase):
-    target_path: str = Field(description="Path to the directory where to extract the compressed file")
+    target_path: str = Field(..., description="Path to the directory where to extract the compressed file")
     model_config = {
         "json_schema_extra": {
             "examples": [
