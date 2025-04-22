@@ -10,7 +10,6 @@ build:
 	docker image rm -f f7t-demo-ui
 	docker build -f ./docker/Dockerfile -t f7t-demo-ui .
 run:
-	docker run --rm -p 9091:9091 --network firecrest-v2_firecrest-internal-v2 -v ${current_dir}/log:/var/log  --name f7t-demo-ui f7t-demo-ui
-	# --ip 192.168.240.11 --network firecrest-v2_firecrest-internal-v2
+	docker run --rm -p 9091:9091 -v ${current_dir}/log:/var/log  --name f7t-demo-ui f7t-demo-ui
 stop:
 	docker stop f7t-demo-ui

@@ -68,7 +68,7 @@ You can check the logs in `log/client.log`
 
 ## How does it work for the user
 
-- Open a browser, and enter [http://localhost:9090](http://localhost:9090)
+- Open a browser, and enter [http://localhost:9090](http://localhost:9091)
 - Set the parameters of the problem (number of steps, nodes, job name, etc)
 - Click `Submit Jobs` to run the simulation (you should see the jobs created in the list, and new result files in `Working directory`)
 - Click on `Start Postprocessing` to launch a job and after completion see the animated gif result image
