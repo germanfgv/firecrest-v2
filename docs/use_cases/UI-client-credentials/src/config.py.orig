@@ -22,6 +22,6 @@ class DevConfig(Config):
     PROBLEM_MSH_FILE = ''
     SBATCH_TEMPLATE = "demo.sh.tmpl"
     POST_TEMPLATE = "demo_post.sh.tmpl"
-    CLIENT_PORT = 9090
+    CLIENT_PORT = 9091
     # SSL configuration
     USE_SSL = False
