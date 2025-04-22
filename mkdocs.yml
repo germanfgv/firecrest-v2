@@ -31,6 +31,8 @@ nav:
     - user_guide/README.md
   - 'Use cases':
     - use_cases/README.md
+    - 'Web UI Application':
+      - use_cases/UI-client-credentials/README.md
   - 'API Reference': https://eth-cscs.github.io/firecrest-v2/openapi/
 
 theme:
