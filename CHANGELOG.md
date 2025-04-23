@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Documentation for logging architecture
+- Images for documentation
+
 ### Fixed
 
 ## [2.2.5]
