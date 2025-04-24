@@ -23,7 +23,7 @@ Follow the Configuration guide to adapt your client credentials to the app.
         $ cp config.py.orig config.py
         ```
 
-2. Replace the follwing values with the specifics for this training 
+2. Replace the following values with the specifics for this tutorial
 
     !!! example "Complete configuration file"
         ```python
