@@ -177,7 +177,10 @@ tmp
 # Docs
 ## Use Cases
 ### JupyterHub
-
 /docs/use_cases/jupyterhub/jupyterhub_cookie_secret
 /docs/use_cases/jupyterhub/jupyterhub-proxy.pid
 /docs/use_cases/jupyterhub/jupyterhub.sqlite
+
+### UI App
+/docs/use_cases/UI-client-credentials/log
+/docs/use_cases/UI-client-credentials/src/config.py

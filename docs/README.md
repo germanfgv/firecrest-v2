@@ -20,7 +20,7 @@ Using FirecREST, users and web developers can **automate** access to HPC resourc
 
 - Check out our [GitHub repository](https://github.com/eth-cscs/firecrest-v2), clone the repo, try the Demo environment, create issues, contribute, and more!
 
-- Join the [FirecREST Slack community](https://firecrest-community.slack.com/) or contact us via [email](mailto:firecrest@cscs.ch)
+- Join the [FirecREST Slack community](https://join.slack.com/t/firecrest-community/shared_invite/zt-340vthx9j-NLp8FwZe1i08WycWTT3M4w) or contact us via [email](mailto:firecrest@cscs.ch)
 
 ## Start using FirecREST
 
