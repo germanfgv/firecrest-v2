@@ -174,3 +174,9 @@ tmp
 
 /build/minio
 
+# Docs
+## Use Cases
+### UI App
+
+/docs/use_cases/UI-client-credentials/log
+/docs/use_cases/UI-client-credentials/src/config.py
