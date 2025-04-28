@@ -69,7 +69,7 @@ We can activate our conda base environment and install `configurable-http-proxy`
     pip install --no-cache jupyterhub==4.1.6 pyfirecrest==3.0.1 SQLAlchemy==1.4.52 oauthenticator==16.3.1 python-hostlist==1.23.0
     git clone https://github.com/eth-cscs/firecrestspawner.git
     cd firecrestspawner
-    git checkout apiv2
+    git checkout fcv2
     pip install --no-cache .
     ```
 
