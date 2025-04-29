@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation for logging architecture
 - UI browser app example
 - POST and PUT bodies request examples
+- Documentation and examples in C# .NET
 
 ### Changed
 
