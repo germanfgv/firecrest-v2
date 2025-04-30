@@ -25,8 +25,6 @@ from lib.scheduler_clients.slurm.models import (
     SlurmReservations,
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
-from lib.scheduler_clients.slurm.slurm_cli_client import SlurmCliClient
-
 
 # Tracing logs
 from lib.loggers.tracing_log import log_backend_http_scheduler
