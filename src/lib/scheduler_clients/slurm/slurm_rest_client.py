@@ -25,6 +25,8 @@ from lib.scheduler_clients.slurm.models import (
     SlurmReservations,
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
+from lib.scheduler_clients.slurm.slurm_cli_client import SlurmCliClient
+
 
 # Tracing logs
 from lib.loggers.tracing_log import log_backend_http_scheduler
@@ -89,6 +91,12 @@ class SlurmRestClient(SlurmBaseClient):
         username: str,
         jwt_token: str,
     ) -> int | None:
+
+        # if `script_path`` is set and `script` is not provided,
+        # then this cannot be submitted with SLURM API
+        if job_description.script_path and not job_description.script:
+            return None
+
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)

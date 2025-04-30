@@ -32,7 +32,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                             "LD_LIBRARY_PATH": "/path/to/library",
                             "PATH": "/path/to/bin"
                         },
-                        "script": "#!/bin/bash\n--partition=part01\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
+                        "script": "#!/bin/bash\n--partition=part01\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",                        
                     }
                 }
             ]
