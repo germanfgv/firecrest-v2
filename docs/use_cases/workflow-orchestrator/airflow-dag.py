@@ -13,10 +13,10 @@ from firecrest_airflow_operators import (FirecRESTSubmitOperator,
                                          FirecRESTDownloadFromJobOperator)
 
 
-workdir = '/path/to/local/demo/dir' # directory on local computer
-remotedir = '/path/to/remote/dir'   # directory on remote HPC system
-username = '<username>'             # username on the HPC system
-system = '<system_name>'            # HPC system name
+workdir = '/Users/jdorsch/dev/firecrest-v2-dev-int/firecrest-v2/docs/use_cases/workflow-orchestrator/demo' # directory on local computer
+remotedir = '/home/fireuser/airflow'   # directory on remote HPC system
+username = 'fireuser'             # username on the HPC system
+system = 'cluster-slurm-api'            # HPC system name
 
 job_script = """#!/bin/bash -l
 

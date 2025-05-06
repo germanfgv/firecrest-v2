@@ -3,7 +3,7 @@ import tempfile
 import time
 
 from firecrest import ClientCredentialsAuth
-from firecrest.v2 import Firecrest as Firecrest
+import firecrest.v2 as f7tv2
 from airflow.models.baseoperator import BaseOperator
 from airflow import AirflowException
 
@@ -30,7 +30,7 @@ class FirecRESTBaseOperator(BaseOperator):
         client_id, client_secret, token_uri
     )
 
-    client = Firecrest(firecrest_url=firecrest_url, authorization=keycloak)
+    client = f7tv2.Firecrest(firecrest_url=firecrest_url, authorization=keycloak)
 
 
 class FirecRESTSubmitOperator(FirecRESTBaseOperator):

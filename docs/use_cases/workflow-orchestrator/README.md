@@ -29,7 +29,7 @@ If this was an operator to submit a job, `arg1` and `arg2` would be the name of 
 
 We can export as environment variables the credentials that FirecREST will use and read them within our operators.
 
-!!! example "Setting up FirecREST credentials"
+!!! example "Exporting up FirecREST credentials"
     ```bash
     export FIRECREST_CLIENT_ID=<client-id>
     export FIRECREST_CLIENT_SECRET=<client-secret>
@@ -44,9 +44,9 @@ You just need to do the following:
 
 !!! example "Setting up Python virtual environment"
     ```bash
-    python -m venv demo-env
-    . demo-env/bin/activate
-    pip install apache-airflow pyfirecrest
+    python -m venv .demo-env
+    source .demo-env/bin/activate
+    pip install apache-airflow pyfirecrest==3.0.1
     ```
 
 ### Launching Airflow
@@ -56,7 +56,7 @@ Before launching Airflow, we need to initialize it's database
 !!! example "Launching Airflow demo"
     ```bash
     export AIRFLOW_HOME=$HOME/airflow-demo
-    airflow db init
+    airflow db migrate
     ```
 
 Airflow comes with many examples that show up in the dashboard. You can set `load_examples = False` in your `$AIRFLOW_HOME/airflow.cfg` configuration file to start Airflow with a clean dashboard.
@@ -68,22 +68,42 @@ Let's launch Airflow in *standalone* mode (only suitable for developing/testing)
     airflow standalone
     ```
 
-When Airflow standalone starts, it creates an admin user and generates credentials to login in the dashboard at http://127.0.0.1:8080.
+When Airflow standalone starts, it creates an `admin` user and generates credentials to login in the dashboard at [http://127.0.0.1:8080](http://127.0.0.1:8080).
+
+This password is set on `$AIRFLOW_HOME/standalone_admin_password.txt`
+
+!!! info
+    If you want to change the port where Airflow is running, edit the file `$AIRFLOW_HOME/airflow.cfg` and set the `webserver_port` variable under the `[api]` section to a different port number
+    ```cfg
+    [api]
+    (...)
+    web_server_port = 9090
+    (...)
+    ```
+
+    And then launch `airflow standalone`
+
 You can find them (username and password) by the end of the initialization message.
 It looks like this:
 
 !!! example "Airflow initialization logs"
     ```log
-    standalone | Airflow is ready
-    standalone | Login with username: admin  password: <password>
-    standalone | Airflow Standalone is for development purposes only. Do not use this in production!
+    standalone | Starting Airflow Standalone
+    standalone | Checking database is initialized
+    INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+    INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+    INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+    INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+    WARNI [airflow.models.crypto] empty cryptography key - values will not be stored encrypted.
+    standalone | Database ready
+    (...)
     ```
 
 The password can be found as well in `$AIRFLOW_HOME/standalone_admin_password.txt`.
 
 ## Hands On
 
-For this example we want to propose you the following problem:
+For this tutorial we want to propose you the following problem:
 
 Let's say that we have a simulation to find geometries of new crystal structures.
 
@@ -113,15 +133,19 @@ To see the DAG on Airflow's dashboard we must copy the file to `$AIRFLOW_HOME/da
 
 It will show up with the name `firecrest_example` after some seconds / refreshing the page.
 
+![airflow_example](../../assets/img/use_cases_workflow_mgr.png)
+
 You can click on it and browse the different tabs such as *Graph*.
 The execution of the DAG can be triggered by clicking on the *Play* button at the right hand side of the dashboard next to the tabs.
 
-The file [firecrest-airflow-operators.py](./firecrest-airflow-operators.py) has the implementation of the operators.
+The file [firecrest_airflow_operators.py](./firecrest_airflow_operators.py) has the implementation of the operators.
 
 For Airflow to see our module, the file must be in the `$PYTHONPATH`. You can install it with:
 
 !!! example "Install Airflow module"
     ```bash
-    cd airflow-operators/
+    cd workflow-orchestrator/
     pip install .
     ```
+
+Remember to refresh the application in the browser or restart Airflow if changes are not applied.
