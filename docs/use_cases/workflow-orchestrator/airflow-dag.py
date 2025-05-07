@@ -13,10 +13,10 @@ from firecrest_airflow_operators import (FirecRESTSubmitOperator,
                                          FirecRESTDownloadFromJobOperator)
 
 
-workdir = '/Users/jdorsch/dev/firecrest-v2-dev-int/firecrest-v2/docs/use_cases/workflow-orchestrator/demo' # directory on local computer
-remotedir = '/home/fireuser/airflow'   # directory on remote HPC system
-username = 'fireuser'             # username on the HPC system
-system = 'cluster-slurm-api'            # HPC system name
+workdir = '/path/to/local/dir'  # directory on local workstation
+remotedir = '/path/to/remote/dir'  # directory on remote HPC system
+username = '<username>'  # username on the HPC system
+system = '<system>'  # HPC system name
 
 job_script = """#!/bin/bash -l
 
@@ -36,7 +36,7 @@ srun --uenv quantumespresso/v7.3.1:v2 --view default pw.x -in si.scf.in
 with DAG(
     dag_id="firecrest_example",
     schedule="@daily",
-    start_date=pendulum.datetime(2023, 9, 1, tz="UTC"),
+    start_date=pendulum.datetime(2025, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["firecrest-v2-demo"],
