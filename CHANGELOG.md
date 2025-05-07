@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - JupyterHub example
 - Documentation for logging architecture
+- Workflow orchestrator example
 - UI browser app example
 - POST and PUT bodies request examples
 - Documentation and examples in C# .NET

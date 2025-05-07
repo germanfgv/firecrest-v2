@@ -32,6 +32,10 @@ nav:
       - user_guide/file_transfer_dotnet/README.md
   - 'Use cases':
     - use_cases/README.md
+    - 'CI pipelines':
+      - use_cases/CI-pipeline/README.md
+    - 'Workflow orchestrator':
+      - use_cases/workflow-orchestrator/README.md
     - 'JupyterHub':
       - use_cases/jupyterhub/README.md
     - 'Web UI Application':
