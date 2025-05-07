@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- JupyterHub example
 - Documentation for logging architecture
 - UI browser app example
 - POST and PUT bodies request examples
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Documentation for logging architecture
 - Images for documentation
 - Description of API definition
 
