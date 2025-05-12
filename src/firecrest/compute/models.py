@@ -23,7 +23,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
             "examples": [
                 {
                     "job": {
-                        "name": "Example with script string",
+                        "name": "Example with inline script",
                         "working_directory": "{{home_path}}",
                         "standard_input": "/dev/null",
                         "standard_output": "count_to_100.out",
