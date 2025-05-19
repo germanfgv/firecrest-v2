@@ -12,7 +12,6 @@ from firecrest.config import HPCCluster, HealthCheckException
 from firecrest.status.health_check.checks.health_check_filesystem import (
     FilesystemHealthCheck,
 )
-from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
 from firecrest.status.health_check.checks.health_check_scheduler import (
     SchedulerHealthCheck,
 )

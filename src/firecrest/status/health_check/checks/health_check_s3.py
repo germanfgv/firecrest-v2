@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from firecrest.config import (
-    HPCCluster,
     S3ServiceHealth,
 )
 from firecrest.dependencies import (
