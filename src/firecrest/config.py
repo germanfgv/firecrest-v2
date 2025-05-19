@@ -197,7 +197,7 @@ class Storage(BaseModel):
         ..., description="Private/internal endpoint URL for the storage."
     )
     public_url: str = Field(..., description="Public/external URL for the storage.")
-    access_key_id: str = Field(
+    access_key_id: SecretStr = Field(
         ..., description="Access key ID for S3-compatible storage."
     )
     secret_access_key: LoadFileSecretStr = Field(

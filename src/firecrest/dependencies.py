@@ -334,7 +334,7 @@ class S3ClientDependency:
             "s3",
             region_name=settings.storage.region,
             aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
-            aws_access_key_id=settings.storage.access_key_id,
+            aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
             endpoint_url=self.url,
             config=AioConfig(signature_version="s3v4"),
         ) as client:
