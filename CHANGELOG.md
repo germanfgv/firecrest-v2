@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed reservation start and end datatime parsing.
+
 ## [2.2.6]
 
 ### Added
