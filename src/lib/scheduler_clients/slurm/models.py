@@ -36,17 +36,31 @@ class SlurmInt(RootModel):
 
 class SlurmJobDescription(JobDescriptionModel):
     name: Optional[str] = Field(default=None, description="Name for the job")
-    account: Optional[str] = Field(default=None, description="Charge job resources to specified account")
-    current_working_directory: str = Field(alias="working_directory", description="Job working directory")
-    standard_input: Optional[str] = Field(default=None, description="Standard input file name")
-    standard_output: Optional[str] = Field(default=None, description="Standard output file name")
-    standard_error: Optional[str] = Field(default=None, description="Standard error file name")
+    account: Optional[str] = Field(
+        default=None, description="Charge job resources to specified account"
+    )
+    current_working_directory: str = Field(
+        alias="working_directory", description="Job working directory"
+    )
+    standard_input: Optional[str] = Field(
+        default=None, description="Standard input file name"
+    )
+    standard_output: Optional[str] = Field(
+        default=None, description="Standard output file name"
+    )
+    standard_error: Optional[str] = Field(
+        default=None, description="Standard error file name"
+    )
     environment: Optional[Dict[str, str] | List[str]] = Field(
-        alias="env", default={"F7T_version": "v2.0.0"}, description="Dictionary of environment variables to set in the job context"
+        alias="env",
+        default={"F7T_version": "v2.0.0"},
+        description="Dictionary of environment variables to set in the job context",
     )
     constraints: Optional[str] = Field(default=None, description="Job constraints")
     script: str = Field(default=None, description="Script for the job")
-    script_path: str = Field(default=None, description="Path to the job in target system")
+    script_path: str = Field(
+        default=None, description="Path to the job in target system"
+    )
 
 
 class SlurmJobMetadata(JobMetadataModel):
@@ -66,7 +80,7 @@ class SlurmJobMetadata(JobMetadataModel):
 class JobStatusSlurm(JobStatus):
     state: str
     stateReason: Optional[str] = None
-    exitCode: SlurmInt
+    exitCode: Optional[SlurmInt] = None
     interruptSignal: Optional[SlurmInt] = None
 
     def __init__(self, **kwargs):
@@ -101,13 +115,18 @@ class JobTaskSlurm(JobTask):
 
         if "exit_code" in kwargs:
             interruptSignal = None
-            if "signal" in kwargs["exit_code"]:
+            exitCode = None
+
+            if kwargs["exit_code"] and "return_code" in kwargs["exit_code"]:
+                exitCode = kwargs["exit_code"]["return_code"]
+
+            if kwargs["exit_code"] and "signal" in kwargs["exit_code"]:
                 interruptSignal = kwargs["exit_code"]["signal"]["id"]
 
             kwargs["status"] = {
                 "state": kwargs["state"],
                 "stateReason": None,
-                "exitCode": kwargs["exit_code"]["return_code"],
+                "exitCode": exitCode,
                 "interruptSignal": interruptSignal,
             }
         super().__init__(**kwargs)
@@ -119,13 +138,18 @@ class SlurmJob(JobModel):
         # Custom status field definition
         if "exit_code" in kwargs:
             interruptSignal = None
-            if "signal" in kwargs["exit_code"]:
+            exitCode = None
+
+            if kwargs["exit_code"] and "return_code" in kwargs["exit_code"]:
+                exitCode = kwargs["exit_code"]["return_code"]
+
+            if kwargs["exit_code"] and "signal" in kwargs["exit_code"]:
                 interruptSignal = kwargs["exit_code"]["signal"]["id"]
 
             kwargs["status"] = {
                 "state": kwargs["state"]["current"],
                 "stateReason": kwargs["state"]["reason"],
-                "exitCode": kwargs["exit_code"]["return_code"],
+                "exitCode": exitCode,
                 "interruptSignal": interruptSignal,
             }
         if "steps" in kwargs:

@@ -11,7 +11,7 @@ from lib.models import CamelModel
 class JobStatus(CamelModel):
     state: str
     stateReason: Optional[str] = None
-    exitCode: int
+    exitCode: Optional[int] = None
     interruptSignal: Optional[int] = None
 
 
