@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Handles instances where no Job exit status is provided.
+
 ## [2.2.6]
 
 ### Added
