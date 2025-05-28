@@ -57,6 +57,11 @@ def mocked_ssh_id_recursive_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_reservation_output():
+    return load_ssh_output("ssh_scontrol_reservation_command.json")
+
+
+@pytest.fixture(scope="module")
 def cluster():
     scheduler = Scheduler(
         type="Slurm", api_url="http://192.168.240.2:6820", api_version="0.0.38"
@@ -199,3 +204,18 @@ async def test_userinfo(
         response = client.get(f"/status/{slurm_cluster_with_ssh_config.name}/userinfo")
         assert response.status_code == 200
         assert UserInfoResponse(**response.json()) is not None
+
+
+async def test_ssh_reservation(
+    client, ssh_client, mocked_ssh_reservation_output, slurm_cluster_with_ssh_config
+):
+
+    async with ssh_client.mocked_output(
+        [mock_ssh_client.MockedCommand(**mocked_ssh_reservation_output)]
+    ):
+        response = client.get(
+            "/status/{cluster_namne}/reservations".format(
+                cluster_namne=slurm_cluster_with_ssh_config.name
+            )
+        )
+        assert response.status_code == 200
