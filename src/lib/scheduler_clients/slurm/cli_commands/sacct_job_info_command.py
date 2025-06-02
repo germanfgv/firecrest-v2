@@ -64,10 +64,14 @@ class SacctCommand(SacctCommandBase):
             "jobId": job_info[0],
             "allocationNodes": job_info[1],
             "cluster": job_info[2],
-            "exit_code": {
-                "return_code": job_info[3].split(":")[0],
-                "signal": {"id": job_info[3].split(":")[1]},
-            },
+            "exit_code": (
+                {
+                    "return_code": job_info[3].split(":")[0],
+                    "signal": {"id": job_info[3].split(":")[1]},
+                }
+                if job_info[3]
+                else None
+            ),
             "group": job_info[4],
             "account": job_info[5],
             "name": job_info[6],
@@ -92,10 +96,14 @@ class SacctCommand(SacctCommandBase):
         return {
             "step": {"id": job_info[0], "name": job_info[6]},
             "state": job_info[10],
-            "exit_code": {
-                "return_code": job_info[3].split(":")[0],
-                "signal": {"id": job_info[3].split(":")[1]},
-            },
+            "exit_code": (
+                {
+                    "return_code": job_info[3].split(":")[0],
+                    "signal": {"id": job_info[3].split(":")[1]},
+                }
+                if job_info[3]
+                else None
+            ),
             "time": {
                 "elapsed": job_info[12],
                 "submission": _datestr_to_epoc(job_info[13]),
