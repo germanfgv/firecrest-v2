@@ -103,6 +103,9 @@ async def test_get_job(
         assert response.status_code == 200
         assert response.json() is not None
 
+        assert response.json()["jobs"][0]["status"]["exitCode"] == 0
+        assert response.json()["jobs"][1]["status"]["exitCode"] is None
+
 
 async def test_get_job_metadata(
     client,
