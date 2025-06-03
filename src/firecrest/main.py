@@ -59,6 +59,11 @@ from lib.loggers.tracing_log import tracing_log_middleware
 logger = logging.getLogger(__name__)
 
 
+class EndpointFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.getMessage().find("/status/liveness") == -1
+
+
 def create_app(settings: config.Settings) -> FastAPI:
 
     # Instance app
@@ -141,6 +146,9 @@ def register_middlewares(app: FastAPI):
 
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
+
+        logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
+
         try:
             response = await call_next(request)
             username = None
