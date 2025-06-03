@@ -140,7 +140,11 @@ class SlurmRestClient(SlurmBaseClient):
         pass
 
     async def get_job(
-        self, job_id: str, username: str, jwt_token: str
+        self,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False   
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -157,7 +161,12 @@ class SlurmRestClient(SlurmBaseClient):
             job_result = await response.json()
 
             # Note: starting from API version v0.0.39 this filter can be set as query param
-            jobs = list(filter(lambda job: job["user"] == username, job_result["jobs"]))
+            jobs = list(
+                filter(
+                    lambda job: allusers or job["user"] == username,
+                    job_result["jobs"]
+                    )
+                )
             if len(jobs) == 0:
                 return None
 
@@ -169,7 +178,12 @@ class SlurmRestClient(SlurmBaseClient):
         # Until version 4.05.1 slurmdb/job end-point does not provide stdout & stderr information
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
-    async def get_jobs(self, username: str, jwt_token: str) -> List[SlurmJob] | None:
+    async def get_jobs(
+            self,
+            username: str,
+            jwt_token: str,
+            allusers: bool = False
+            ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -185,7 +199,12 @@ class SlurmRestClient(SlurmBaseClient):
             job_result = await response.json()
 
             # Note: starting from API version v0.0.39 this filter can be set as query param
-            jobs = list(filter(lambda job: job["user"] == username, job_result["jobs"]))
+            jobs = list(
+                filter(
+                    lambda job: allusers or job["user"] == username,
+                    job_result["jobs"]
+                    )
+                )
             if len(jobs) == 0:
                 return None
 
