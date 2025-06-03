@@ -14,6 +14,11 @@ FirecREST is a high performance proxy providing a standardized interface to acce
 -	💠 Modular architecture with a lightweight and modern stack
 
 
+# Documentation
+
+### User Guide: [Full Documentation](https://eth-cscs.github.io/firecrest-v2/)
+### API Reference: [OpenAPI Swagger](https://eth-cscs.github.io/firecrest-v2/openapi/)
+### K8s Deployment: [Helm Charts](https://eth-cscs.github.io/firecrest-v2/setup/deploy/)
 
 
 # FirecREST v2 Demo
@@ -32,12 +37,6 @@ docker run -p 8025:8025 -p 5025:5025  -p 3000:3000 --pull always ghcr.io/eth-csc
 Once the container is running, open your browser and navigate to:
 
 ➡️ **[http://localhost:8025/](http://localhost:8025/)**
-
-
-# Documentation
-
-### API Reference: [OpenAPI Swagger](https://eth-cscs.github.io/firecrest-v2/openapi/)
-### K8s Deployment: [Helm Charts](https://eth-cscs.github.io/firecrest-v2/)
 
 
 # Running FirecREST v2 with Docker-Compose
