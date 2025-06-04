@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed reservation start and end datatime parsing.
 - Handles instances where no Job exit status is provided.
+- Fixed proper SSH process termination on timeout
 
 
 ## [2.2.6]
