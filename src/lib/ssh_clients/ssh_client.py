@@ -97,6 +97,9 @@ class SSHClient:
                 )
 
         except TimeoutError as e:
+            process.terminate()
+            process.stdin.write("\x03")
+            process.stdin.write_eof()
             raise TimeoutLimitExceeded(
                 "Command execution timeout limit exceeded."
             ) from e
