@@ -26,6 +26,12 @@ def mocked_ssh_sacct_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_sacct_allusers_output():
+    output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_allusers_command.json"
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+@pytest.fixture(scope="module")
 def mocked_ssh_sacct_script_output():
     output_file = (
         impresources.files(mocked_ssh_outputs) / "ssh_sacct_batch_script_command.json"
@@ -103,8 +109,23 @@ async def test_get_job(
         assert response.status_code == 200
         assert response.json() is not None
 
-        assert response.json()["jobs"][0]["status"]["exitCode"] == 0
-        assert response.json()["jobs"][1]["status"]["exitCode"] is None
+        assert response.json()["jobs"][0]["status"]["exitCode"] == 0        
+
+
+async def test_get_jobs_allusers(
+    client, ssh_client, mocked_ssh_sacct_allusers_output, slurm_cluster_with_ssh_config
+):
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_sacct_allusers_output)]):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?allusers=true".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert response.json()["jobs"][0]["user"] == "fireuser"
+        assert response.json()["jobs"][1]["user"] == "firesrv"
 
 
 async def test_get_job_metadata(

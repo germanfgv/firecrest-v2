@@ -83,9 +83,17 @@ class SlurmCliClient(SlurmBaseClient):
         return await self.__executed_ssh_cmd(username, jwt_token, srun)
 
     async def get_job(
-        self, job_id: str | None, username: str, jwt_token: str
+        self,
+        job_id: str | None,
+        username: str,
+        jwt_token: str,
+        allusers: bool = True
     ) -> List[SlurmJob] | None:
-        sacct = SacctCommand(username, [job_id] if job_id else None)
+        sacct = SacctCommand(
+            username,
+            [job_id] if job_id else None,
+            allusers
+            )
         return await self.__executed_ssh_cmd(username, jwt_token, sacct)
 
     async def get_job_metadata(
@@ -140,8 +148,15 @@ class SlurmCliClient(SlurmBaseClient):
 
         return jobs
 
-    async def get_jobs(self, username: str, jwt_token: str) -> List[SlurmJob] | None:
-        return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)
+    async def get_jobs(self,
+                       username: str,
+                       jwt_token: str,
+                       allusers: bool = False
+                       ) -> List[SlurmJob] | None:
+        return await self.get_job(job_id=None,
+                                  username=username,
+                                  jwt_token=jwt_token,
+                                  allusers=allusers)
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         scancel = ScancelCommand(username, job_id)

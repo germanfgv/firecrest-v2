@@ -1,6 +1,6 @@
 {
-    "stdout": "2|1|cluster|0:0|test1|test|sbatch|localhost|part01|4294901758|COMPLETED|None|18|2024-05-06T08:36:56|2024-05-06T08:36:56|2024-05-06T08:37:14|00:00:00|7200|test1|/home/test1\n13|1|cluster||test1|test|sbatch|localhost|part01|4294901758|COMPLETED|None|18|2024-05-06T08:36:56|2024-05-06T08:36:56|2024-05-06T08:37:14|00:00:00|7200|test1|/home/test1",
+    "stdout": "1|1|cluster|0:0|users|staff|SbatchTest|localhost|part01|1|COMPLETED|None|100|2025-06-03T09:34:05|2025-06-03T09:34:06|2025-06-03T09:35:46|00:00:00|7200|fireuser|/home/fireuser",
     "stderr": "",
     "exit_code": 0,
-    "command":"sacct --user=test-user --jobs='1' --noheader --parsable2 --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"
+    "command":"sacct --allusers --jobs='1' --noheader --parsable2 --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"
 }
