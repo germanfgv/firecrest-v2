@@ -87,7 +87,7 @@ class SlurmCliClient(SlurmBaseClient):
         job_id: str | None,
         username: str,
         jwt_token: str,
-        allusers: bool = False
+        allusers: bool = True
     ) -> List[SlurmJob] | None:
         sacct = SacctCommand(
             username,

@@ -71,7 +71,7 @@ class SlurmClient(SlurmBaseClient):
             job_id: str | None,
             username: str,
             jwt_token: str,
-            allusers: bool = False
+            allusers: bool = True
             ) -> List[SlurmJob] | None:
         return await self.slurm_default_client.get_job(job_id,
                                                        username,

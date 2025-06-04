@@ -44,7 +44,8 @@ class SchedulerBaseClient(ABC):
         self,
         job_id: str,
         username: str,
-        jwt_token: str
+        jwt_token: str,
+        allusers: bool = True
     ) -> List[JobModel]:
         pass
 

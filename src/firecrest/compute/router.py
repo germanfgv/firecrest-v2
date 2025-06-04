@@ -79,7 +79,7 @@ async def get_jobs(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency()),
     ],
-    allusers: Annotated[bool, Query(description="Show all users' jobs")] = False
+    allusers: Annotated[bool, Query(description="If set to `true` returns all jobs visible by the current user, otherwise only the current user owned jobs")] = False
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()

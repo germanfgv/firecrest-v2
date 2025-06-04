@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Query parameter `allusers` in `GET /compute/jobs` to show scheduler jobs from all users
+- Query parameter `allusers` in `GET /compute/jobs` to show all visible jobs for the user in the scheduler
 - Environment variable `UVICORN_LOG_CONFIG` to enable [Uvicorn log configuration](https://www.uvicorn.org/settings/#logging) file path (analog to `--log-config`)
 
 ### Changed

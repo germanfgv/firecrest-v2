@@ -144,7 +144,7 @@ class SlurmRestClient(SlurmBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-        allusers: bool = False   
+        allusers: bool = True   
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
