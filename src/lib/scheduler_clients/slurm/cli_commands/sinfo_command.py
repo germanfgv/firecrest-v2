@@ -24,7 +24,7 @@ def _int_or_none(intstr: str):
 class SinfoCommand(BaseCommand):
 
     def get_command(self) -> str:
-        cmd = ["sinfo -N"]
+        cmd = ["sinfo -a -N"]
         cmd += ["--noheader"]
         cmd += ["--format='%z|%c|%O|%e|%f|%N|%o|%n|%T|%R|%w|%v|%m|%C'"]
         return " ".join(cmd)
