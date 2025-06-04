@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Show nodes from hidden partitions using SLURM CLI
 - Fixed reservation start and end datatime parsing.
 - Handles instances where no Job exit status is provided.
 
