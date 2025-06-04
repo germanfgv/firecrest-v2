@@ -67,14 +67,26 @@ class SlurmClient(SlurmBaseClient):
                                                               jwt_token)
 
     async def get_job(
-            self, job_id: str | None, username: str, jwt_token: str
+            self,
+            job_id: str | None,
+            username: str,
+            jwt_token: str,
+            allusers: bool = True
             ) -> List[SlurmJob] | None:
-        return await self.slurm_default_client.get_job(job_id, username,
-                                                       jwt_token)
+        return await self.slurm_default_client.get_job(job_id,
+                                                       username,
+                                                       jwt_token,
+                                                       allusers)
 
-    async def get_jobs(self, username: str, jwt_token: str
-                       ) -> List[SlurmJob] | None:
-        return await self.slurm_default_client.get_jobs(username, jwt_token)
+    async def get_jobs(
+            self,
+            username: str,
+            jwt_token: str,
+            allusers: bool = False
+            ) -> List[SlurmJob] | None:
+        return await self.slurm_default_client.get_jobs(username,
+                                                        jwt_token,
+                                                        allusers)
 
     async def get_job_metadata(
             self, job_id: str, username: str, jwt_token: str

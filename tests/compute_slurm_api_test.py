@@ -28,6 +28,11 @@ def mocked_get_job_response():
     with response_file.open("r") as response:
         return json.load(response)
 
+@pytest.fixture(scope="module")
+def mocked_get_jobs_allusers_response():
+    response_file = impresources.files(mocked_api_responses) / "slurm_get_allusers_jobs.json"
+    with response_file.open("r") as response:
+        return json.load(response)
 
 @pytest.fixture(scope="module")
 def mocked_get_job_not_found_response():
@@ -151,6 +156,40 @@ def test_get_job_not_found(
         )
         mocked.assert_called_once_with(
             f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/job/{job_id}",
+            method="GET",
+            headers={
+                "Content-Type": "application/json",
+                "X-SLURM-USER-NAME": "test-user",
+                "X-SLURM-USER-TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcm5hbWUiOiJ0ZXN0IiwicHJlZmZlcmVkLXVzZXJuYW1lIjoidGVzdCJ9.9lEMnYRwLVeOTQKoXxzMd81zJNOAEnrDI3QtcJsUi7A",
+            },
+            timeout=timeout,
+        )
+
+
+async def test_get_jobs_allusers(
+    client, mocked_get_jobs_allusers_response, slurm_cluster_with_api_config
+):
+
+    with aioresponses() as mocked:
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_allusers_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?allusers=true"
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        jobs_result = GetJobResponse(**response.json())
+        assert jobs_result.jobs[0].user == "fireuser"
+        assert jobs_result.jobs[1].user == "firesrv"
+        timeout = aiohttp.ClientTimeout(
+            total=slurm_cluster_with_api_config.scheduler.timeout
+        )
+        mocked.assert_called_once_with(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
             method="GET",
             headers={
                 "Content-Type": "application/json",
