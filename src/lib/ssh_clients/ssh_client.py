@@ -166,10 +166,7 @@ class SSHClientPool:
             k: conn for k, conn in self.clients.items() if not conn.is_closed()
         }
 
-    @asynccontextmanager
-    async def get_client(self, username: str, jwt_token: str):
-        client: SSHClient = None
-
+    async def get_conn_options(self, username: str, jwt_token: str):
         try:
             keys = await self.key_provider.get_keys(username, jwt_token)
         except TimeoutError as e:
@@ -210,6 +207,11 @@ class SSHClientPool:
                 )
             case _:
                 raise TypeError("Unsupported SSHKeysProvider")
+        return options
+
+    @asynccontextmanager
+    async def get_client(self, username: str, jwt_token: str):
+        client: SSHClient = None
 
         async with SSHClientPool.lock:
             try:
@@ -224,7 +226,7 @@ class SSHClientPool:
                         raise SSHConnectionError(
                             "SSH connection pool capacity exceeded"
                         )
-
+                    options = await self.get_conn_options(username, jwt_token)
                     proxy = ()
                     if self.proxy_host:
                         proxy = await asyncssh.connect(
