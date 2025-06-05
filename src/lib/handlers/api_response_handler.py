@@ -3,7 +3,6 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import os
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -23,7 +22,7 @@ HEADERS_META_PREFIX_KEY = "F7T"
 
 def _response_headers_meta(request: Request = None, exc: Exception = None) -> dict:
     meta_model = ApiResponseMeta.build_http_meta(
-        app_version=os.getenv("APP_VERSION") or "local",
+        app_version=request.app.version,
         auth=ApiAuthHelper.get_auth() if ApiAuthHelper.is_authenticated() else None,
     )
     headers_meta = {
