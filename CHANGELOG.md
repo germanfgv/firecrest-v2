@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.7] - OPEN
+## [2.2.7]
 
 ### Added
 
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handles instances where no Job exit status is provided.
 - Fixed unnecessary user keys retrieval with SSH connection pool.
 - Fixed proper SSH process termination on timeout.
+- `UVICORN_LOG_CONFIG` value on helm chart
 
 ## [2.2.6]
 
