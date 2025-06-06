@@ -1,0 +1,266 @@
+name: Release new version
+
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+
+jobs:
+  burn-version:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get release version
+        id: get_version
+        run: |
+          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Checkout release tag
+        run: |
+          git checkout tags/${{ env.RELEASE_TAG }} -b release-version-update
+
+      - name: Update version in code
+        run: |
+          # Replace in a specific file — adjust pattern and file path
+          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/firecrest/config.py
+          git commit -m "Update version to ${{ env.RELEASE_TAG }}"
+          git tag -f ${{ env.RELEASE_TAG }}
+          git push origin release-version-update
+          git push --force origin refs/tags/${{ env.RELEASE_TAG }}
+
+  publish-docker-images:
+    runs-on: ubuntu-22.04
+    needs: burn-version
+    if: ${{ github.event_name == 'release' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./build/docker/firecrest-api/Dockerfile
+            image: ${{ github.repository }}
+          - dockerfile: ./build/demo-launcher/Dockerfile
+            image: ${{ github.repository }}-demo
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ matrix.image }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64,linux/arm64
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  
+  publish-helm-charts:
+    runs-on: ubuntu-latest
+    needs: burn-version
+    if: ${{ github.event_name == 'release' }}
+    env:
+        CHART_DIR: build/helm
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Helm
+      uses: azure/setup-helm@v4.2.0      
+
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Package Helm chart
+      run: |
+        helm package $CHART_DIR/firecrest-api --version=${{ github.ref_name }} --app-version=${{ github.ref_name }} 
+        rm -rf $CHART_DIR/firecrest-api/Chart.lock $CHART_DIR/firecrest-api/charts/
+
+        # move the packages to a directory to avoid issues
+        # when checking out to `gh-pages`
+        mkdir gh_
+        mv *.tgz gh_
+
+    - name: Push to gh-pages branch
+      run: |
+        
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv gh_/*tgz ./charts/
+
+        helm repo index ./charts --url https://eth-cscs.github.io/firecrest-v2/charts --merge ./charts/index.yaml
+
+        git add ./charts/*.tgz ./charts/index.yaml
+        git commit -m "New firecrest-api helm chart release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
+
+  publish-documentation:
+    runs-on: ubuntu-latest
+    needs: publish-openapi-swager
+    if: ${{ always() }}
+    env:
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+          python-version: 3.11
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Build MkDocs
+      run: |
+        pip install --upgrade pip
+        pip install -r ./requirements.txt
+        pip install -r ./docs/requirements.txt
+        make clean
+        make docs
+        mv site .site
+        git restore docs/setup/conf/README.md
+    - name: Merge site with gh-pages branch
+      run: |
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv openapi .openapi
+        mv charts .charts
+        find . -mindepth 1 -maxdepth 1 ! -name '.*' -exec rm -rf {} \;
+        mv  ./.site/* ./
+        rm -rf .site
+        mv .openapi openapi
+        mv .charts charts
+    - name: Check for changes
+      run: |
+        git diff --quiet || echo "CHANGES=true" >> $GITHUB_ENV
+    - name: Publish MkDocs
+      if: ${{ env.CHANGES == 'true' }}
+      run: |
+        git add .
+        git commit -m "New documentation release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
+
+  publish-openapi-swager:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: burn-version
+    env:
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
+    - name: Get the version
+      id: get_version
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Setup files and folders
+      run: |
+        mv src/lib lib
+        mv src/firecrest firecrest
+        touch f7t-api-config.local-env-empty.yaml
+        echo "apis_root_path: \"\"" >> f7t-api-config.local-env-empty.yaml
+        echo "doc_servers:" >> f7t-api-config.local-env-empty.yaml
+        echo "  - url: \"http://localhost:8000\"" >> f7t-api-config.local-env-empty.yaml
+        echo "    description: \"Local environment\"" >> f7t-api-config.local-env-empty.yaml
+        echo "auth:" >> f7t-api-config.local-env-empty.yaml
+        echo "  authentication:" >> f7t-api-config.local-env-empty.yaml
+        echo "    scopes:  {}" >> f7t-api-config.local-env-empty.yaml
+        echo "    tokenUrl:  \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token\"" >> f7t-api-config.local-env-empty.yaml
+        echo "    publicCerts:" >> f7t-api-config.local-env-empty.yaml
+        echo "        - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\"" >> f7t-api-config.local-env-empty.yaml
+        echo "ssh_credentials: {}" >> f7t-api-config.local-env-empty.yaml
+        echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
+    - name: Generate OpenAPI file
+      uses: column-st/fastapi-openapi-specs-action@v1.0.2
+      with:
+        installDependencies: pip install -r requirements.txt
+        moduleDir: firecrest
+        fileName: main
+        appName: app
+        fastapiVersioning: v1
+        outputName: openapi
+        outputExtension: yaml
+        yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
+    - name: Move OpenAPI file
+      run: |
+        mkdir openapi_
+        cp openapi.yaml openapi_/openapi-latest.yaml
+        mv openapi.yaml openapi_/openapi-${{ env.RELEASE_VERSION }}.yaml
+    - name: Push to gh-pages branch
+      run: |
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv openapi_/* ./openapi/
+        sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_VERSION }}.yaml", name: "${{ env.RELEASE_VERSION }}"},|g' openapi/dist/swagger-initializer.js
+        git add openapi/openapi-latest.yaml openapi/openapi-${{ env.RELEASE_VERSION }}.yaml openapi/dist/swagger-initializer.js
+        git status -uno
+        git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
