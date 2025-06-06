@@ -78,10 +78,10 @@ jobs:
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Setup files and folders
       run: |
+        sed -i '' "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
         mv src/lib lib
         mv src/firecrest firecrest
         touch f7t-api-config.local-env-empty.yaml
-        echo "app_version: \"${{ env.RELEASE_VERSION }}\"" >> f7t-api-config.local-env-empty.yaml
         echo "apis_root_path: \"\"" >> f7t-api-config.local-env-empty.yaml
         echo "doc_servers:" >> f7t-api-config.local-env-empty.yaml
         echo "  - url: \"http://localhost:8000\"" >> f7t-api-config.local-env-empty.yaml

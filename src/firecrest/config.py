@@ -7,7 +7,7 @@ from enum import Enum
 import os
 import yaml
 from pathlib import Path
-from typing import Any, Dict, Tuple, Type
+from typing import Any, Dict, Literal, Tuple, Type
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -381,7 +381,7 @@ class Settings(BaseSettings):
     app_debug: bool = Field(
         False, description="Enable debug mode for the FastAPI application."
     )
-    app_version: str = Field("2.x.x", description="Application version string.")
+    app_version: Literal["2.x.x"] = "2.x.x"
     apis_root_path: str = Field(
         "",
         description="Base path prefix for exposing the APIs.",

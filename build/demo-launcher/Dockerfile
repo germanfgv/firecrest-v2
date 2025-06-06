@@ -57,7 +57,7 @@ COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app ./web-ui
 RUN npm install --global yarn
 
 
-ENV APP_VERSION='local'
+
 ENV ENVIRONMENT='development'
 ENV SERVICE_NAME='firecrest-web-ui'
 ENV LOGGING_LEVEL='error'
