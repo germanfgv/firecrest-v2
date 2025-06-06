@@ -24,6 +24,7 @@ jobs:
       - name: Checkout release tag
         run: |
           git checkout tags/${{ env.RELEASE_TAG }} -b release-version-update
+          git pull
 
       - name: Update version in code
         run: |
