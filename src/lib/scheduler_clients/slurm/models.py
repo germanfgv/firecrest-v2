@@ -5,7 +5,11 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import AliasChoices, Field, RootModel, TypeAdapter
+from pydantic import (
+    AliasChoices,
+    Field,
+    RootModel,
+)
 
 # models
 from lib.models.base_model import CamelModel
@@ -107,10 +111,9 @@ class JobStatusSlurm(JobStatus):
             else:
                 kwargs["state"] = None
 
-        if "exitCode" in kwargs:
-            kwargs["exitCode"] = slurm_int_to_int(kwargs["exitCode"])
-        if "interruptSignal" in kwargs:
-            kwargs["interruptSignal"] = slurm_int_to_int(kwargs["interruptSignal"])
+        for field in ["exitCode", "interruptSignal"]:
+            if field in kwargs and kwargs[field] is not None:
+                kwargs[field] = slurm_int_to_int(kwargs[field])
 
         super().__init__(**kwargs)
 
@@ -125,6 +128,9 @@ class JobTimeSlurm(JobTime):
 
 
 class JobTaskSlurm(JobTask):
+
+    time: JobTimeSlurm
+
     def __init__(self, **kwargs):
         # Custom task field definition
         if "step" in kwargs:
@@ -148,12 +154,13 @@ class JobTaskSlurm(JobTask):
                 interruptSignal=interruptSignal,
             )
 
-        kwargs["time"] = JobTimeSlurm(**kwargs["time"])
-
         super().__init__(**kwargs)
 
 
 class SlurmJob(JobModel):
+
+    tasks: Optional[List[JobTaskSlurm]] = None
+    time: JobTimeSlurm
 
     def __init__(self, **kwargs):
         # Custom status field definition
@@ -176,15 +183,8 @@ class SlurmJob(JobModel):
         if "steps" in kwargs:
             kwargs["tasks"] = kwargs["steps"]
 
-        kwargs["time"] = JobTimeSlurm(**kwargs["time"])
-
         if "priority" in kwargs:
             kwargs["priority"] = slurm_int_to_int(kwargs["priority"])
-
-        if "tasks" in kwargs:
-            kwargs["tasks"] = TypeAdapter(List[JobTaskSlurm]).validate_python(
-                kwargs["tasks"]
-            )
 
         super().__init__(**kwargs)
 
