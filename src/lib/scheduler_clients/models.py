@@ -16,11 +16,11 @@ class JobStatus(CamelModel):
 
 
 class JobTime(CamelModel):
-    elapsed: int
-    start: Optional[int]
-    end: Optional[int]
-    suspended: Optional[int]
-    limit: int
+    elapsed: Optional[int]
+    start: Optional[int] = None
+    end: Optional[int] = None
+    suspended: Optional[int] = None
+    limit: Optional[int] = None
 
 
 class JobTask(CamelModel):
@@ -36,6 +36,16 @@ class JobModel(CamelModel):
     status: JobStatus
     tasks: Optional[List[JobTask]] = None
     time: JobTime
+    account: Optional[str]
+    allocation_nodes: int
+    cluster: str
+    group: str
+    nodes: str
+    partition: str
+    kill_request_user: Optional[str] = None
+    user: Optional[str]
+    working_directory: str
+    priority: Optional[int] = None
 
 
 class JobMetadataModel(CamelModel):

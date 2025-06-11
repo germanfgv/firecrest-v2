@@ -5,7 +5,7 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import AliasChoices, Field, RootModel
+from pydantic import AliasChoices, Field, RootModel, TypeAdapter
 
 # models
 from lib.models.base_model import CamelModel
@@ -32,6 +32,28 @@ class SlurmInt(RootModel):
             super().__init__(None)
         else:
             super().__init__(kwargs["number"])
+
+
+def slurm_int_to_int(v) -> Optional[int]:
+    # starting from v0.0.40 slurm api represents int with a complex object
+    # e.s. {"set": True, "infinite": False, "number": 0},
+    if v is None or isinstance(v, int) or isinstance(v, float):
+        return v
+
+    if isinstance(v, str):
+        try:
+            # FIXME: not sure if this is always int or can be float
+            return int(v)
+        except ValueError:
+            raise ValueError(f"Invalid SlurmInt value: {v!r}")
+
+    if isinstance(v, dict):
+        if not v.get("set", True):
+            return None
+
+        return int(v.get("number"))
+
+    raise ValueError(f"Invalid SlurmInt value: {v!r}")
 
 
 class SlurmJobDescription(JobDescriptionModel):
@@ -78,11 +100,6 @@ class SlurmJobMetadata(JobMetadataModel):
 
 
 class JobStatusSlurm(JobStatus):
-    state: str
-    stateReason: Optional[str] = None
-    exitCode: Optional[SlurmInt] = None
-    interruptSignal: Optional[SlurmInt] = None
-
     def __init__(self, **kwargs):
         if isinstance(kwargs["state"], list):
             if len(kwargs["state"]) > 0:
@@ -90,23 +107,24 @@ class JobStatusSlurm(JobStatus):
             else:
                 kwargs["state"] = None
 
+        if "exitCode" in kwargs:
+            kwargs["exitCode"] = slurm_int_to_int(kwargs["exitCode"])
+        if "interruptSignal" in kwargs:
+            kwargs["interruptSignal"] = slurm_int_to_int(kwargs["interruptSignal"])
+
         super().__init__(**kwargs)
 
 
 class JobTimeSlurm(JobTime):
-    elapsed: Optional[SlurmInt]
-    start: Optional[SlurmInt]
-    end: Optional[SlurmInt]
-    suspended: Optional[SlurmInt]
-    limit: Optional[SlurmInt] = None
+    def __init__(self, **kwargs):
+        for field in ["elapsed", "start", "end", "suspended", "limit"]:
+            if field in kwargs and kwargs[field] is not None:
+                kwargs[field] = slurm_int_to_int(kwargs[field])
+
+        super().__init__(**kwargs)
 
 
 class JobTaskSlurm(JobTask):
-    id: str
-    name: str
-    status: JobStatusSlurm
-    time: JobTimeSlurm
-
     def __init__(self, **kwargs):
         # Custom task field definition
         if "step" in kwargs:
@@ -123,12 +141,15 @@ class JobTaskSlurm(JobTask):
             if kwargs["exit_code"] and "signal" in kwargs["exit_code"]:
                 interruptSignal = kwargs["exit_code"]["signal"]["id"]
 
-            kwargs["status"] = {
-                "state": kwargs["state"],
-                "stateReason": None,
-                "exitCode": exitCode,
-                "interruptSignal": interruptSignal,
-            }
+            kwargs["status"] = JobStatusSlurm(
+                state=kwargs["state"],
+                stateReason=None,
+                exitCode=exitCode,
+                interruptSignal=interruptSignal,
+            )
+
+        kwargs["time"] = JobTimeSlurm(**kwargs["time"])
+
         super().__init__(**kwargs)
 
 
@@ -146,29 +167,26 @@ class SlurmJob(JobModel):
             if kwargs["exit_code"] and "signal" in kwargs["exit_code"]:
                 interruptSignal = kwargs["exit_code"]["signal"]["id"]
 
-            kwargs["status"] = {
-                "state": kwargs["state"]["current"],
-                "stateReason": kwargs["state"]["reason"],
-                "exitCode": exitCode,
-                "interruptSignal": interruptSignal,
-            }
+            kwargs["status"] = JobStatusSlurm(
+                state=kwargs["state"]["current"],
+                stateReason=kwargs["state"]["reason"],
+                exitCode=exitCode,
+                interruptSignal=interruptSignal,
+            )
         if "steps" in kwargs:
             kwargs["tasks"] = kwargs["steps"]
-        super().__init__(**kwargs)
 
-    status: JobStatusSlurm
-    tasks: Optional[List[JobTaskSlurm]] = None
-    time: JobTimeSlurm
-    account: Optional[str]
-    allocation_nodes: int
-    cluster: str
-    group: str
-    nodes: str
-    partition: str
-    priority: SlurmInt
-    kill_request_user: Optional[str] = None
-    user: Optional[str]
-    working_directory: str
+        kwargs["time"] = JobTimeSlurm(**kwargs["time"])
+
+        if "priority" in kwargs:
+            kwargs["priority"] = slurm_int_to_int(kwargs["priority"])
+
+        if "tasks" in kwargs:
+            kwargs["tasks"] = TypeAdapter(List[JobTaskSlurm]).validate_python(
+                kwargs["tasks"]
+            )
+
+        super().__init__(**kwargs)
 
 
 class SlurmNode(NodeModel):

@@ -140,11 +140,7 @@ class SlurmRestClient(SlurmBaseClient):
         pass
 
     async def get_job(
-        self,
-        job_id: str,
-        username: str,
-        jwt_token: str,
-        allusers: bool = True   
+        self, job_id: str, username: str, jwt_token: str, allusers: bool = True
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -163,10 +159,11 @@ class SlurmRestClient(SlurmBaseClient):
             # Note: starting from API version v0.0.39 this filter can be set as query param
             jobs = list(
                 filter(
-                    lambda job: allusers or job["user"] == username,
-                    job_result["jobs"]
-                    )
+                    lambda job: allusers or job["user"] == username, job_result["jobs"]
                 )
+            )
+            # Apply Slurm model
+            jobs = [SlurmJob.model_validate(job) for job in jobs]
             if len(jobs) == 0:
                 return None
 
@@ -179,11 +176,8 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-            self,
-            username: str,
-            jwt_token: str,
-            allusers: bool = False
-            ) -> List[SlurmJob] | None:
+        self, username: str, jwt_token: str, allusers: bool = False
+    ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -201,10 +195,11 @@ class SlurmRestClient(SlurmBaseClient):
             # Note: starting from API version v0.0.39 this filter can be set as query param
             jobs = list(
                 filter(
-                    lambda job: allusers or job["user"] == username,
-                    job_result["jobs"]
-                    )
+                    lambda job: allusers or job["user"] == username, job_result["jobs"]
                 )
+            )
+            # Apply Slurm model
+            jobs = [SlurmJob.model_validate(job) for job in jobs]
             if len(jobs) == 0:
                 return None
 
