@@ -8,17 +8,16 @@ from pydantic import Field
 
 # models
 from lib.models import CamelModel
-from lib.scheduler_clients.models import JobSubmitRequestModel
-from lib.scheduler_clients.slurm.models import (
-    SlurmJob,
-    SlurmJobDescription,
-    SlurmJobMetadata,
+from lib.scheduler_clients.models import (
+    JobDescriptionModel,
+    JobMetadataModel,
+    JobModel,
+    JobSubmitRequestModel,
 )
-from lib.scheduler_clients.models import JobModel
 
 
 class PostJobSubmitRequest(JobSubmitRequestModel):
-    job: SlurmJobDescription
+    job: JobDescriptionModel
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -62,7 +61,7 @@ class GetJobResponse(CamelModel):
 
 
 class GetJobMetadataResponse(CamelModel):
-    jobs: Optional[List[SlurmJobMetadata]] = None
+    jobs: Optional[List[JobMetadataModel]] = None
 
 
 class PostJobSubmissionResponse(CamelModel):

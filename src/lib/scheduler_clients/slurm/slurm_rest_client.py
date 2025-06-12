@@ -17,12 +17,15 @@ from lib.exceptions import SlurmAuthTokenError, SlurmError
 # Models
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
-    SlurmJobDescription,
     SlurmJobMetadata,
-    SlurmNode,
-    SlurmPartitions,
-    SlurmPing,
     SlurmReservations,
+    SlurmPartitions,
+)
+from lib.scheduler_clients.models import (
+    JobDescriptionModel,
+    PartitionModel,
+    NodeModel,
+    SchedPing,
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 
@@ -85,7 +88,7 @@ class SlurmRestClient(SlurmBaseClient):
 
     async def submit_job(
         self,
-        job_description: SlurmJobDescription,
+        job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -220,7 +223,7 @@ class SlurmRestClient(SlurmBaseClient):
                 return True
             await _slurm_unexpected_response(response)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -254,13 +257,16 @@ class SlurmRestClient(SlurmBaseClient):
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             reservation_result = await response.json()
-            if len(reservation_result["reservations"]) == 0:
-                return []
-        return reservation_result["reservations"]
+            # Apply Slurm model
+            res = [
+                SlurmReservations.model_validate(r)
+                for r in reservation_result["reservations"]
+            ]
+        return res
 
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[SlurmPartitions] | None:
+    ) -> List[PartitionModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -274,11 +280,14 @@ class SlurmRestClient(SlurmBaseClient):
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
-            if len(partition_result["partitions"]) == 0:
-                return []
-        return partition_result["partitions"]
+            # Apply Slurm model
+            res = [
+                SlurmPartitions.model_validate(partition)
+                for partition in partition_result["partitions"]
+            ]
+        return res
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SchedPing] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)

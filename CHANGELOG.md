@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Query parameter `allusers` in `GET /compute/jobs` to show all visible jobs for the user in the scheduler
 - Environment variable `UVICORN_LOG_CONFIG` to enable [Uvicorn log configuration](https://www.uvicorn.org/settings/#logging) file path (analog to `--log-config`)
+- Refactor FastAPI models for Slurm, in order to make it easier to add new schedulers
 
 ### Changed
 

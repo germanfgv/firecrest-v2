@@ -42,12 +42,24 @@ class ScontrolReservationCommand(ScontrolBase):
             {"name": "Nodes", "pattern": r"Nodes=(\S+)", "type": "str"},
             {
                 "name": "StartTime",
-                "pattern": r"StartTime=((\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4}))",
+                "pattern": (
+                    r"StartTime=("
+                    r"(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})|"
+                    r"(?:\d{1,2} \S+ \d{2}:\d{2})"
+                    r"|(?:\d{2}:\d{2}:\d{2})"
+                    r"|(?:\d{1,2} \S+ \d{4}))"
+                ),
                 "type": "datetime",
             },
             {
                 "name": "EndTime",
-                "pattern": r"EndTime=((\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4}))",
+                "pattern": (
+                    r"EndTime=("
+                    r"(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})|"
+                    r"(?:\d{1,2} \S+ \d{2}:\d{2})"
+                    r"|(?:\d{2}:\d{2}:\d{2})"
+                    r"|(?:\d{1,2} \S+ \d{4}))"
+                ),
                 "type": "datetime",
             },
             {"name": "Features", "pattern": r"Features=(\S+)", "type": "str"},

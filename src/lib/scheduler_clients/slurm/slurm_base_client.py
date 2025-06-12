@@ -6,13 +6,15 @@
 from abc import abstractmethod
 from typing import List
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.scheduler_clients.models import (
+    JobDescriptionModel,
+    PartitionModel,
+    NodeModel,
+    SchedPing,
+)
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
-    SlurmJobDescription,
     SlurmJobMetadata,
-    SlurmNode,
-    SlurmPartitions,
-    SlurmPing,
     SlurmReservations,
 )
 
@@ -22,7 +24,7 @@ class SlurmBaseClient(SchedulerBaseClient):
     @abstractmethod
     async def submit_job(
         self,
-        job_description: SlurmJobDescription,
+        job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -41,11 +43,7 @@ class SlurmBaseClient(SchedulerBaseClient):
     @abstractmethod
     # Note: returns multiple jobs to deal with job_id duplicates (see Slurm doc)
     async def get_job(
-        self,
-        job_id: str,
-        username: str,
-        jwt_token: str,
-        allusers: bool = True
+        self, job_id: str, username: str, jwt_token: str, allusers: bool = True
     ) -> List[SlurmJob]:
         pass
 
@@ -56,7 +54,9 @@ class SlurmBaseClient(SchedulerBaseClient):
         pass
 
     @abstractmethod
-    async def get_jobs(self, username: str, jwt_token: str, allusers: bool = False) -> List[SlurmJob] | None:
+    async def get_jobs(
+        self, username: str, jwt_token: str, allusers: bool = False
+    ) -> List[SlurmJob] | None:
         pass
 
     @abstractmethod
@@ -64,7 +64,7 @@ class SlurmBaseClient(SchedulerBaseClient):
         pass
 
     @abstractmethod
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
         pass
 
     @abstractmethod
@@ -76,9 +76,9 @@ class SlurmBaseClient(SchedulerBaseClient):
     @abstractmethod
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[SlurmPartitions] | None:
+    ) -> List[PartitionModel] | None:
         pass
 
     @abstractmethod
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SchedPing] | None:
         pass

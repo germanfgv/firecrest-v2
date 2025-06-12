@@ -35,11 +35,13 @@ from lib.scheduler_clients.slurm.cli_commands.srun_command import SrunCommand
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
     SlurmJobMetadata,
-    SlurmNode,
-    SlurmJobDescription,
     SlurmPartitions,
-    SlurmPing,
     SlurmReservations,
+)
+from lib.scheduler_clients.models import (
+    JobDescriptionModel,
+    NodeModel,
+    SchedPing,
 )
 
 # clients
@@ -63,7 +65,7 @@ class SlurmCliClient(SlurmBaseClient):
 
     async def submit_job(
         self,
-        job_description: SlurmJobDescription,
+        job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -155,7 +157,7 @@ class SlurmCliClient(SlurmBaseClient):
         scancel = ScancelCommand(username, job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, scancel)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
         sinfo = SinfoCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, sinfo)
 
@@ -163,14 +165,25 @@ class SlurmCliClient(SlurmBaseClient):
         self, username: str, jwt_token: str
     ) -> List[SlurmReservations] | None:
         scontrolreservation = ScontrolReservationCommand()
-        return await self.__executed_ssh_cmd(username, jwt_token, scontrolreservation)
+        result = await self.__executed_ssh_cmd(username, jwt_token, scontrolreservation)
+        # Apply Slurm model
+        if result:
+            result = [
+                SlurmReservations.model_validate(reservation) for reservation in result
+            ]
+        return result
 
     async def get_partitions(
         self, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
         scontrolpartition = ScontrolPartitionCommand()
-        return await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
+        result = await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
+        if result:
+            result = [
+                SlurmPartitions.model_validate(reservation) for reservation in result
+            ]
+        return result
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SchedPing] | None:
         scontrolping = ScontrolPingCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolping)

@@ -8,7 +8,7 @@ from typing import Dict, List, Optional
 from pydantic import (
     AliasChoices,
     Field,
-    RootModel,
+    field_validator,
 )
 
 # models
@@ -16,26 +16,12 @@ from lib.models.base_model import CamelModel
 from lib.scheduler_clients.models import (
     JobMetadataModel,
     JobModel,
-    JobDescriptionModel,
     JobStatus,
     JobTask,
     JobTime,
-    NodeModel,
     PartitionModel,
     ReservationModel,
 )
-
-
-class SlurmInt(RootModel):
-    root: int | None
-
-    # starting from v0.0.40 slurm api represents int with a complex object
-    # e.s. {"set": True, "infinite": False, "number": 0},
-    def __init__(self, **kwargs):
-        if kwargs["set"] == "False":
-            super().__init__(None)
-        else:
-            super().__init__(kwargs["number"])
 
 
 def slurm_int_to_int(v) -> Optional[int]:
@@ -60,38 +46,7 @@ def slurm_int_to_int(v) -> Optional[int]:
     raise ValueError(f"Invalid SlurmInt value: {v!r}")
 
 
-class SlurmJobDescription(JobDescriptionModel):
-    name: Optional[str] = Field(default=None, description="Name for the job")
-    account: Optional[str] = Field(
-        default=None, description="Charge job resources to specified account"
-    )
-    current_working_directory: str = Field(
-        alias="working_directory", description="Job working directory"
-    )
-    standard_input: Optional[str] = Field(
-        default=None, description="Standard input file name"
-    )
-    standard_output: Optional[str] = Field(
-        default=None, description="Standard output file name"
-    )
-    standard_error: Optional[str] = Field(
-        default=None, description="Standard error file name"
-    )
-    environment: Optional[Dict[str, str] | List[str]] = Field(
-        alias="env",
-        default={"F7T_version": "v2.0.0"},
-        description="Dictionary of environment variables to set in the job context",
-    )
-    constraints: Optional[str] = Field(default=None, description="Job constraints")
-    script: str = Field(default=None, description="Script for the job")
-    script_path: str = Field(
-        default=None, description="Path to the job in target system"
-    )
-
-
 class SlurmJobMetadata(JobMetadataModel):
-    job_id: int
-    script: Optional[str] = None
     standard_input: Optional[str] = Field(
         validation_alias=AliasChoices("StdIn", "standardInput"), default=None
     )
@@ -111,20 +66,20 @@ class JobStatusSlurm(JobStatus):
             else:
                 kwargs["state"] = None
 
-        for field in ["exitCode", "interruptSignal"]:
-            if field in kwargs and kwargs[field] is not None:
-                kwargs[field] = slurm_int_to_int(kwargs[field])
-
         super().__init__(**kwargs)
+
+    @field_validator("exitCode", "interruptSignal", mode="before")
+    @classmethod
+    def _parse_time(cls, v):
+        return slurm_int_to_int(v)
 
 
 class JobTimeSlurm(JobTime):
-    def __init__(self, **kwargs):
-        for field in ["elapsed", "start", "end", "suspended", "limit"]:
-            if field in kwargs and kwargs[field] is not None:
-                kwargs[field] = slurm_int_to_int(kwargs[field])
 
-        super().__init__(**kwargs)
+    @field_validator("elapsed", "start", "end", "suspended", "limit", mode="before")
+    @classmethod
+    def _parse_time(cls, v):
+        return slurm_int_to_int(v)
 
 
 class JobTaskSlurm(JobTask):
@@ -159,7 +114,9 @@ class JobTaskSlurm(JobTask):
 
 class SlurmJob(JobModel):
 
-    tasks: Optional[List[JobTaskSlurm]] = None
+    tasks: Optional[List[JobTaskSlurm]] = Field(
+        validation_alias=AliasChoices("steps"), default=None
+    )
     time: JobTimeSlurm
 
     def __init__(self, **kwargs):
@@ -180,71 +137,35 @@ class SlurmJob(JobModel):
                 exitCode=exitCode,
                 interruptSignal=interruptSignal,
             )
-        if "steps" in kwargs:
-            kwargs["tasks"] = kwargs["steps"]
-
-        if "priority" in kwargs:
-            kwargs["priority"] = slurm_int_to_int(kwargs["priority"])
 
         super().__init__(**kwargs)
 
-
-class SlurmNode(NodeModel):
-    sockets: int
-    cores: int
-    threads: int
-    cpus: int
-    cpu_load: Optional[float] = None
-    free_memory: Optional[int] = None
-    features: str | List[str]
-    name: str
-    address: str
-    hostname: str
-    state: str | List[str]  # e.g. ["IDLE", "RESERVED"]
-    partitions: List[str]
-    weight: int
-    slurmd_version: Optional[str] = None
-    alloc_memory: Optional[int] = None
-    alloc_cpus: Optional[int] = None
-    idle_cpus: Optional[int] = None
-
-
-class SlurmPing(CamelModel):
-    hostname: Optional[str] = None
-    pinged: Optional[str] = None
-    latency: Optional[int] = None
-    mode: Optional[str] = None
-
-
-class SlurmPartition(RootModel):
-    root: List[str]
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs["state"])
-
-
-class SlurmPartitionCPUs(RootModel):
-    root: int
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs["total"])
+    @field_validator("priority", mode="before")
+    @classmethod
+    def _parse_int(cls, v):
+        return slurm_int_to_int(v)
 
 
 class SlurmPartitions(PartitionModel):
     name: str = Field(validation_alias=AliasChoices("partitionName", "PartitionName"))
-    cpus: int | SlurmPartitionCPUs = Field(
+    cpus: int = Field(
         validation_alias=AliasChoices("totalCPUs", "total_cpus", "TotalCPUs")
     )
     total_nodes: int = Field(validation_alias=AliasChoices("totalNodes", "TotalNodes"))
-    partition: SlurmPartition | str = Field(
-        validation_alias=AliasChoices("state", "State")
-    )
+    partition: str | List[str] = Field(validation_alias=AliasChoices("state", "State"))
 
     def __init__(self, **kwargs):
 
         # To allow back compatibility with Slurm API versions <= 0.0.38
         if "total_nodes" not in kwargs and "nodes" in kwargs:
             kwargs["total_nodes"] = kwargs["nodes"]["total"]
+
+        if "cpus" in kwargs and isinstance(kwargs["cpus"], dict):
+            kwargs["cpus"] = kwargs["cpus"]["total"]
+
+        if "partition" in kwargs and isinstance(kwargs["partition"], dict):
+            kwargs["partition"] = kwargs["partition"]["state"]
+
         super().__init__(**kwargs)
 
 
@@ -253,10 +174,11 @@ class SlurmReservations(ReservationModel):
         validation_alias=AliasChoices("reservationName", "ReservationName")
     )
     node_list: str = Field(validation_alias=AliasChoices("nodes", "Nodes", "nodeList"))
-    end_time: int | SlurmInt = Field(
-        validation_alias=AliasChoices("endTime", "EndTime")
-    )
-    start_time: int | SlurmInt = Field(
-        validation_alias=AliasChoices("startTime", "StartTime")
-    )
+    end_time: int = Field(validation_alias=AliasChoices("endTime", "EndTime"))
+    start_time: int = Field(validation_alias=AliasChoices("startTime", "StartTime"))
     features: Optional[str] = Field(validation_alias=AliasChoices("Features"))
+
+    @field_validator("start_time", "end_time", mode="before")
+    @classmethod
+    def _parse_time(cls, v):
+        return slurm_int_to_int(v)
