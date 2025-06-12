@@ -3,7 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import (
     AliasChoices,
@@ -12,7 +12,6 @@ from pydantic import (
 )
 
 # models
-from lib.models.base_model import CamelModel
 from lib.scheduler_clients.models import (
     JobMetadataModel,
     JobModel,
@@ -35,7 +34,7 @@ def slurm_int_to_int(v) -> Optional[int]:
             # FIXME: not sure if this is always int or can be float
             return int(v)
         except ValueError:
-            raise ValueError(f"Invalid SlurmInt value: {v!r}")
+            raise ValueError(f"Invalid SlurmInt value: {v!r}") from None
 
     if isinstance(v, dict):
         if not v.get("set", True):
