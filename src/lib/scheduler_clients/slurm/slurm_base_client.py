@@ -6,16 +6,14 @@
 from abc import abstractmethod
 from typing import List
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
-from lib.scheduler_clients.models import (
-    JobDescriptionModel,
-    PartitionModel,
-    NodeModel,
-    SchedPing,
-)
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
+    SlurmJobDescription,
     SlurmJobMetadata,
+    SlurmPartitions,
+    SlurmPing,
     SlurmReservations,
+    SlurmNode,
 )
 
 
@@ -24,7 +22,7 @@ class SlurmBaseClient(SchedulerBaseClient):
     @abstractmethod
     async def submit_job(
         self,
-        job_description: JobDescriptionModel,
+        job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -64,7 +62,7 @@ class SlurmBaseClient(SchedulerBaseClient):
         pass
 
     @abstractmethod
-    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
         pass
 
     @abstractmethod
@@ -76,9 +74,9 @@ class SlurmBaseClient(SchedulerBaseClient):
     @abstractmethod
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[PartitionModel] | None:
+    ) -> List[SlurmPartitions] | None:
         pass
 
     @abstractmethod
-    async def ping(self, username: str, jwt_token: str) -> List[SchedPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         pass

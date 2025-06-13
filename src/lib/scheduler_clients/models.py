@@ -25,7 +25,7 @@ class JobStatus(CamelModel):
 
 
 class JobTime(CamelModel):
-    elapsed: Optional[int]
+    elapsed: Optional[int] = None
     start: Optional[int] = None
     end: Optional[int] = None
     suspended: Optional[int] = None

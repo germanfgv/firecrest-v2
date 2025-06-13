@@ -2,14 +2,12 @@ from typing import List
 
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
+    SlurmJobDescription,
     SlurmJobMetadata,
+    SlurmPartitions,
+    SlurmPing,
     SlurmReservations,
-)
-from lib.scheduler_clients.models import (
-    JobDescriptionModel,
-    NodeModel,
-    PartitionModel,
-    SchedPing,
+    SlurmNode,
 )
 
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
@@ -46,7 +44,7 @@ class SlurmClient(SlurmBaseClient):
 
     async def submit_job(
         self,
-        job_description: JobDescriptionModel,
+        job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -84,7 +82,7 @@ class SlurmClient(SlurmBaseClient):
     ) -> List[SlurmJobMetadata]:
         return await self.slurm_cli_client.get_job_metadata(job_id, username, jwt_token)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
         return await self.slurm_default_client.get_nodes(username, jwt_token)
 
     async def get_reservations(
@@ -94,11 +92,11 @@ class SlurmClient(SlurmBaseClient):
 
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[PartitionModel] | None:
+    ) -> List[SlurmPartitions] | None:
         return await self.slurm_default_client.get_partitions(username, jwt_token)
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         return await self.slurm_default_client.cancel_job(job_id, username, jwt_token)
 
-    async def ping(self, username: str, jwt_token: str) -> List[SchedPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         return await self.slurm_default_client.ping(username, jwt_token)

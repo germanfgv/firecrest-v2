@@ -34,14 +34,12 @@ from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
 from lib.scheduler_clients.slurm.cli_commands.srun_command import SrunCommand
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
+    SlurmJobDescription,
     SlurmJobMetadata,
     SlurmPartitions,
+    SlurmPing,
     SlurmReservations,
-)
-from lib.scheduler_clients.models import (
-    JobDescriptionModel,
-    NodeModel,
-    SchedPing,
+    SlurmNode,
 )
 
 # clients
@@ -65,7 +63,7 @@ class SlurmCliClient(SlurmBaseClient):
 
     async def submit_job(
         self,
-        job_description: JobDescriptionModel,
+        job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -157,7 +155,7 @@ class SlurmCliClient(SlurmBaseClient):
         scancel = ScancelCommand(username, job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, scancel)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
         sinfo = SinfoCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, sinfo)
 
@@ -184,6 +182,6 @@ class SlurmCliClient(SlurmBaseClient):
             ]
         return result
 
-    async def ping(self, username: str, jwt_token: str) -> List[SchedPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         scontrolping = ScontrolPingCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolping)

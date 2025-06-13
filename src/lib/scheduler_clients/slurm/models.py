@@ -13,13 +13,16 @@ from pydantic import (
 
 # models
 from lib.scheduler_clients.models import (
+    JobDescriptionModel,
     JobMetadataModel,
     JobModel,
     JobStatus,
     JobTask,
     JobTime,
+    NodeModel,
     PartitionModel,
     ReservationModel,
+    SchedPing,
 )
 
 
@@ -42,7 +45,9 @@ def slurm_int_to_int(v) -> Optional[int]:
 
         return int(v.get("number"))
 
-    raise ValueError(f"Invalid SlurmInt value: {v!r}")
+
+class SlurmJobDescription(JobDescriptionModel):
+    pass
 
 
 class SlurmJobMetadata(JobMetadataModel):
@@ -143,6 +148,14 @@ class SlurmJob(JobModel):
     @classmethod
     def _parse_int(cls, v):
         return slurm_int_to_int(v)
+
+
+class SlurmNode(NodeModel):
+    pass
+
+
+class SlurmPing(SchedPing):
+    pass
 
 
 class SlurmPartitions(PartitionModel):
