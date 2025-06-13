@@ -112,7 +112,6 @@ class NodeModel(CamelModel):
     state: str | List[str]
     partitions: List[str]
     weight: int
-    slurmd_version: Optional[str] = None
     alloc_memory: Optional[int] = None
     alloc_cpus: Optional[int] = None
     idle_cpus: Optional[int] = None
