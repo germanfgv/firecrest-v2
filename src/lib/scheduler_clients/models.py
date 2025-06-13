@@ -48,7 +48,7 @@ class JobModel(CamelModel):
     account: Optional[str]
     allocation_nodes: int
     cluster: str
-    group: str
+    group: Optional[str]
     nodes: str
     partition: str
     kill_request_user: Optional[str] = None
@@ -99,20 +99,19 @@ class JobSubmitRequestModel(CamelModel):
 
 
 class NodeModel(CamelModel):
-    sockets: int
-    cores: int
-    threads: int
+    sockets: Optional[int] = None
+    cores: Optional[int] = None
+    threads: Optional[int] = None
     cpus: int
     cpu_load: Optional[float] = None
     free_memory: Optional[int] = None
-    features: str | List[str]
+    features: Optional[str | List[str]] = None
     name: str
-    address: str
-    hostname: str
+    address: Optional[str]
+    hostname: Optional[str]
     state: str | List[str]
-    partitions: List[str]
-    weight: int
-    slurmd_version: Optional[str] = None
+    partitions: Optional[List[str]]
+    weight: Optional[int] = None
     alloc_memory: Optional[int] = None
     alloc_cpus: Optional[int] = None
     idle_cpus: Optional[int] = None
