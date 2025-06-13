@@ -41,19 +41,12 @@ class RstatReservationsCommand(BaseCommand):
 
             for line in block.splitlines():
                 line = line.strip()
-                if line.startswith("Resv ID:"):
-                    full_job_id = line.split(":", 1)[1].strip()
-                    info["resv_id"] = full_job_id.split(".")[0]
-                elif line.startswith("Reserve_Name"):
-                    info["ReservationName"] = line.split("=", 1)[1].strip()
-                elif line.startswith("Reserve_Owner"):
-                    info["owner"] = line.split("=", 1)[1].strip()
-                elif line.startswith("reserve_state"):
-                    info["state"] = line.split("=", 1)[1].strip()
+                if line.startswith("Reserve_Name"):
+                    info["name"] = line.split("=", 1)[1].strip()
                 elif line.startswith("reserve_start"):
-                    info["StartTime"] = line.split("=", 1)[1].strip()
+                    info["start_time"] = line.split("=", 1)[1].strip()
                 elif line.startswith("reserve_end"):
-                    info["EndTime"] = line.split("=", 1)[1].strip()
+                    info["end_time"] = line.split("=", 1)[1].strip()
                 elif line.startswith("resv_nodes"):
                     info["node_list"] = line.split("=", 1)[1].strip()
 
