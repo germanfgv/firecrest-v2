@@ -2,6 +2,10 @@ FROM ubuntu:22.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PBS_HOME="/var/spool/pbs"
+ENV PBS_SERVER="localhost"
+
+ARG PBS_VERSION=23.06.06
 
 # Install required dependencies
 RUN apt-get update && apt-get install -y \
@@ -43,7 +47,7 @@ RUN apt-get update && apt-get install -y \
 
 # Download and install PBS Pro Open Source
 WORKDIR /opt
-RUN wget -O pbspro.tar.gz https://github.com/openpbs/openpbs/archive/refs/tags/v23.06.06.tar.gz \
+RUN wget -O pbspro.tar.gz https://github.com/openpbs/openpbs/archive/refs/tags/v${PBS_VERSION}.tar.gz \
     && tar -xzf pbspro.tar.gz \
     && cd openpbs-23.06.06 \
     && ./autogen.sh \
@@ -51,11 +55,6 @@ RUN wget -O pbspro.tar.gz https://github.com/openpbs/openpbs/archive/refs/tags/v
     && make -j$(nproc) \
     && make install \
     && rm -rf /opt/openpbs-23.06.06 /opt/pbspro.tar.gz
-
-
-# Set up PBS environment
-ENV PBS_HOME="/var/spool/pbs"
-ENV PBS_SERVER="localhost"
 
 # Expose required ports
 EXPOSE 22 5432 15001 15002 15003 15004 15005 15006 15007
