@@ -1,20 +1,19 @@
 #!/bin/bash
 
 while [ ! -f /var/run/sshd.pid ]; do
-    echo "Waiting for sshd.pid..."
+    echo "Waiting for sshd..."
     sleep 1
 done
 
-# Restart PostgreSQL
-service postgresql restart
+while [ ! -f /var/run/postgresql/14-main.pid ]; do
+    echo "Waiting for postgresql..."
+    sleep 1
+done
 
-# Create the munge key
-dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
-chown munge:munge /etc/munge/munge.key
-chmod 400 /etc/munge/munge.key
-
-# Start Munge
-service munge start
+while [ ! -f /var/run/munge/munged.pid ]; do
+    echo "Waiting for munged..."
+    sleep 1
+done
 
 sshpass -p 'root' ssh -T -o StrictHostKeyChecking=no localhost << 'EOF'
   /usr/libexec/pbs_postinstall

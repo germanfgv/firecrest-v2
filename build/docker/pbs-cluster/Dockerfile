@@ -68,9 +68,8 @@ RUN mkdir /var/run/sshd && \
 
 RUN useradd -ms /bin/bash pbsuser
 
-COPY ./build/docker/pbs-cluster/init_sequence.sh /usr/local/bin/init_sequence.sh
-
-RUN chmod +x /usr/local/bin/init_sequence.sh
+COPY ./build/docker/pbs-cluster/boot_pbs.sh /usr/local/bin/boot_pbs.sh
+RUN chmod +x /usr/local/bin/boot_pbs.sh
 
 COPY ./build/docker/pbs-cluster/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -84,10 +83,18 @@ ADD --chown=fireuser:users ./build/environment/keys/fireuser.pub /home/fireuser/
 ADD --chown=firesrv:service-accounts ./build/environment/keys/firesrv.pub /home/firesrv/.ssh/authorized_keys
 
 # Setup SSH keys
-RUN chmod 0755 /var/run/sshd
 # use the fireuser.pub key also as a trusted ca (used for cscs keygen solution)
 ADD ./build/environment/keys/fireuser.pub  /etc/ssh/ca-key.pub
 RUN chmod -R 400 /etc/ssh/  && chown -R root:root /etc/ssh/
 RUN /usr/bin/ssh-keygen -A
+
+
+# Create the munge key
+RUN dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
+RUN chown munge:munge /etc/munge/munge.key
+RUN chmod 400 /etc/munge/munge.key
+RUN mkdir -p /run/munge
+RUN chown munge:munge /run/munge
+
 
 CMD ["/usr/bin/supervisord"]
