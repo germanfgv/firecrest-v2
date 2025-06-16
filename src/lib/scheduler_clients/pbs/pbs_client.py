@@ -97,7 +97,11 @@ class PbsClient(SchedulerBaseClient):
         self, job_id: str, username: str, jwt_token: str
     ) -> List[PbsJobMetadata] | Exception | None:
         qstat_meta = QstatJobMetadataCommand(username, [job_id])
-        return await self.__executed_ssh_cmd(username, jwt_token, qstat_meta)
+        result = await self.__executed_ssh_cmd(username, jwt_token, qstat_meta)
+        # Apply PBS model
+        if result:
+            result = [PbsJobMetadata.model_validate(job) for job in result]
+        return result
 
     async def get_jobs(
         self, username: str, jwt_token: str, allusers: bool = False

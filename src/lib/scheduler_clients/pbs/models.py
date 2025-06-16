@@ -28,18 +28,22 @@ class PbsJobDescription(JobDescriptionModel):
 
 
 class PbsJobMetadata(JobMetadataModel):
-    job_id: str = Field(alias=AliasChoices("jobId"))
-    script: None = None
-    # TODO: Do we need all these aliases???
-    standard_input: None = Field(
-        validation_alias=AliasChoices("StdIn", "standardInput"), default=None
-    )
     standard_output: Optional[str] = Field(
-        validation_alias=AliasChoices("StdOut", "standardOutput"), default=None
+        validation_alias=AliasChoices("Error_Path"), default=None
     )
     standard_error: Optional[str] = Field(
-        validation_alias=AliasChoices("StdErr", "standardError"), default=None
+        validation_alias=AliasChoices("Output_Path"), default=None
     )
+
+    @field_validator("standard_output", "standard_error", mode="before")
+    @classmethod
+    def _parse_pbs_path(cls, v):
+        """
+        Removes the cluster name and the colon from the start of a PBS path,
+         e.g. "pbs:/home/fireuser/test_dir/hello_pbs.o1" into
+        "/home/fireuser/test_dir/hello_pbs.o1"
+        """
+        return re.sub(r"^[^:]+:", "", v)
 
 
 class JobStatusPbs(JobStatus):
