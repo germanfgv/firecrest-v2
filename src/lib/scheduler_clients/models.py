@@ -45,10 +45,10 @@ class JobModel(CamelModel):
     status: JobStatus
     tasks: Optional[List[JobTask]] = None
     time: JobTime
-    account: Optional[str]
+    account: Optional[str] = None
     allocation_nodes: int
     cluster: str
-    group: Optional[str]
+    group: Optional[str] = None
     nodes: str
     partition: str
     kill_request_user: Optional[str] = None
