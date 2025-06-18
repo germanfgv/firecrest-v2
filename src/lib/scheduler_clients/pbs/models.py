@@ -129,7 +129,33 @@ class PbsJob(JobModel):
 
 
 class PbsNode(NodeModel):
-    pass
+    cpus: int = Field(alias=AliasChoices("pcpus"))
+
+    def __init__(self, **kwargs):
+
+        kwargs["idle_cpus"] = kwargs.get("resources_available", {}).get("ncpus", 0)
+        kwargs["free_memory"] = kwargs.get("resources_available", {}).get("mem", None)
+        kwargs["hostname"] = kwargs.get("resources_available", {}).get("host", None)
+        kwargs["alloc_memory"] = kwargs.get("resources_assigned", {}).get("mem", None)
+        kwargs["alloc_cpus"] = kwargs.get("resources_assigned", {}).get("ncpus", 0)
+
+        super().__init__(**kwargs)
+
+    @field_validator("free_memory", "alloc_memory", mode="before")
+    @classmethod
+    def _parse_timestamp(cls, value):
+        """
+        Convert memory from a string like "16gb" to an integer in bytes.
+        """
+        if isinstance(value, str):
+            value = value.lower().replace("kb", 3 * "0")
+            value = value.lower().replace("mb", 6 * "0")
+            value = value.lower().replace("gb", 9 * "0")
+            value = value.lower().replace("tb", 12 * "0")
+            value = value.lower().replace("pb", 15 * "0")
+            return int(value)
+
+        return value
 
 
 class PbsPing(SchedPing):

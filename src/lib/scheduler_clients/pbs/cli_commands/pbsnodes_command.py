@@ -40,10 +40,10 @@ class PbsnodesCommand(BaseCommand):
         nodes_data = payload.get("nodes")
         for node_name, node_data in nodes_data.items():
             nodes.append(
-                NodeModel(
-                    name=node_name,
+                {
+                    "name": node_name,
                     **node_data,
-                )
+                }
             )
 
         return nodes

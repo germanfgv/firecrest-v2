@@ -107,10 +107,10 @@ class NodeModel(CamelModel):
     free_memory: Optional[int] = None
     features: Optional[str | List[str]] = None
     name: str
-    address: Optional[str]
-    hostname: Optional[str]
+    address: Optional[str] = None
+    hostname: Optional[str] = None
     state: str | List[str]
-    partitions: Optional[List[str]]
+    partitions: Optional[List[str]] = None
     weight: Optional[int] = None
     alloc_memory: Optional[int] = None
     alloc_cpus: Optional[int] = None

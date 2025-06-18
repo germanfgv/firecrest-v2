@@ -116,7 +116,11 @@ class PbsClient(SchedulerBaseClient):
 
     async def get_nodes(self, username: str, jwt_token: str) -> List[PbsNode] | None:
         nodes = PbsnodesCommand()
-        return await self.__executed_ssh_cmd(username, jwt_token, nodes)
+        res = await self.__executed_ssh_cmd(username, jwt_token, nodes)
+        # Apply PBS model
+        if res:
+            res = [PbsNode.model_validate(node) for node in res]
+        return res
 
     async def get_reservations(
         self, username: str, jwt_token: str
