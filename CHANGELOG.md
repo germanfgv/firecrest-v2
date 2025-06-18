@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed Slurm timestamps parsing issues, timezone was not properly handled.
+
 ## [2.2.7]
 
 ### Added
