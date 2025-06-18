@@ -163,16 +163,16 @@ class PbsPing(SchedPing):
 
 
 class PbsPartition(PartitionModel):
-    pass
+    partition: str = Field(alias=AliasChoices("started"))
+
+    @field_validator("partition", mode="before")
+    @classmethod
+    def _parse_state(cls, v):
+        state = "UP" if v.lower() == "true" else "DOWN"
+        return state
 
 
 class PbsReservation(ReservationModel):
-    start_time: Optional[str] = Field(
-        default=None, alias=AliasChoices("startTime", "start_time")
-    )
-    end_time: Optional[str] = Field(
-        default=None, alias=AliasChoices("endTime", "end_time")
-    )
 
     @field_validator("start_time", "end_time", mode="before")
     @classmethod

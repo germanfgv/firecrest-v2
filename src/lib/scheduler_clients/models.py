@@ -127,6 +127,6 @@ class ReservationModel(CamelModel):
 
 class PartitionModel(CamelModel):
     name: str
-    cpus: int
-    total_nodes: int
+    cpus: int | None = None
+    total_nodes: int | None = None
     partition: str | List[str]

@@ -135,7 +135,10 @@ class PbsClient(SchedulerBaseClient):
         self, username: str, jwt_token: str
     ) -> List[PbsPartition] | None:
         queues = PbsPartitionsCommand()
-        return await self.__executed_ssh_cmd(username, jwt_token, queues)
+        result = await self.__executed_ssh_cmd(username, jwt_token, queues)
+        # Apply PBS model
+        result = [PbsPartition.model_validate(queue) for queue in result]
+        return result
 
     async def ping(self, username: str, jwt_token: str) -> List[PbsPing] | None:
         ping_cmd = PbsPingCommand()
