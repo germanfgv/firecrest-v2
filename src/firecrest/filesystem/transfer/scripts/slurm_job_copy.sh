@@ -9,7 +9,16 @@
 
 echo $(date -u) "Copy Files Job (id:${SLURM_JOB_ID})"
 
-status=$(cp --force -R{{ dereference }} --preserve=all -- '{{ source_path }}' '{{ target_path }}')
+
+if [ "{{ dereference }}" = "True" ]; then 
+    derefparam="L"
+else
+    derefparam="d"
+fi
+
+status=$(cp --force -R${derefparam} --preserve=all -- '{{ source_path }}' '{{ target_path }}')
+
+
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully copied."
