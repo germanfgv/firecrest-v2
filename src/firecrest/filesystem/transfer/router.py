@@ -470,7 +470,7 @@ async def post_cp(
         ),
         "source_path": request.path,
         "target_path": request.target_path,
-        "dereference": "L" if request.dereference else "d",
+        "dereference": request.dereference,
     }
 
     work_dir = next(
