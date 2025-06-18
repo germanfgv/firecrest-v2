@@ -17,6 +17,15 @@ def _timestr_to_seconds(timestr: str):
         return None
 
 
+def _parse_timestamp(timestr: str):
+    if timestr == "Unknown":
+        return None
+    try:
+        return int(timestr)
+    except ValueError:
+        return None
+
+
 class SacctCommand(SacctCommandBase):
 
     def get_command(self) -> str:
@@ -73,9 +82,9 @@ class SacctCommand(SacctCommandBase):
             "state": {"current": job_info[10], "reason": job_info[11]},
             "time": {
                 "elapsed": job_info[12],
-                "submission": job_info[13],
-                "start": job_info[14],
-                "end": job_info[15],
+                "submission": _parse_timestamp(job_info[13]),
+                "start": _parse_timestamp(job_info[14]),
+                "end": _parse_timestamp(job_info[15]),
                 "suspended": _timestr_to_seconds(job_info[16]),
                 "limit": int(job_info[17]) if job_info[17] else None,
             },
@@ -98,9 +107,9 @@ class SacctCommand(SacctCommandBase):
             ),
             "time": {
                 "elapsed": job_info[12],
-                "submission": job_info[13],
-                "start": job_info[14],
-                "end": job_info[15],
+                "submission": _parse_timestamp(job_info[13]),
+                "start": _parse_timestamp(job_info[14]),
+                "end": _parse_timestamp(job_info[15]),
                 "suspended": _timestr_to_seconds(job_info[16]),
                 "limit": int(job_info[17]) if job_info[17] else None,
             },
