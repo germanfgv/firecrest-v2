@@ -76,7 +76,7 @@ class CopyRequest(FilesystemRequestBase):
         default=None, description="Name of the account in the scheduler"
     )
     dereference: Optional[bool] = Field(
-        default=True,
+        default=False,
         description=(
             "If set to `true`, it follows symbolic links and copies the "
             "files they point to instead of the links themselves."
