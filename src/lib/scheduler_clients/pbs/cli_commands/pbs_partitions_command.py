@@ -28,12 +28,10 @@ class PbsPartitionsCommand(QstatBaseCommand):
                 f"Failed to parse JSON from qstat output: {e!s}\nOutput was:\n{stdout!r}"
             ) from e
 
-        queues_data = payload.get("Queue")
-        if queues_data is None:
-            return []
+        queues_data = payload.get("Queue", [])
 
         result = []
         for name, attrs in queues_data.items():
-            result.append(PartitionModel(name=name, **attrs))
+            result.append({"name": name, **attrs})
 
         return result
