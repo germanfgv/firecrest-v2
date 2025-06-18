@@ -5,16 +5,8 @@
 
 # commands
 from datetime import datetime
-import time
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
-
-
-def _datestr_to_epoc(datestr: str):
-    try:
-        return time.mktime(time.strptime(datestr, "%Y-%m-%dT%H:%M:%S"))
-    except ValueError:
-        return None
 
 
 def _timestr_to_seconds(timestr: str):
@@ -81,9 +73,9 @@ class SacctCommand(SacctCommandBase):
             "state": {"current": job_info[10], "reason": job_info[11]},
             "time": {
                 "elapsed": job_info[12],
-                "submission": _datestr_to_epoc(job_info[13]),
-                "start": _datestr_to_epoc(job_info[14]),
-                "end": _datestr_to_epoc(job_info[15]),
+                "submission": job_info[13],
+                "start": job_info[14],
+                "end": job_info[15],
                 "suspended": _timestr_to_seconds(job_info[16]),
                 "limit": int(job_info[17]) if job_info[17] else None,
             },
@@ -106,9 +98,9 @@ class SacctCommand(SacctCommandBase):
             ),
             "time": {
                 "elapsed": job_info[12],
-                "submission": _datestr_to_epoc(job_info[13]),
-                "start": _datestr_to_epoc(job_info[14]),
-                "end": _datestr_to_epoc(job_info[15]),
+                "submission": job_info[13],
+                "start": job_info[14],
+                "end": job_info[15],
                 "suspended": _timestr_to_seconds(job_info[16]),
                 "limit": int(job_info[17]) if job_info[17] else None,
             },
