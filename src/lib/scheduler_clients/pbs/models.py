@@ -168,6 +168,7 @@ class PbsPartition(PartitionModel):
     @field_validator("partition", mode="before")
     @classmethod
     def _parse_state(cls, v):
+        # Not sure if we should use both "started" and "enabled" attributes
         state = "UP" if v.lower() == "true" else "DOWN"
         return state
 
