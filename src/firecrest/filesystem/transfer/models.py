@@ -13,7 +13,9 @@ from lib.models import CamelModel
 
 class PostFileUploadRequest(FilesystemRequestBase):
     file_name: str = Field(..., description="Name of the local file to upload")
-    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    account: Optional[str] = Field(
+        default=None, description="Name of the account in the scheduler"
+    )
     file_size: int = Field(..., description="Size of the file to upload in bytes")
     model_config = {
         "json_schema_extra": {
@@ -22,7 +24,7 @@ class PostFileUploadRequest(FilesystemRequestBase):
                     "path": "/home/user/dir/file",
                     "file_name": "/path/local/file",
                     "account": "group",
-                    "file_size": "7340032"
+                    "file_size": "7340032",
                 }
             ]
         }
@@ -30,15 +32,12 @@ class PostFileUploadRequest(FilesystemRequestBase):
 
 
 class PostFileDownloadRequest(FilesystemRequestBase):
-    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    account: Optional[str] = Field(
+        default=None, description="Name of the account in the scheduler"
+    )
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "path": "/home/user/dir/file",
-                    "account": "group"
-                }
-            ]
+            "examples": [{"path": "/home/user/dir/file", "account": "group"}]
         }
     }
 
@@ -73,14 +72,24 @@ class DownloadFileResponse(CamelModel):
 
 class CopyRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Target path of the copy operation")
-    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    account: Optional[str] = Field(
+        default=None, description="Name of the account in the scheduler"
+    )
+    dereference: Optional[bool] = Field(
+        default=False,
+        description=(
+            "If set to `true`, it follows symbolic links and copies the "
+            "files they point to instead of the links themselves."
+        ),
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "source_path": "/home/user/dir/file.orig",
                     "target_path": "/home/user/dir/file.new",
-                    "account": "group"
+                    "account": "group",
+                    "dereference": "true",
                 }
             ]
         }
@@ -97,14 +106,16 @@ class DeleteResponse(CamelModel):
 
 class MoveRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Target path of the move operation")
-    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    account: Optional[str] = Field(
+        default=None, description="Name of the account in the scheduler"
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "source_path": "/home/user/dir/file.orig",
                     "target_path": "/home/user/dir/file.new",
-                    "account": "group"
+                    "account": "group",
                 }
             ]
         }
@@ -117,9 +128,16 @@ class MoveResponse(CamelModel):
 
 class CompressRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Target path of the compress operation")
-    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
-    match_pattern: Optional[str] = Field(default=None, description="Regex pattern to filter files to compress")
-    dereference: Optional[bool] = Field(default=False, description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.")
+    account: Optional[str] = Field(
+        default=None, description="Name of the account in the scheduler"
+    )
+    match_pattern: Optional[str] = Field(
+        default=None, description="Regex pattern to filter files to compress"
+    )
+    dereference: Optional[bool] = Field(
+        default=False,
+        description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.",
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -128,7 +146,7 @@ class CompressRequest(FilesystemRequestBase):
                     "target_path": "/home/user/file.tar.gz",
                     "match_pattern": "*./[ab].*\\.txt",
                     "dereference": "true",
-                    "account": "group"
+                    "account": "group",
                 }
             ]
         }
@@ -140,15 +158,19 @@ class CompressResponse(CamelModel):
 
 
 class ExtractRequest(FilesystemRequestBase):
-    target_path: str = Field(..., description="Path to the directory where to extract the compressed file")
-    account: Optional[str] = Field(default=None, description="Name of the account in the scheduler")
+    target_path: str = Field(
+        ..., description="Path to the directory where to extract the compressed file"
+    )
+    account: Optional[str] = Field(
+        default=None, description="Name of the account in the scheduler"
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "source_path": "/home/user/dir/file.tar.gz",
                     "target_path": "/home/user/dir",
-                    "account": "group"
+                    "account": "group",
                 }
             ]
         }

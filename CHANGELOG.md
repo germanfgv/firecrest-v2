@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Refactor FastAPI models for Slurm, in order to make it easier to add new schedulers
+- Refactor FastAPI models for Slurm, in order to make it easier to add new schedulers.
+- Make cp recursive so that directories can also be copied and add the option to keep symbolic links.
 
 ### Changed
 
 ### Fixed
+
+- Fixed Slurm timestamps parsing issues, timezone was not properly handled.
 
 ## [2.2.7]
 
