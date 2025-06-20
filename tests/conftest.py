@@ -136,8 +136,6 @@ def slurm_cluster_with_ssh_config():
 @pytest.fixture(scope="module")
 def pbs_cluster():
     for cluster in settings.clusters:
-        # you’ll need to know how PBS is identified in your config;
-        # e.g. by type, name, or lack of api_url
         if getattr(cluster.scheduler, "type", "").lower() == "pbs":
             return cluster
 

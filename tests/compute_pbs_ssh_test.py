@@ -48,6 +48,15 @@ def mocked_ssh_pbsnodes_output():
         return json.load(output)
 
 
+@pytest.fixture(scope="module")
+def mocked_ssh_qstat_partitions_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_qstat_partitions_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
 async def test_submit_job(client, ssh_client, mocked_ssh_qsub_output, pbs_cluster):
 
     request_body = {
@@ -139,3 +148,18 @@ async def test_get_nodes(client, ssh_client, mocked_ssh_pbsnodes_output, pbs_clu
         assert response.status_code == 200
         assert response.json() is not None
         assert response.json()["nodes"] is not None
+
+
+async def test_get_partitions(
+    client, ssh_client, mocked_ssh_qstat_partitions_output, pbs_cluster
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_qstat_partitions_output)]
+    ):
+        response = client.get(
+            "/status/{cluster_name}/partitions".format(cluster_name=pbs_cluster.name)
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["partitions"] is not None
