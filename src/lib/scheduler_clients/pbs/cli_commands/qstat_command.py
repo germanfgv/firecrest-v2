@@ -37,15 +37,15 @@ class QstatCommand(QstatBaseCommand):
         res = payload.get("Jobs", {})
         jobs = []
         for job_id, job_data in res.items():
+            job_owner = job_data.get("Job_Owner", "").split("@")[0]
+            if not self.allusers and job_owner != self.username:
+                continue
+
             job_id_parsed = int(job_id.split(".")[0])
             job_info = {
                 "job_id": job_id_parsed,
                 **job_data,
             }
-            job_owner = job_data.get("Job_Owner", "").split("@")[0]
-            if not self.allusers and job_owner != self.username:
-                continue
-
             job_info["user"] = job_owner
             jobs.append(job_info)
 
