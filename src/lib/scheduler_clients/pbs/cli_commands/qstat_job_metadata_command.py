@@ -7,7 +7,6 @@ import json
 from lib.exceptions import PbsError
 
 from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatBaseCommand
-from lib.scheduler_clients.models import JobMetadataModel
 
 
 class QstatJobMetadataCommand(QstatBaseCommand):

@@ -6,7 +6,6 @@
 import json
 from lib.exceptions import PbsError
 from lib.ssh_clients.ssh_client import BaseCommand
-from lib.scheduler_clients.models import NodeModel
 
 
 class PbsnodesCommand(BaseCommand):
