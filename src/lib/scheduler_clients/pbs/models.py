@@ -23,6 +23,17 @@ from lib.scheduler_clients.models import (
 )
 
 
+def parse_timestamp(value):
+    """
+    Turn "Wed May 14 11:52:02 2025" into a UNIX timestamp (int).
+    If it's already an int (or None), just pass it through.
+    """
+    if isinstance(value, str):
+        dt = datetime.strptime(value, "%a %b %d %H:%M:%S %Y")
+        return int(dt.timestamp())
+    return value
+
+
 class PbsJobDescription(JobDescriptionModel):
     pass
 
@@ -72,14 +83,7 @@ class JobTimePbs(JobTime):
     @field_validator("start", mode="before")
     @classmethod
     def _parse_timestamp(cls, v):
-        """
-        Turn "Wed May 14 11:52:02 2025" into a UNIX timestamp (int).
-        If it's already an int (or None), just pass it through.
-        """
-        if isinstance(v, str):
-            dt = datetime.strptime(v, "%a %b %d %H:%M:%S %Y")
-            return int(dt.timestamp())
-        return v
+        return parse_timestamp(v)
 
 
 class PbsJob(JobModel):
@@ -178,11 +182,4 @@ class PbsReservation(ReservationModel):
     @field_validator("start_time", "end_time", mode="before")
     @classmethod
     def _parse_timestamp(cls, v):
-        """
-        Turn "Wed May 14 11:52:02 2025" into a UNIX timestamp (int).
-        If it's already an int (or None), just pass it through.
-        """
-        if isinstance(v, str):
-            dt = datetime.strptime(v, "%a %b %d %H:%M:%S %Y")
-            return int(dt.timestamp())
-        return v
+        return parse_timestamp(v)
